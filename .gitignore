@@ -1,0 +1,60 @@
+# Dependencies and package-manager state
+node_modules/
+.pnpm-store/
+.pnp.*
+.yarn/cache/
+.yarn/unplugged/
+.yarn/build-state.yml
+.yarn/install-state.gz
+
+# Turborepo and build output
+.turbo/
+dist/
+dist-ssr/
+build/
+coverage/
+.vite/
+*.tsbuildinfo
+
+# Environment files and local configuration
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.local
+
+# Logs and diagnostic reports
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Test and tooling artifacts
+.nyc_output/
+playwright-report/
+test-results/
+blob-report/
+
+# Editor and operating-system files
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/*.code-snippets
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Temporary files
+.tmp/
+tmp/
+*.tmp
+*.temp
