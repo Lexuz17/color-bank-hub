@@ -41,10 +41,9 @@ git clone https://github.com/<owner>/<repo>.git
 cd color-bank
 pnpm install
 
-cp apps/api/.env.example apps/api/.env
-cp apps/web/.env.example apps/web/.env
+cp .env.example .env
 
-docker compose up -d       # start PostgreSQL
+pnpm docker:db             # start PostgreSQL
 pnpm db:migrate            # apply migrations
 pnpm db:seed               # load dummy data
 pnpm dev                   # web :5173, api :3000
@@ -74,22 +73,37 @@ API documentation is served at `http://localhost:3000/docs`.
 
 ## Scripts
 
-| Command           | Description                    |
-| ----------------- | ------------------------------ |
-| `pnpm dev`        | Run web and API in watch mode  |
-| `pnpm build`      | Build all apps and packages    |
-| `pnpm test`       | Run unit and integration tests |
-| `pnpm lint`       | Lint and format check          |
-| `pnpm typecheck`  | Type-check all workspaces      |
-| `pnpm db:migrate` | Apply database migrations      |
-| `pnpm db:seed`    | Seed dummy data                |
+| Command            | Description                                            |
+| ------------------ | ------------------------------------------------------ |
+| `pnpm dev`         | Run web and API in watch mode                          |
+| `pnpm build`       | Build all apps and packages                            |
+| `pnpm test`        | Run unit and integration tests                         |
+| `pnpm lint`        | Lint and format check                                  |
+| `pnpm typecheck`   | Type-check all workspaces                              |
+| `pnpm db:migrate`  | Apply database migrations                              |
+| `pnpm db:seed`     | Seed dummy data                                        |
+| `pnpm docker:db`   | Start PostgreSQL database container                    |
+| `pnpm docker:up`   | Build and start all containers in background           |
+| `pnpm docker:down` | Stop and remove all containers                         |
+| `pnpm docker:logs` | Follow live container logs                             |
 
 ## Project Structure
 
 ```
 apps/
   web/              React SPA
-  api/              Hono API (feature modules)
+    ├── src/features/   Feature modules (shades, mapping, product-detail, color-bank, admin, imports)
+    ├── src/components/ Shared UI components (shadcn/ui) and layout shell
+    ├── src/routes/     TanStack Router route tree
+    ├── src/stores/     Zustand client state (mapping canvas, active filters)
+    ├── src/hooks/      Reusable custom React hooks
+    └── src/lib/        HTTP client (Axios), TanStack Query client, utilities
+  api/              Hono API (functional layered architecture)
+    ├── src/controllers/  HTTP request/response handlers (pure functions)
+    ├── src/services/     Business logic and domain operations
+    ├── src/repositories/ Database access and queries
+    ├── src/routes/       Hono router and route definitions
+    └── src/models/       Data models and TypeScript interfaces
 packages/
   db/               Drizzle schema, migrations, seed
   shared/           Zod schemas, types, permission matrix

@@ -75,31 +75,21 @@ Database scripts (`db:migrate`, `db:seed`) live in `packages/db` and are availab
 ```
 apps/api/
 ├── Dockerfile
-├── tsup.config.ts
+├── tsconfig.json
 └── src/
-    ├── server.ts            # starts the server, shuts down cleanly
-    ├── app.ts               # creates the Hono app, mounts all modules
-    ├── container.ts         # creates repositories and services, passes them to routes
-    ├── config/
-    │   └── env.ts           # reads and validates environment variables
-    ├── core/                # shared code, no business rules
-    │   ├── errors.ts        # AppError and its subclasses (NotFound, Forbidden, ...)
-    │   ├── logger/          # pino setup and sensitive-field masking
-    │   ├── authz/           # authorize(user, permission)
-    │   ├── audit/           # writes audit log entries
-    │   └── http.ts          # AppEnv type (user, requestId, logger on the context)
-    ├── middleware/          # request-id, request-logger, session, error-handler,
-    │                        # cors, secure-headers, rate-limit, metrics
-    └── modules/
-        ├── auth/            # login, sessions, email domain check, first-login role
-        ├── users/           # roles, role approval, audit log of role changes
-        ├── shades/          # list, filter, search, detail, similar shades
-        ├── mappings/        # generate, save, pin, delete mappings
-        ├── color-bank/      # prototype requests and their workflow
-        ├── reports/         # submit and resolve reports
-        ├── imports/         # Excel upload, column mapping, preview, commit
-        ├── classification/  # classification thresholds (admin)
-        └── health/          # /health, /ready, /metrics
+    ├── controllers/         # HTTP request/response handlers (pure functions)
+    │   └── sample-item-controller.ts
+    ├── services/            # Business logic and domain operations (pure functions)
+    │   └── sample-item-service.ts
+    ├── repositories/        # Database access and query operations (pure functions)
+    │   └── sample-item-repository.ts
+    ├── routes/              # Hono endpoint definitions and middleware wiring
+    │   └── sample-item-routes.ts
+    ├── models/              # TypeScript types, interfaces, and schemas
+    │   └── sample-item.ts
+    ├── middleware/          # CORS, authentication, error-handling middleware
+    ├── config/              # Environment variables and app configuration
+    └── index.ts             # Server bootstrap and HTTP server startup
 ```
 
 Shared packages used by the API:
@@ -110,29 +100,23 @@ Shared packages used by the API:
 | `packages/shared`       | Zod schemas shared with the web app, permission matrix |
 | `packages/color-engine` | HEX conversion and color classification                |
 
-### Inside a module
+### Layered Architecture (Functional)
 
-Every module has the same files:
+Data flow strictly follows a unidirectional layered model using pure functions:
 
 ```
-modules/shades/
-├── shades.routes.ts       # HTTP endpoints
-├── shades.schema.ts       # request and response shapes (Zod)
-├── shades.service.ts      # business rules
-├── shades.repository.ts   # database queries
-├── shades.model.ts        # types and small pure functions
-├── shades.errors.ts       # optional: errors specific to this module
-└── __tests__/
+Request -> Route -> Controller -> Service -> Repository -> Database
 ```
 
-| File         | Does                                              | Does not                          |
-| ------------ | ------------------------------------------------- | --------------------------------- |
-| `routes`     | Read input, call the service, return the response | Contain business rules or SQL     |
-| `service`    | Apply business rules, throw errors                | Know about HTTP or SQL            |
-| `repository` | Read and write the database                       | Contain business rules            |
-| `model`      | Define types, field-level rules per role          | Import anything from other layers |
+| Layer          | Responsibility                                            | Implementation Style               |
+| -------------- | --------------------------------------------------------- | ---------------------------------- |
+| `routes`       | Defines URL paths, HTTP verbs, and binds controllers      | Hono router definitions            |
+| `controllers`  | Parses request context, invokes service, returns response | Async handler functions `(c) => {}`|
+| `services`     | Core business logic, validations, calculations            | Async functions                    |
+| `repositories` | Data persistence, database queries, ORM operations        | Async query functions              |
+| `models`       | Type definitions, interfaces, domain entity shapes        | TypeScript interfaces & types      |
 
-Calls only go one way: `routes -> service -> repository`. A service receives its repository as an argument, so tests can pass in a fake one.
+Calls only go one way: `routes -> controllers -> services -> repositories`. Components are written with functional composition without classes.
 
 ## How a Request Flows
 
