@@ -1,8 +1,10 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { loadEnv } from "#api/load-env.js";
 import { sampleItemRoutes } from "#api/routes/sample-item-routes.js";
 
+loadEnv();
 const app = new Hono();
 
 app.use("/api/*", cors());
