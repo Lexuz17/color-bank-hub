@@ -2,6 +2,12 @@ import { SampleItemList } from "@/components/sample-item-list";
 import { SampleItemForm } from "@/components/sample-item-form";
 import { useSampleItems } from "@/hooks/use-sample-items";
 
+import { createFileRoute } from "@tanstack/react-router";
+
+export const Route = createFileRoute("/")({
+  component: HomePage,
+});
+
 export function HomePage() {
   const { data: sampleItems = [], error, isLoading } = useSampleItems();
 
