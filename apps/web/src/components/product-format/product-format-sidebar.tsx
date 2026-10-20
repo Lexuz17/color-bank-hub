@@ -89,7 +89,7 @@ export function ProductFormatSidebar({
     <div className="flex h-full flex-col bg-card text-[11px]">
       <nav
         aria-label="Product formats"
-        className="min-h-0 flex-1 overflow-y-auto py-3"
+        className="min-h-0 flex-1 overflow-y-auto py-2"
       >
         {groups.map((group) => (
           <div key={group.name}>

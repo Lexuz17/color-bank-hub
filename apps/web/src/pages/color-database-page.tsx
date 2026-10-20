@@ -43,19 +43,11 @@ export function ColorDatabasePage() {
     },
     { accessorKey: "hex", header: "HEX" },
   ];
-  const detail = (
-    <ProductDetailPanel
-      key={selected.shade}
-      shade={{ ...sampleProfile, ...selected }}
-      canViewComposition
-    />
-  );
   return (
     <PageShell
       section="Color Database"
       format={format}
       onFormatChange={setFormat}
-      detailPanel={detail}
     >
       <PageToolbar
         title={`Color Database · ${format}`}
@@ -73,7 +65,6 @@ export function ColorDatabasePage() {
           Demo records are available under Lip Tint Gloss. Select a shade to
           inspect its profile.
         </p>
-        <div className="mt-5 rounded-md border xl:hidden">{detail}</div>
       </div>
     </PageShell>
   );
