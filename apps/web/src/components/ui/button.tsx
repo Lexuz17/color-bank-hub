@@ -6,7 +6,7 @@ const buttonVariants = cva(
   [
     "group/button inline-flex shrink-0 items-center justify-center",
     "rounded-md border border-transparent bg-clip-padding",
-    "text-sm font-medium whitespace-nowrap",
+    "text-xs font-medium whitespace-nowrap",
     "transition-colors duration-150",
     "outline-none select-none",
     "focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30",
@@ -20,7 +20,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 active:bg-primary/85",
+          "bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/85",
 
         outline:
           "border-border bg-card text-foreground hover:border-muted-foreground/30 hover:bg-muted/70",
@@ -30,26 +30,17 @@ const buttonVariants = cva(
 
         ghost: "text-foreground hover:bg-muted hover:text-foreground",
 
-        destructive:
-          "bg-destructive text-white shadow-sm hover:bg-destructive/90",
+        destructive: "bg-destructive text-white hover:bg-destructive/90",
 
         "destructive-outline":
           "border-destructive/25 bg-destructive/5 text-destructive hover:border-destructive/40 hover:bg-destructive/10",
 
         link: "text-primary underline-offset-4 hover:underline",
-
-        terracotta:
-          "bg-[#B9664E] text-white shadow-sm hover:bg-[#A95842] active:bg-[#984B38]",
-
-        "terracotta-outline":
-          "border-[#B9664E]/35 bg-transparent text-[#A95842] hover:border-[#B9664E]/60 hover:bg-[#B9664E]/8",
-
-        soft: "bg-[#F7EDE8] text-[#8F4938] hover:bg-[#F0DFD7]",
       },
 
       size: {
         default:
-          "h-9 gap-2 px-3.5 has-data-[icon=inline-end]:pr-3 has-data-[icon=inline-start]:pl-3",
+          "h-8 gap-2 px-3.5 has-data-[icon=inline-end]:pr-3 has-data-[icon=inline-start]:pl-3",
 
         xs: "h-6 gap-1 rounded px-2 text-xs [&_svg:not([class*='size-'])]:size-3",
 

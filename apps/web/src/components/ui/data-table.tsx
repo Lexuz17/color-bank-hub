@@ -35,11 +35,11 @@ interface DataTableProps<TData, TValue> {
 
 function SortIcon({ isSorted }: { isSorted: false | "asc" | "desc" }) {
   if (isSorted === "asc")
-    return <ChevronUp className="ml-1 inline-block h-4 w-4" />;
+    return <ChevronUp className="ml-1 inline-block h-3 w-3" />;
   if (isSorted === "desc")
-    return <ChevronDown className="ml-1 inline-block h-4 w-4" />;
+    return <ChevronDown className="ml-1 inline-block h-3 w-3" />;
   return (
-    <ChevronsUpDown className="ml-1 inline-block h-4 w-4 text-muted-foreground" />
+    <ChevronsUpDown className="ml-1 inline-block h-3 w-3 text-muted-foreground" />
   );
 }
 
@@ -86,7 +86,7 @@ export function DataTable<TData, TValue>({
   const totalCount = table.getFilteredRowModel().rows.length;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {filterColumnId && (
         <div className="flex items-center gap-2">
           <Input
@@ -163,7 +163,7 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-between text-sm text-muted-foreground">
+      <div className="flex items-center justify-between text-xs text-muted-foreground">
         <span>
           {selectedCount > 0
             ? `${selectedCount} of ${totalCount} row(s) selected.`
@@ -173,7 +173,7 @@ export function DataTable<TData, TValue>({
         <div className="flex items-center gap-2">
           <span>
             Page {table.getState().pagination.pageIndex + 1} of{" "}
-            {table.getPageCount()}
+            {Math.max(1, table.getPageCount())}
           </span>
           <Button
             variant="outline"
