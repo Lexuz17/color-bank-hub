@@ -21,9 +21,9 @@ export function WorkspaceLayout({
   onProfile,
 }: {
   children: ReactNode;
-  sidebar: ReactNode;
+  sidebar?: ReactNode;
   detailPanel?: ReactNode;
-  activeSection: AppSection;
+  activeSection: AppSection | null;
   onNavigate: (section: AppSection) => void;
   role: Role;
   userName: string;
@@ -45,30 +45,32 @@ export function WorkspaceLayout({
         role={role}
         userName={userName}
         onProfile={onProfile}
-        onOpenSidebar={() => setMobileOpen(true)}
+        onOpenSidebar={sidebar ? () => setMobileOpen(true) : undefined}
       />
       <div className="flex min-h-0 flex-1">
-        <aside
-          aria-label="Workspace sidebar"
-          className={`hidden shrink-0 flex-col border-r lg:flex ${collapsed ? "w-11" : "w-[204px]"}`}
-        >
-          <div className="flex h-9 shrink-0 items-center justify-between border-b px-2">
-            {!collapsed && (
-              <span className="pl-2 text-[9px] tracking-wide text-muted-foreground">
-                WORKSPACE
-              </span>
-            )}
-            <Button
-              size="icon-xs"
-              variant="ghost"
-              aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-              onClick={() => setCollapsed(!collapsed)}
-            >
-              {collapsed ? <PanelLeftOpen /> : <PanelLeftClose />}
-            </Button>
-          </div>
-          {!collapsed && <div className="min-h-0 flex-1">{sidebar}</div>}
-        </aside>
+        {sidebar && (
+          <aside
+            aria-label="Workspace sidebar"
+            className={`hidden shrink-0 flex-col border-r lg:flex ${collapsed ? "w-11" : "w-[204px]"}`}
+          >
+            <div className="flex h-9 shrink-0 items-center justify-between border-b px-2">
+              {!collapsed && (
+                <span className="pl-2 text-[9px] tracking-wide text-muted-foreground">
+                  WORKSPACE
+                </span>
+              )}
+              <Button
+                size="icon-xs"
+                variant="ghost"
+                aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+                onClick={() => setCollapsed(!collapsed)}
+              >
+                {collapsed ? <PanelLeftOpen /> : <PanelLeftClose />}
+              </Button>
+            </div>
+            {!collapsed && <div className="min-h-0 flex-1">{sidebar}</div>}
+          </aside>
+        )}
         <main id="workspace-main" className="min-w-0 flex-1 overflow-y-auto">
           {children}
         </main>

@@ -10,33 +10,141 @@
 
 import { Route as rootRouteImport } from "./routes/__root";
 import { Route as IndexRouteImport } from "./routes/index";
+import { Route as ColorBankRouteImport } from "./routes/color-bank";
+import { Route as ColorDatabaseRouteImport } from "./routes/color-database";
+import { Route as DataInputRouteImport } from "./routes/data-input";
+import { Route as MyMappingsRouteImport } from "./routes/my-mappings";
+import { Route as ReportRouteImport } from "./routes/report";
+import { Route as ShadeMappingRouteImport } from "./routes/shade-mapping";
+import { Route as ShowcaseRouteImport } from "./routes/showcase";
+import { Route as UserManagementRouteImport } from "./routes/user-management";
 
 const IndexRoute = IndexRouteImport.update({
   id: "/",
   path: "/",
   getParentRoute: () => rootRouteImport,
 } as any);
+const ColorBankRoute = ColorBankRouteImport.update({
+  id: "/color-bank",
+  path: "/color-bank",
+  getParentRoute: () => rootRouteImport,
+} as any);
+const ColorDatabaseRoute = ColorDatabaseRouteImport.update({
+  id: "/color-database",
+  path: "/color-database",
+  getParentRoute: () => rootRouteImport,
+} as any);
+const DataInputRoute = DataInputRouteImport.update({
+  id: "/data-input",
+  path: "/data-input",
+  getParentRoute: () => rootRouteImport,
+} as any);
+const MyMappingsRoute = MyMappingsRouteImport.update({
+  id: "/my-mappings",
+  path: "/my-mappings",
+  getParentRoute: () => rootRouteImport,
+} as any);
+const ReportRoute = ReportRouteImport.update({
+  id: "/report",
+  path: "/report",
+  getParentRoute: () => rootRouteImport,
+} as any);
+const ShadeMappingRoute = ShadeMappingRouteImport.update({
+  id: "/shade-mapping",
+  path: "/shade-mapping",
+  getParentRoute: () => rootRouteImport,
+} as any);
+const ShowcaseRoute = ShowcaseRouteImport.update({
+  id: "/showcase",
+  path: "/showcase",
+  getParentRoute: () => rootRouteImport,
+} as any);
+const UserManagementRoute = UserManagementRouteImport.update({
+  id: "/user-management",
+  path: "/user-management",
+  getParentRoute: () => rootRouteImport,
+} as any);
 
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
+  "/color-bank": typeof ColorBankRoute;
+  "/color-database": typeof ColorDatabaseRoute;
+  "/data-input": typeof DataInputRoute;
+  "/my-mappings": typeof MyMappingsRoute;
+  "/report": typeof ReportRoute;
+  "/shade-mapping": typeof ShadeMappingRoute;
+  "/showcase": typeof ShowcaseRoute;
+  "/user-management": typeof UserManagementRoute;
 }
 export interface FileRoutesByTo {
   "/": typeof IndexRoute;
+  "/color-bank": typeof ColorBankRoute;
+  "/color-database": typeof ColorDatabaseRoute;
+  "/data-input": typeof DataInputRoute;
+  "/my-mappings": typeof MyMappingsRoute;
+  "/report": typeof ReportRoute;
+  "/shade-mapping": typeof ShadeMappingRoute;
+  "/showcase": typeof ShowcaseRoute;
+  "/user-management": typeof UserManagementRoute;
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport;
   "/": typeof IndexRoute;
+  "/color-bank": typeof ColorBankRoute;
+  "/color-database": typeof ColorDatabaseRoute;
+  "/data-input": typeof DataInputRoute;
+  "/my-mappings": typeof MyMappingsRoute;
+  "/report": typeof ReportRoute;
+  "/shade-mapping": typeof ShadeMappingRoute;
+  "/showcase": typeof ShowcaseRoute;
+  "/user-management": typeof UserManagementRoute;
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
-  fullPaths: "/";
+  fullPaths:
+    | "/"
+    | "/color-bank"
+    | "/color-database"
+    | "/data-input"
+    | "/my-mappings"
+    | "/report"
+    | "/shade-mapping"
+    | "/showcase"
+    | "/user-management";
   fileRoutesByTo: FileRoutesByTo;
-  to: "/";
-  id: "__root__" | "/";
+  to:
+    | "/"
+    | "/color-bank"
+    | "/color-database"
+    | "/data-input"
+    | "/my-mappings"
+    | "/report"
+    | "/shade-mapping"
+    | "/showcase"
+    | "/user-management";
+  id:
+    | "__root__"
+    | "/"
+    | "/color-bank"
+    | "/color-database"
+    | "/data-input"
+    | "/my-mappings"
+    | "/report"
+    | "/shade-mapping"
+    | "/showcase"
+    | "/user-management";
   fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute;
+  ColorBankRoute: typeof ColorBankRoute;
+  ColorDatabaseRoute: typeof ColorDatabaseRoute;
+  DataInputRoute: typeof DataInputRoute;
+  MyMappingsRoute: typeof MyMappingsRoute;
+  ReportRoute: typeof ReportRoute;
+  ShadeMappingRoute: typeof ShadeMappingRoute;
+  ShowcaseRoute: typeof ShowcaseRoute;
+  UserManagementRoute: typeof UserManagementRoute;
 }
 
 declare module "@tanstack/react-router" {
@@ -48,11 +156,75 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof IndexRouteImport;
       parentRoute: typeof rootRouteImport;
     };
+    "/color-bank": {
+      id: "/color-bank";
+      path: "/color-bank";
+      fullPath: "/color-bank";
+      preLoaderRoute: typeof ColorBankRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/color-database": {
+      id: "/color-database";
+      path: "/color-database";
+      fullPath: "/color-database";
+      preLoaderRoute: typeof ColorDatabaseRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/data-input": {
+      id: "/data-input";
+      path: "/data-input";
+      fullPath: "/data-input";
+      preLoaderRoute: typeof DataInputRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/my-mappings": {
+      id: "/my-mappings";
+      path: "/my-mappings";
+      fullPath: "/my-mappings";
+      preLoaderRoute: typeof MyMappingsRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/report": {
+      id: "/report";
+      path: "/report";
+      fullPath: "/report";
+      preLoaderRoute: typeof ReportRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/shade-mapping": {
+      id: "/shade-mapping";
+      path: "/shade-mapping";
+      fullPath: "/shade-mapping";
+      preLoaderRoute: typeof ShadeMappingRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/showcase": {
+      id: "/showcase";
+      path: "/showcase";
+      fullPath: "/showcase";
+      preLoaderRoute: typeof ShowcaseRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/user-management": {
+      id: "/user-management";
+      path: "/user-management";
+      fullPath: "/user-management";
+      preLoaderRoute: typeof UserManagementRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ColorBankRoute: ColorBankRoute,
+  ColorDatabaseRoute: ColorDatabaseRoute,
+  DataInputRoute: DataInputRoute,
+  MyMappingsRoute: MyMappingsRoute,
+  ReportRoute: ReportRoute,
+  ShadeMappingRoute: ShadeMappingRoute,
+  ShowcaseRoute: ShowcaseRoute,
+  UserManagementRoute: UserManagementRoute,
 };
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

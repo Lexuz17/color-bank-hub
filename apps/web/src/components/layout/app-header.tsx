@@ -1,3 +1,5 @@
+import { Link } from "@tanstack/react-router";
+import { sectionPaths } from "@/lib/navigation";
 import { Menu, Home, ChevronDown, Palette } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -55,7 +57,7 @@ export function AppHeader({
   onOpenSidebar,
   onProfile,
 }: {
-  activeSection: AppSection;
+  activeSection: AppSection | null;
   onNavigate: (section: AppSection) => void;
   role: Role;
   userName: string;
@@ -89,22 +91,21 @@ export function AppHeader({
         className="hidden min-w-0 flex-1 items-stretch self-stretch overflow-x-auto lg:flex"
       >
         {items.map((item) => (
-          <button
+          <Link
             key={item}
-            type="button"
-            onClick={() => onNavigate(item)}
+            to={sectionPaths[item]}
             aria-current={activeSection === item ? "page" : undefined}
             className="flex shrink-0 items-center gap-1 border-b-2 border-transparent px-3 text-[11px] whitespace-nowrap text-muted-foreground transition-colors hover:bg-muted hover:text-foreground aria-[current=page]:border-primary aria-[current=page]:font-medium aria-[current=page]:text-primary"
           >
             {item === "Home" && <Home className="size-3" />}
             {item}
-          </button>
+          </Link>
         ))}
       </nav>
       <div className="ml-auto lg:hidden">
         <DropdownMenu>
           <DropdownMenuTrigger render={<Button variant="outline" size="sm" />}>
-            {activeSection}
+            {activeSection ?? "Showcase"}
             <ChevronDown />
           </DropdownMenuTrigger>
           <DropdownMenuContent>
