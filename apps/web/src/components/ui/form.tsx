@@ -1,21 +1,37 @@
-import type { ComponentProps, ReactNode } from "react";
-import { Button } from "@/components/ui/button";
+import { useContext, type ComponentProps, type ReactNode } from "react";
 import {
-  TanStackFormContext,
-  useTanStackFormContext,
-} from "@/components/ui/form-context";
+  createFormHook,
+  type AnyFormApi,
+  useStore,
+} from "@tanstack/react-form";
+import { Button } from "@/components/ui/button";
+import { fieldContext, formContext } from "@/components/ui/form-context";
 
-type FormApiLike = any;
+type FormHookComponents = Parameters<
+  typeof createFormHook
+>[0]["fieldComponents"];
+
+export function createAppForm<
+  TFieldComponents extends FormHookComponents = Record<string, never>,
+  TFormComponents extends FormHookComponents = Record<string, never>,
+>(fieldComponents?: TFieldComponents, formComponents?: TFormComponents) {
+  return createFormHook({
+    fieldContext,
+    formContext,
+    fieldComponents: fieldComponents ?? ({} as TFieldComponents),
+    formComponents: formComponents ?? ({} as TFormComponents),
+  });
+}
 
 interface FormProps extends Omit<ComponentProps<"form">, "onSubmit"> {
-  form: FormApiLike;
+  form: AnyFormApi;
   children: ReactNode;
   onSubmit?: () => void | Promise<void>;
 }
 
 function Form({ form, children, onSubmit, ...props }: FormProps) {
   return (
-    <TanStackFormContext.Provider value={form}>
+    <formContext.Provider value={form}>
       <form
         {...props}
         onSubmit={(event) => {
@@ -30,7 +46,7 @@ function Form({ form, children, onSubmit, ...props }: FormProps) {
       >
         {children}
       </form>
-    </TanStackFormContext.Provider>
+    </formContext.Provider>
   );
 }
 
@@ -43,21 +59,29 @@ function FormSubmitButton({
   submittingText = "Submitting...",
   ...props
 }: FormSubmitButtonProps) {
-  const form = useTanStackFormContext();
+  const form = useContext(formContext);
+  if (!form) return null;
 
   return (
-    <form.Subscribe
-      selector={(state: { canSubmit: boolean; isSubmitting: boolean }) => [
-        state.canSubmit,
-        state.isSubmitting,
-      ]}
-    >
-      {([canSubmit, isSubmitting]: [boolean, boolean]) => (
-        <Button type="submit" disabled={!canSubmit} {...props}>
-          {isSubmitting ? submittingText : children}
-        </Button>
-      )}
-    </form.Subscribe>
+    <SubmitButton formApi={form} submittingText={submittingText} {...props}>
+      {children}
+    </SubmitButton>
+  );
+}
+
+function SubmitButton({
+  formApi,
+  submittingText,
+  children,
+  ...props
+}: FormSubmitButtonProps & { formApi: AnyFormApi }) {
+  const canSubmit = useStore(formApi.store, (state) => state.canSubmit);
+  const isSubmitting = useStore(formApi.store, (state) => state.isSubmitting);
+
+  return (
+    <Button type="submit" disabled={!canSubmit} {...props}>
+      {isSubmitting ? submittingText : children}
+    </Button>
   );
 }
 

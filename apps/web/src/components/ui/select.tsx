@@ -1,24 +1,15 @@
-"use client";
-
+import { Field } from "@tanstack/react-form";
 import { Select as SelectPrimitive } from "@base-ui/react/select";
 import { cn } from "cn";
 import { ChevronDownIcon, CheckIcon, ChevronUpIcon } from "lucide-react";
-import { useOptionalTanStackFormContext } from "@/components/ui/form-context";
+import { formContext } from "@/components/ui/form-context";
+import {
+  type StringFieldApi,
+  type StringFieldValidators,
+  getFieldError,
+} from "@/lib/form-utils";
 
 const SelectRoot = SelectPrimitive.Root;
-
-type StringFieldApi = {
-  name: string;
-  state: {
-    value: string;
-    meta: {
-      errors: unknown[];
-      isTouched?: boolean;
-    };
-  };
-  handleBlur: () => void;
-  handleChange: (value: string) => void;
-};
 
 type SelectFormOption = {
   label: string;
@@ -28,7 +19,7 @@ type SelectFormOption = {
 type FormSelectProps = {
   field: StringFieldApi;
   name?: string;
-  validators?: any;
+  validators?: StringFieldValidators;
   label?: string;
   id?: string;
   description?: string;
@@ -48,14 +39,6 @@ type SelectProps =
   | FormSelectProps
   | ContextSelectProps;
 
-function getFieldError(field: StringFieldApi) {
-  if (!field.state.meta.isTouched || field.state.meta.errors.length === 0) {
-    return null;
-  }
-
-  return field.state.meta.errors.map((error) => String(error)).join(", ");
-}
-
 function isFormSelectProps(props: SelectProps): props is FormSelectProps {
   return "field" in props;
 }
@@ -65,64 +48,79 @@ function isContextSelectProps(props: SelectProps): props is ContextSelectProps {
 }
 
 function Select(props: SelectProps) {
-  const form = useOptionalTanStackFormContext();
+  return (
+    <formContext.Consumer>
+      {(form) => {
+        if (!isFormSelectProps(props) && isContextSelectProps(props) && form) {
+          const { name, validators, ...restProps } = props;
 
-  if (!isFormSelectProps(props) && isContextSelectProps(props) && form) {
-    const { name, validators, ...restProps } = props;
+          return (
+            <Field form={form} name={name} validators={validators}>
+              {(field: StringFieldApi) => (
+                <Select field={field} {...restProps} />
+              )}
+            </Field>
+          );
+        }
 
-    return (
-      <form.Field name={name as never} validators={validators as any}>
-        {(field: StringFieldApi) => <Select field={field} {...restProps} />}
-      </form.Field>
-    );
-  }
+        if (isFormSelectProps(props)) {
+          const {
+            field,
+            label,
+            id,
+            description,
+            placeholder,
+            options,
+            containerClassName,
+            triggerClassName,
+            errorClassName,
+          } = props;
+          const fieldId = id ?? field.name;
+          const error = getFieldError(field);
 
-  if (isFormSelectProps(props)) {
-    const {
-      field,
-      label,
-      id,
-      description,
-      placeholder,
-      options,
-      containerClassName,
-      triggerClassName,
-      errorClassName,
-    } = props;
-    const fieldId = id ?? field.name;
-    const error = getFieldError(field);
+          return (
+            <div className={containerClassName ?? "flex flex-col gap-1.5"}>
+              {label ? <label htmlFor={fieldId}>{label}</label> : null}
+              {description ? (
+                <p className="text-sm text-muted-foreground">{description}</p>
+              ) : null}
+              <SelectRoot
+                value={field.state.value}
+                onValueChange={(value) => field.handleChange(value ?? "")}
+              >
+                <SelectTrigger
+                  id={fieldId}
+                  className={triggerClassName ?? "w-full"}
+                >
+                  <SelectValue
+                    placeholder={placeholder ?? "Select an option"}
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {options.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </SelectRoot>
+              {error ? (
+                <p className={cn("text-sm text-destructive", errorClassName)}>
+                  {error}
+                </p>
+              ) : null}
+            </div>
+          );
+        }
 
-    return (
-      <div className={containerClassName ?? "flex flex-col gap-1.5"}>
-        {label ? <label htmlFor={fieldId}>{label}</label> : null}
-        {description ? (
-          <p className="text-sm text-muted-foreground">{description}</p>
-        ) : null}
-        <SelectRoot
-          value={field.state.value}
-          onValueChange={(value) => field.handleChange(value ?? "")}
-        >
-          <SelectTrigger id={fieldId} className={triggerClassName ?? "w-full"}>
-            <SelectValue placeholder={placeholder ?? "Select an option"} />
-          </SelectTrigger>
-          <SelectContent>
-            {options.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </SelectRoot>
-        {error ? (
-          <p className={cn("text-sm text-destructive", errorClassName)}>
-            {error}
-          </p>
-        ) : null}
-      </div>
-    );
-  }
-
-  return <SelectRoot {...props} />;
+        return (
+          <SelectRoot
+            {...(props as SelectPrimitive.Root.Props<string, false>)}
+          />
+        );
+      }}
+    </formContext.Consumer>
+  );
 }
 
 function SelectGroup({ className, ...props }: SelectPrimitive.Group.Props) {

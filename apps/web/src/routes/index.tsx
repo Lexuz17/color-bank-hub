@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useForm } from "@tanstack/react-form";
+import { type ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
+import { DataTable } from "@/components/ui/data-table";
 import { ThemeToggle } from "@/components/theme-toggle";
 import {
   Accordion,
@@ -94,14 +96,7 @@ import {
 } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -118,6 +113,35 @@ const tableRows = [
   { item: "Atlas Swatch", owner: "Design", status: "Active" },
   { item: "Meridian Palette", owner: "Product", status: "Review" },
   { item: "North Shade", owner: "R&D", status: "Draft" },
+  { item: "Cobalt Series", owner: "Design", status: "Active" },
+  { item: "Ember Tones", owner: "Brand", status: "Review" },
+  { item: "Frost Line", owner: "R&D", status: "Draft" },
+  { item: "Solar Gradient", owner: "Product", status: "Active" },
+  { item: "Dusk Palette", owner: "Brand", status: "Active" },
+  { item: "Verdant Set", owner: "Design", status: "Review" },
+  { item: "Obsidian Core", owner: "R&D", status: "Draft" },
+  { item: "Blush Collection", owner: "Brand", status: "Active" },
+  { item: "Slate Range", owner: "Product", status: "Draft" },
+];
+
+type PaletteRow = (typeof tableRows)[number];
+
+const paletteColumns: ColumnDef<PaletteRow>[] = [
+  {
+    accessorKey: "item",
+    header: "Item",
+  },
+  {
+    accessorKey: "owner",
+    header: "Owner",
+  },
+  {
+    accessorKey: "status",
+    header: "Status",
+    cell: ({ row }) => (
+      <Badge variant="outline">{row.getValue("status")}</Badge>
+    ),
+  },
 ];
 
 function ShowcasePage() {
@@ -439,7 +463,7 @@ function ShowcasePage() {
               </TabsContent>
             </Tabs>
 
-            <Accordion type="single" defaultValue="item-1" collapsible>
+            <Accordion defaultValue={["item-1"]}>
               <AccordionItem value="item-1">
                 <AccordionTrigger>What is this page?</AccordionTrigger>
                 <AccordionContent>
@@ -460,29 +484,18 @@ function ShowcasePage() {
       <Card className="mt-8">
         <CardHeader>
           <CardTitle>Table</CardTitle>
-          <CardDescription>Tabular data display primitives.</CardDescription>
+          <CardDescription>
+            TanStack Table with sorting, filtering, and pagination.
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Item</TableHead>
-                <TableHead>Owner</TableHead>
-                <TableHead>Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {tableRows.map((row) => (
-                <TableRow key={row.item}>
-                  <TableCell>{row.item}</TableCell>
-                  <TableCell>{row.owner}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{row.status}</Badge>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <DataTable
+            columns={paletteColumns}
+            data={tableRows}
+            searchColumn="item"
+            searchPlaceholder="Search items…"
+            pageSize={5}
+          />
         </CardContent>
       </Card>
     </main>
