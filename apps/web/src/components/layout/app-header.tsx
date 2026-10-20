@@ -10,6 +10,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuGroup,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 
@@ -123,16 +124,27 @@ export function AppHeader({
         </Badge>
         <DropdownMenu>
           <DropdownMenuTrigger
-            render={<Button variant="ghost" className="h-auto gap-2 p-0.5" />}
+            render={
+              <Button
+                variant="ghost"
+                className="h-9 gap-2.5 rounded-md px-2.5 py-1 hover:bg-muted/70 hover:text-foreground active:translate-y-0"
+              />
+            }
           >
             <span className="hidden text-[11px] xl:inline">{userName}</span>
             <Avatar size="sm">
               <AvatarFallback>{initials}</AvatarFallback>
             </Avatar>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>{userName}</DropdownMenuLabel>
-            <DropdownMenuItem disabled>{role} · Local preview</DropdownMenuItem>
+          <DropdownMenuContent align="end" sideOffset={8} className="w-64">
+            <DropdownMenuGroup>
+              <DropdownMenuLabel className="px-2 pt-2 pb-1 text-foreground">
+                {userName}
+              </DropdownMenuLabel>
+              <p className="px-2 pb-2 text-[11px] text-muted-foreground">
+                {role} · Local preview
+              </p>
+            </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={onProfile}>
               <Palette />

@@ -24,15 +24,40 @@ export function DataInputPage() {
       />
       <div className="p-5">
         <Tabs defaultValue="manual">
-          <TabsList className="max-w-full overflow-x-auto">
-            <TabsTrigger value="paste">Paste from Excel</TabsTrigger>
-            <TabsTrigger value="upload">File Upload</TabsTrigger>
-            <TabsTrigger value="manual">Manual Entry</TabsTrigger>
-            <TabsTrigger value="manage">Manage Database</TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto border-b">
+            <TabsList
+              variant="line"
+              className="h-10! w-max justify-start gap-1 rounded-none p-0"
+            >
+              <TabsTrigger
+                className="h-10 flex-none px-4 after:bottom-0!"
+                value="paste"
+              >
+                Paste from Excel
+              </TabsTrigger>
+              <TabsTrigger
+                className="h-10 flex-none px-4 after:bottom-0!"
+                value="upload"
+              >
+                File Upload
+              </TabsTrigger>
+              <TabsTrigger
+                className="h-10 flex-none px-4 after:bottom-0!"
+                value="manual"
+              >
+                Manual Entry
+              </TabsTrigger>
+              <TabsTrigger
+                className="h-10 flex-none px-4 after:bottom-0!"
+                value="manage"
+              >
+                Manage Database
+              </TabsTrigger>
+            </TabsList>
+          </div>
           <TabsContent value="manual">
             <form
-              className="mt-4 max-w-3xl space-y-5 rounded-md border bg-card p-5"
+              className="mt-4 w-full space-y-5 rounded-md border bg-card p-5"
               onSubmit={(event) => {
                 event.preventDefault();
                 toast.info("Shade validated", {
@@ -76,7 +101,7 @@ export function DataInputPage() {
             </form>
           </TabsContent>
           <TabsContent value="paste">
-            <div className="mt-4 max-w-3xl space-y-4 rounded border p-5">
+            <div className="mt-4 w-full space-y-4 rounded-md border bg-card p-5">
               <h2 className="text-sm font-medium">Paste from Excel</h2>
               <p className="text-xs text-muted-foreground">
                 Paste tab-separated rows: brand, product, shade, HEX. Preview
@@ -138,12 +163,13 @@ export function DataInputPage() {
             </div>
           </TabsContent>
           <TabsContent value="upload">
-            <div className="mt-4 max-w-xl space-y-4 rounded border border-dashed p-8">
+            <div className="mt-4 flex min-h-64 w-full flex-col items-center justify-center gap-4 rounded-md border border-dashed bg-card p-8 text-center">
               <h2 className="text-sm font-medium">Upload tab-separated data</h2>
               <p className="text-xs text-muted-foreground">
                 Choose a .tsv file to load it into Paste from Excel for preview.
               </p>
               <Input
+                className="max-w-md"
                 aria-label="Upload TSV file"
                 type="file"
                 accept=".tsv,text/tab-separated-values"

@@ -52,15 +52,56 @@ export function ColorBankPage() {
     "Formulating",
     "Result uploaded",
   ] as const;
+  const detailPanel = (
+    <section className="space-y-4 p-5">
+      <h2 className="text-sm font-medium">{request.name}</h2>
+      <ShadeSwatch hex={request.hex} size="lg" />
+      <p className="text-xs text-muted-foreground">
+        Target {request.hex} · {format}
+      </p>
+      <WorkflowSteps activeStep={stages.indexOf(request.status)} />
+      <p className="text-xs text-muted-foreground">
+        Demonstration request workflow. Changes last for this session.
+      </p>
+      {request.status !== "Result uploaded" && (
+        <Button
+          onClick={() => {
+            setRequests((prev) =>
+              prev.map((item) =>
+                item.id === active
+                  ? {
+                      ...item,
+                      status: stages[stages.indexOf(item.status) + 1],
+                    }
+                  : item,
+              ),
+            );
+            toast.success("Demo request updated");
+          }}
+        >
+          {request.status === "Pending"
+            ? "Approve request"
+            : request.status === "Approved"
+              ? "Start formulation"
+              : "Mark result uploaded"}
+        </Button>
+      )}
+    </section>
+  );
   return (
-    <PageShell section="Color Bank" format={format} onFormatChange={setFormat}>
+    <PageShell
+      section="Color Bank"
+      format={format}
+      onFormatChange={setFormat}
+      detailPanel={detailPanel}
+    >
       <PageToolbar
         title="Color Bank"
         description="Prototype shade requests · session demo"
       >
         <Button onClick={() => setOpen(true)}>+ New request</Button>
       </PageToolbar>
-      <div className="grid lg:grid-cols-[1fr_300px]">
+      <div>
         <div>
           {requests.map((item) => (
             <button
@@ -78,40 +119,7 @@ export function ColorBankPage() {
             </button>
           ))}
         </div>
-        <section className="space-y-4 border-l p-5">
-          <h2 className="text-sm font-medium">{request.name}</h2>
-          <ShadeSwatch hex={request.hex} size="lg" />
-          <p className="text-xs text-muted-foreground">
-            Target {request.hex} · {format}
-          </p>
-          <WorkflowSteps activeStep={stages.indexOf(request.status)} />
-          <p className="text-xs text-muted-foreground">
-            Demonstration request workflow. Changes last for this session.
-          </p>
-          {request.status !== "Result uploaded" && (
-            <Button
-              onClick={() => {
-                setRequests((prev) =>
-                  prev.map((item) =>
-                    item.id === active
-                      ? {
-                          ...item,
-                          status: stages[stages.indexOf(item.status) + 1],
-                        }
-                      : item,
-                  ),
-                );
-                toast.success("Demo request updated");
-              }}
-            >
-              {request.status === "Pending"
-                ? "Approve request"
-                : request.status === "Approved"
-                  ? "Start formulation"
-                  : "Mark result uploaded"}
-            </Button>
-          )}
-        </section>
+        <div className="border-t xl:hidden">{detailPanel}</div>
       </div>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>

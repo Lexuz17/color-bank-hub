@@ -85,6 +85,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuGroup,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -643,20 +644,22 @@ function ShowcasePage() {
                   Open Menu
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => setDialogOpen(true)}>
-                    Rename mapping
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() =>
-                      toast.info(
-                        "Duplicate action demonstrated; no mapping is stored in this showcase.",
-                      )
-                    }
-                  >
-                    Duplicate example
-                  </DropdownMenuItem>
+                  <DropdownMenuGroup>
+                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => setDialogOpen(true)}>
+                      Rename mapping
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() =>
+                        toast.info(
+                          "Duplicate action demonstrated; no mapping is stored in this showcase.",
+                        )
+                      }
+                    >
+                      Duplicate example
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
                 </DropdownMenuContent>
               </DropdownMenu>
             </CardContent>

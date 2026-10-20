@@ -14,6 +14,7 @@ export function WorkspaceLayout({
   children,
   sidebar,
   detailPanel,
+  footer,
   activeSection,
   onNavigate,
   role,
@@ -23,6 +24,7 @@ export function WorkspaceLayout({
   children: ReactNode;
   sidebar?: ReactNode;
   detailPanel?: ReactNode;
+  footer?: ReactNode;
   activeSection: AppSection | null;
   onNavigate: (section: AppSection) => void;
   role: Role;
@@ -71,13 +73,19 @@ export function WorkspaceLayout({
             {!collapsed && <div className="min-h-0 flex-1">{sidebar}</div>}
           </aside>
         )}
-        <main id="workspace-main" className="min-w-0 flex-1 overflow-y-auto">
-          {children}
-        </main>
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+          <main
+            id="workspace-main"
+            className="min-h-0 min-w-0 flex-1 overflow-y-auto"
+          >
+            {children}
+          </main>
+          {footer && <div className="shrink-0 bg-background">{footer}</div>}
+        </div>
         {detailPanel && (
           <aside
             aria-label="Product detail"
-            className="hidden w-[272px] shrink-0 overflow-y-auto border-l bg-card xl:block"
+            className="hidden min-h-0 w-[272px] shrink-0 self-stretch overflow-y-auto border-l bg-card xl:block"
           >
             {detailPanel}
           </aside>

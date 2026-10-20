@@ -40,14 +40,16 @@ export function PageShell({
         )
       }
       detailPanel={detailPanel}
+      footer={
+        <footer className="mx-5 flex flex-wrap justify-between gap-2 border-t py-3 text-[10px] text-muted-foreground">
+          <span>Color Bank & Shade Mapping Hub · Local prototype</span>
+          <Link to="/showcase" className="text-primary hover:underline">
+            Component showcase
+          </Link>
+        </footer>
+      }
     >
       {children}
-      <footer className="m-5 flex flex-wrap justify-between gap-2 border-t pt-3 text-[10px] text-muted-foreground">
-        <span>Color Bank & Shade Mapping Hub · Local prototype</span>
-        <Link to="/showcase" className="text-primary hover:underline">
-          Component showcase
-        </Link>
-      </footer>
     </WorkspaceLayout>
   );
 }
