@@ -211,7 +211,7 @@ function ShowcasePage() {
       activeSection={activeSection}
       onNavigate={navigate}
       role={role}
-      userName="Eugenia Clarissa"
+      userName="John doe"
       onProfile={() => setProfileOpen(true)}
       sidebar={
         <ProductFormatSidebar
@@ -915,7 +915,7 @@ function ShowcasePage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Preview identity</DialogTitle>
-            <DialogDescription>Eugenia Clarissa · {role}</DialogDescription>
+            <DialogDescription>John doe · {role}</DialogDescription>
           </DialogHeader>
           <Alert variant="info">
             <Info />

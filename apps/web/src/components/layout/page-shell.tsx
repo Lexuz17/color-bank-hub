@@ -28,7 +28,7 @@ export function PageShell({
         void navigate({ to: sectionPaths[item] });
       }}
       role="Website Admin"
-      userName="Eugenia Clarissa"
+      userName="John doe"
       onProfile={() => {
         void navigate({ to: "/user-management" });
       }}

@@ -18,7 +18,7 @@ type Account = {
 };
 const accounts: Account[] = [
   {
-    name: "Eugenia Clarissa",
+    name: "John doe",
     email: "eugenia@example.com",
     role: "Admin",
     status: "Active",
