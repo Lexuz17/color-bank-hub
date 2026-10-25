@@ -76,8 +76,6 @@ Copy the root `.env.example` to `.env`. Both apps read their configuration from 
 | `pnpm db:seed` | Seed development data |
 | `pnpm docker:db` / `pnpm docker:db:down` | Start or stop the PostgreSQL container |
 | `pnpm docker:db:logs` | Follow PostgreSQL logs |
-| `pnpm docker:up` / `pnpm docker:down` | Build and start, or stop and remove, Compose services |
-| `pnpm docker:logs` | Follow Compose service logs |
 
 ## Project Structure
 

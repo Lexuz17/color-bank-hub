@@ -194,11 +194,47 @@ export const mockRequests = [
   },
 ];
 
-export async function setupApiMocks(page: Page) {
+export async function setupApiMocks(
+  page: Page,
+  { authenticated = true }: { authenticated?: boolean } = {},
+) {
   await page.route("**/api/**", async (route: Route) => {
     const url = new URL(route.request().url());
     const method = route.request().method();
     const pathname = url.pathname.replace(/^\/api/, "");
+
+    // Better Auth session lookup used by the authenticated route guard.
+    if (pathname === "/auth/get-session" && method === "GET") {
+      return route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(
+          authenticated
+            ? {
+                session: {
+                  id: "session-1",
+                  userId: "user-1",
+                  token: "test-session-token",
+                  expiresAt: "2099-01-01T00:00:00.000Z",
+                  createdAt: "2026-01-01T00:00:00.000Z",
+                  updatedAt: "2026-01-01T00:00:00.000Z",
+                },
+                user: {
+                  id: "user-1",
+                  name: "Test User",
+                  email: "admin@dev.local",
+                  emailVerified: true,
+                  image: null,
+                  createdAt: "2026-01-01T00:00:00.000Z",
+                  updatedAt: "2026-01-01T00:00:00.000Z",
+                  role: "admin",
+                  status: "active",
+                },
+              }
+            : null,
+        ),
+      });
+    }
 
     // GET /brands, POST /brands
     if (pathname === "/brands") {

@@ -56,4 +56,17 @@ test.describe("App Navigation & Layout", () => {
       await expect(heading).toBeVisible();
     }
   });
+
+  test("redirects signed-out users to login before opening a workspace view", async ({
+    page,
+  }) => {
+    await setupApiMocks(page, { authenticated: false });
+
+    await page.goto("/color-bank");
+
+    await expect(page).toHaveURL(/\/login\?redirect=%2Fcolor-bank/);
+    await expect(
+      page.getByRole("button", { name: "Login with Google" }),
+    ).toBeVisible();
+  });
 });
