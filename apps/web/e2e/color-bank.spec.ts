@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { setupApiMocks, mockRequests } from "./helpers/mock-api";
+import { setupApiMocks } from "./helpers/mock-api";
 
 test.describe("Color Bank Prototype Feature", () => {
   test.beforeEach(async ({ page }) => {
