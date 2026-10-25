@@ -1,0 +1,15 @@
+import { Hono } from "hono";
+import * as catalog from "#api/controllers/catalog-controller.js";
+export const catalogRoutes = new Hono();
+catalogRoutes.get("/brands", catalog.listBrands);
+catalogRoutes.post("/brands", catalog.createBrand);
+catalogRoutes.get("/product-formats", catalog.listFormats);
+catalogRoutes.post("/product-formats", catalog.createFormat);
+catalogRoutes.get("/products", catalog.listProducts);
+catalogRoutes.post("/products", catalog.createProduct);
+catalogRoutes.get("/shades", catalog.listShades);
+catalogRoutes.post("/shades", catalog.createShade);
+catalogRoutes.get("/shades/:id", catalog.findShade);
+catalogRoutes.patch("/shades/:id", catalog.updateShade);
+catalogRoutes.post("/imports/preview", catalog.preview);
+catalogRoutes.post("/imports/commit", catalog.commit);
