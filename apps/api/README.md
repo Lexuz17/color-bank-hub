@@ -2,7 +2,7 @@
 
 Hono REST API backed by the existing PostgreSQL/Drizzle schema. This first pass covers Color Database, Report, Data Input, and Color Bank. The Color Database, Report, Data Input, and Color Bank pages use these endpoints through the Vite `/api` proxy and TanStack Query. The component showcase and mapping previews remain independent demo screens.
 
-Authentication and user management are deferred. The server reads its bind address from `HOST` and refuses production startup until authentication is implemented. Reports, prototypes, decisions, and audit records use a database placeholder identity with a randomly generated UUID, a disabled account, and no role. Existing NOT NULL constraints and foreign keys remain intact. This identity does not authenticate requests.
+Better Auth is configured for Google sign-in, and the API exposes its auth handler and session endpoint. The server reads its bind address from `HOST`. Resource routes are currently guarded by session authentication, but role-based authorization and user-management endpoints are not implemented. The web app has a user-management screen, but it is not backed by API endpoints yet. Reports, prototypes, decisions, and audit records use a database placeholder identity with a randomly generated UUID, a disabled account, and no role. Existing NOT NULL constraints and foreign keys remain intact. This identity does not authenticate requests.
 
 ## Development
 
@@ -136,4 +136,4 @@ HTTP 400: malformed JSON; 404: missing resource; 409: unique constraint or workf
 
 ## Structure
 
-`routes -> controllers -> services -> repositories -> PostgreSQL`. Transaction-dependent workflow checks stay beside the locked database updates. No authentication endpoints or user-management endpoints are added.
+`routes -> controllers -> services -> repositories -> PostgreSQL`. Transaction-dependent workflow checks stay beside the locked database updates. Better Auth handles sign-in and sessions; role-based authorization and user-management API endpoints remain future work.

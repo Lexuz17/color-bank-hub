@@ -19,95 +19,87 @@ A web application for exploring, mapping, and managing lip product shades.
 | ------------- | --------------------------------------------------------------- |
 | Monorepo      | pnpm workspaces, Turborepo                                      |
 | Web           | React, Vite, TanStack Router / Query / Table / Virtual, Zustand |
-| UI            | shadcn/ui, Tailwind CSS                                         |
-| Visualization | visx, d3                                                        |
-| API           | Hono (Node.js), Zod, `@hono/zod-openapi`, Scalar                |
-| Auth          | Better Auth (OAuth/SSO)                                         |
-| Authorization | Custom RBAC (permission matrix in `packages/shared`)            |
+| UI            | Base UI, Tailwind CSS                                           |
+| API           | Hono (Node.js), Zod                                             |
+| Auth          | Better Auth (Google OAuth)                                     |
 | Database      | PostgreSQL, Drizzle ORM                                         |
-| Search        | PostgreSQL full-text search, `pg_trgm`                          |
-| Tooling       | TypeScript, Vitest, Biome, GitHub Actions, Docker Compose       |
+| Tooling       | TypeScript, Oxlint, Biome, Playwright, Docker Compose           |
 
 ## Prerequisites
 
-- Node.js (current LTS)
-- pnpm
+- Node.js (22 or newer)
+- pnpm 10.14.0
 - Docker (for local PostgreSQL)
 
 ## Getting Started
 
 ```bash
-git clone https://github.com/<owner>/<repo>.git
-cd color-bank
 pnpm install
-
 cp .env.example .env
-
+# Set POSTGRES_PASSWORD and BETTER_AUTH_SECRET in .env.
 pnpm docker:db             # start PostgreSQL
-pnpm db:migrate            # apply migrations
-pnpm db:seed               # load dummy data
-pnpm dev                   # web :5173, api :3000
+pnpm db:migrate             # apply migrations
+pnpm db:seed                # load development data
+pnpm dev                    # start web and API
 ```
 
-API documentation is served at `http://localhost:3000/docs`.
+The web app runs at the configured `WEB_HOST` and `WEB_PORT` (defaults to `127.0.0.1:5173`). The API listens on `APP_PORT` (default `3000`). API documentation is served at `/docs`.
 
 ## Environment Variables
 
-**`apps/api/.env`**
+Copy the root `.env.example` to `.env`. Both apps read their configuration from this root file.
 
-| Variable                                  | Description                              |
-| ----------------------------------------- | ---------------------------------------- |
-| `DATABASE_URL`                            | PostgreSQL connection string             |
-| `BETTER_AUTH_SECRET`                      | Secret used to sign sessions             |
-| `BETTER_AUTH_URL`                         | Public base URL of the API               |
-| `OAUTH_CLIENT_ID` / `OAUTH_CLIENT_SECRET` | OAuth client credentials                 |
-| `OAUTH_ISSUER`                            | OIDC issuer URL of the identity provider |
-| `ALLOWED_EMAIL_DOMAIN`                    | Only emails from this domain can sign in |
-| `WEB_ORIGIN`                              | Allowed CORS origin (web app URL)        |
-
-**`apps/web/.env`**
-
-| Variable       | Description         |
-| -------------- | ------------------- |
-| `VITE_API_URL` | Base URL of the API |
+| Variable | Description |
+| --- | --- |
+| `DATABASE_URL` | PostgreSQL connection string for host commands |
+| `BETTER_AUTH_SECRET` / `BETTER_AUTH_URL` | Better Auth session secret and public API URL |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Google OAuth credentials (optional in development; required otherwise) |
+| `ALLOWED_EMAIL_DOMAIN` | Email domain allowed to sign in |
+| `WEB_ORIGIN` | Allowed web app origin for CORS |
+| `API_URL` | API target used by the Vite `/api` proxy |
+| `WEB_HOST` / `WEB_PORT` | Vite bind address and port |
+| `VITE_API_BASE_URL` | Browser API base path, normally `/api` |
+| `POSTGRES_*` | Local PostgreSQL settings; see `.env.example` for each variable |
 
 ## Scripts
 
-| Command            | Description                                            |
-| ------------------ | ------------------------------------------------------ |
-| `pnpm dev`         | Run web and API in watch mode                          |
-| `pnpm build`       | Build all apps and packages                            |
-| `pnpm test`        | Run unit and integration tests                         |
-| `pnpm lint`        | Lint and format check                                  |
-| `pnpm typecheck`   | Type-check all workspaces                              |
-| `pnpm db:migrate`  | Apply database migrations                              |
-| `pnpm db:seed`     | Seed dummy data                                        |
-| `pnpm docker:db`   | Start PostgreSQL database container                    |
-| `pnpm docker:up`   | Build and start all containers in background           |
-| `pnpm docker:down` | Stop and remove all containers                         |
-| `pnpm docker:logs` | Follow live container logs                             |
+| Command | Description |
+| --- | --- |
+| `pnpm dev` | Run web and API in watch mode |
+| `pnpm build` | Build workspace packages and apps |
+| `pnpm test` | Run workspace tests |
+| `pnpm lint` | Run Oxlint for the web workspace |
+| `pnpm format` | Format repository files with Biome |
+| `pnpm typecheck` | Type-check configured workspaces |
+| `pnpm db:generate` | Generate Drizzle migrations |
+| `pnpm db:migrate` | Apply database migrations |
+| `pnpm db:seed` | Seed development data |
+| `pnpm docker:db` / `pnpm docker:db:down` | Start or stop the PostgreSQL container |
+| `pnpm docker:db:logs` | Follow PostgreSQL logs |
+| `pnpm docker:up` / `pnpm docker:down` | Build and start, or stop and remove, Compose services |
+| `pnpm docker:logs` | Follow Compose service logs |
 
 ## Project Structure
 
 ```
 apps/
-  web/              React SPA
-    ├── src/features/   Feature modules (shades, mapping, product-detail, color-bank, admin, imports)
-    ├── src/components/ Shared UI components (shadcn/ui) and layout shell
-    ├── src/routes/     TanStack Router route tree
-    ├── src/stores/     Zustand client state (mapping canvas, active filters)
-    ├── src/hooks/      Reusable custom React hooks
-    └── src/lib/        HTTP client (Axios), TanStack Query client, utilities
-  api/              Hono API (functional layered architecture)
-    ├── src/controllers/  HTTP request/response handlers (pure functions)
-    ├── src/services/     Business logic and domain operations
-    ├── src/repositories/ Database access and queries
-    ├── src/routes/       Hono router and route definitions
-    └── src/models/       Data models and TypeScript interfaces
+  web/                 React SPA
+    src/components/    Shared UI and layout components
+    src/features/      Auth and feature-specific modules/notes
+    src/hooks/         Shared data hooks
+    src/lib/           HTTP client, utilities, and demo data
+    src/pages/         Page components
+    src/routes/        TanStack Router route tree
+  api/                 Hono API (layered architecture)
+    src/controllers/   HTTP request/response handlers
+    src/services/      Business logic and domain operations
+    src/repositories/  Database access and queries
+    src/routes/        Hono route definitions
+    src/models/        API model types
 packages/
-  db/               Drizzle schema, migrations, seed
-  shared/           Zod schemas, types, permission matrix
-  color-engine/     HEX conversion and color classification
-  ui/               Shared UI components (shadcn/ui)
-  config/           Shared tsconfig, Biome, Tailwind preset
+  contracts/           Shared API contracts and Zod schemas
+  db/                  Drizzle schema, migrations, and seed
+  shared/              Shared TypeScript package
 ```
+
+See [apps/api/README.md](apps/api/README.md) for API endpoints and workflow details, and [apps/web/README.md](apps/web/README.md) for web-specific commands and structure.

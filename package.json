@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
-    "lint": "turbo run lint",
+    "lint": "turbo run lint --filter=web",
     "format": "biome format --write .",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
@@ -19,6 +19,9 @@
     "docker:db": "docker compose up -d db",
     "docker:db:down": "docker compose stop db",
     "docker:db:logs": "docker compose logs -f db",
+    "docker:up": "docker compose up -d --build",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f",
     "prepare": "husky || true"
   },
   "keywords": [],

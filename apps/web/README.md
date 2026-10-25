@@ -1,101 +1,52 @@
 # Color Bank Web
 
-Frontend web application for Color Bank. It provides interfaces for browsing and searching shades, creating interactive shade mappings, submitting prototype requests, importing data, and administering roles.
+React single-page application built with Vite, TanStack Router and Query, Tailwind CSS, Base UI, and TypeScript. It includes the shade database interface, mapping previews, Color Bank requests, reports, data input, and user management screens. Some screens remain demos or previews; see `apps/api/README.md` for the API's current scope.
 
-Built with React 19, Vite, Tailwind CSS, TanStack Router & Query, and TypeScript.
+Run commands from the repository root.
 
-> Part of the Color Bank monorepo. Run commands from the repository root unless noted.
+## Development
 
-## Tech Stack
-
-| Purpose                 | Tool                                                  |
-| ----------------------- | ----------------------------------------------------- |
-| UI Framework            | React 19, Vite                                        |
-| Routing                 | TanStack Router                                       |
-| Server State & Caching  | TanStack Query                                        |
-| Tables & Virtualization | TanStack Table, TanStack Virtual                      |
-| Forms & Validation      | TanStack Form, Zod (`packages/shared`)                |
-| Client State            | Zustand                                               |
-| UI Components & Styling | shadcn/ui, Tailwind CSS                               |
-| Data Visualization      | visx, d3                                              |
-| HTTP Client             | Axios                                                 |
-| Tooling & Quality       | TypeScript, Oxlint, Biome                             |
-
-## Getting Started
-
-```bash
+```sh
 pnpm install
-cp apps/web/.env.example apps/web/.env
-pnpm --filter web dev
+cp .env.example .env
+# Configure the required root environment values, then:
+pnpm dev:web
 ```
 
-The app will be available at `http://localhost:5173`.
+The root `.env` is used by Vite. `WEB_HOST`, `WEB_PORT`, `API_URL`, and `VITE_API_BASE_URL` are required. The Vite development server proxies `/api` requests to `API_URL`. Do not create an `apps/web/.env` for the standard monorepo setup.
 
-## Environment Variables
+## Commands
 
-| Variable       | Description                                 | Default                 |
-| -------------- | ------------------------------------------- | ----------------------- |
-| `VITE_API_URL` | Base URL of the backend API                 | `http://localhost:3000` |
+| Command | Purpose |
+| --- | --- |
+| `pnpm --filter web dev` or `pnpm dev:web` | Start Vite |
+| `pnpm --filter web build` | Type-check and create a production bundle |
+| `pnpm --filter web typecheck` | Run TypeScript project checks |
+| `pnpm --filter web lint` | Run Oxlint |
+| `pnpm --filter web format` | Format web source with Biome |
+| `pnpm --filter web format:check` | Check web source formatting |
+| `pnpm --filter web preview` | Preview the production bundle |
+| `pnpm --filter web test` | Run Playwright tests in `e2e/` |
+| `pnpm --filter web test:ui` | Open Playwright UI mode |
 
-## Scripts
+The Playwright configuration starts the web dev server and uses Chromium. E2E tests are in `apps/web/e2e/`.
 
-Run with `pnpm --filter web <script>`.
+## Source layout
 
-| Script         | Description                             |
-| -------------- | --------------------------------------- |
-| `dev`          | Start Vite development server           |
-| `build`        | Type-check and bundle for production    |
-| `preview`      | Preview production build locally        |
-| `typecheck`    | Run TypeScript type checking            |
-| `lint`         | Run Oxlint                              |
-| `format`       | Format code with Biome                  |
-| `format:check` | Check code formatting with Biome        |
-
-## Project Structure
-
-```
-apps/web/
-├── public/
-│   ├── favicon.svg
-│   └── icons.svg
-├── src/
-│   ├── assets/              # Static assets (images, icons, logos)
-│   ├── components/          # Shared components across features
-│   │   ├── layout/          # App shell, navbar, sidebar, page headers
-│   │   └── ui/              # Base UI primitives (button, modal, dropdown, etc.)
-│   ├── features/            # Feature-driven domain modules
-│   │   ├── shades/          # Color database table, filters, search, multi-select
-│   │   ├── mapping/         # 3-step wizard, interactive 2D map (visx/d3), export
-│   │   ├── product-detail/  # Shade specs, composition, benchmarks, similar shades
-│   │   ├── my-mappings/     # Saved, pinned, and personal mappings gallery
-│   │   ├── color-bank/      # Prototype requests and approval workflows
-│   │   ├── reports/         # Issue reporting and resolution
-│   │   ├── imports/         # Excel upload, column mapping preview, commit
-│   │   └── admin/           # User/role management, audit logs, thresholds
-│   ├── hooks/               # Global utility hooks (use-debounce, use-media-query)
-│   ├── lib/                 # Shared libraries (http-client, query-client, utils)
-│   ├── routes/              # Application route definitions and page views
-│   ├── stores/              # Zustand global client stores (mapping-canvas, active filters)
-│   ├── types/               # App-level TypeScript type declarations
-│   ├── App.tsx              # Root component & providers
-│   ├── index.css            # Global styles and Tailwind directives
-│   └── main.tsx             # Application bootstrap entry point
-├── index.html
-├── package.json
-├── tsconfig.json
-├── vite.config.ts
-└── .oxlintrc.json
-```
-
-### Inside a Feature Module
-
-Features are modular and self-contained:
-
-```
-features/shades/
-├── components/          # Feature-specific UI components
-├── hooks/               # TanStack queries and mutations
-├── services/            # API request functions
-├── stores/              # Feature-specific Zustand store (if needed)
-└── types/               # Local types and view models
+```text
+src/
+  components/           Shared layout, API, product, and UI components
+  features/              Feature-specific code and planning notes
+    auth/                Auth API, components, hooks, and user store
+    color-database/      Color database notes
+    my-mappings/         Mapping notes
+    report/              Report notes
+    shade-mapping/       Mapping notes
+    user-management/     User management notes
+  hooks/                 Shared data hooks
+  lib/                   HTTP client, utilities, and local demo data
+  pages/                 Page components
+  routes/                TanStack Router route definitions and generated tree
+  services/              API access helpers
+  types/                 API types
 ```
