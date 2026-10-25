@@ -7,18 +7,17 @@ test.describe("Report Feature", () => {
     await page.goto("/report");
   });
 
+  // ── READ: list ─────────────────────────────────────────────────────────────
   test("displays report list and status indicators", async ({ page }) => {
     await expect(
       page.getByRole("heading", { name: "Report" }).first(),
     ).toBeVisible();
 
-    // Verify report item is rendered
     await expect(
       page.getByText(`Report ${mockReports[0].id.slice(0, 8)}`),
     ).toBeVisible();
     await expect(page.getByText(mockReports[0].description)).toBeVisible();
 
-    // Check status badge exists (e.g., Pending)
     await expect(
       page
         .locator("span")
@@ -27,27 +26,42 @@ test.describe("Report Feature", () => {
     ).toBeVisible();
   });
 
-  test("filters reports by status and opens new report modal", async ({
-    page,
-  }) => {
-    // Check status filter dropdown
-    const statusSelect = page.locator("select").first();
-    if (await statusSelect.isVisible()) {
-      await statusSelect.selectOption({ label: "Pending" });
-    }
+  // ── READ: status filter ────────────────────────────────────────────────────
+  test("filters reports by status", async ({ page }) => {
+    const statusSelect = page.getByLabel(/Filter report status/i);
+    await expect(statusSelect).toBeVisible();
+    await statusSelect.selectOption({ label: "Pending" });
+    // List stays visible after filtering
+    await expect(
+      page.getByText(`Report ${mockReports[0].id.slice(0, 8)}`),
+    ).toBeVisible();
+  });
 
-    // Open new report drawer / modal
-    const newReportBtn = page
-      .getByRole("button", { name: /New Report|\+ Report/i })
+  // ── CREATE: submit report form ─────────────────────────────────────────────
+  test("submits a new report", async ({ page }) => {
+    // The submit form is always visible on this page (left column)
+    await expect(
+      page.getByRole("heading", { name: /Submit a report/i }),
+    ).toBeVisible();
+
+    // Fill description (required, minLength 10)
+    await page
+      .getByRole("textbox", { name: /Issue description/i })
+      .fill("Shade 08 has a visible yellow shift vs the master swatch.");
+
+    await page.getByRole("button", { name: /Submit report/i }).click();
+
+    await expect(page.getByText(/Report submitted/i)).toBeVisible();
+  });
+
+  // ── UPDATE: mark a report resolved ────────────────────────────────────────
+  test("marks a pending report as resolved", async ({ page }) => {
+    const markBtn = page
+      .getByRole("button", { name: /Mark resolved/i })
       .first();
-    if (await newReportBtn.isVisible()) {
-      await newReportBtn.click();
-      await expect(
-        page.getByRole("heading", { name: /New Report|Submit Report/i }),
-      ).toBeVisible();
+    await expect(markBtn).toBeVisible();
+    await markBtn.click();
 
-      // Close modal
-      await page.keyboard.press("Escape");
-    }
+    await expect(page.getByText(/Report status updated/i)).toBeVisible();
   });
 });

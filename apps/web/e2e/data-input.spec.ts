@@ -7,12 +7,12 @@ test.describe("Data Input Feature", () => {
     await page.goto("/data-input");
   });
 
+  // ── READ: tab rendering ────────────────────────────────────────────────────
   test("renders all tabs and switches between modes", async ({ page }) => {
     await expect(
       page.getByRole("heading", { name: "Data Input" }).first(),
     ).toBeVisible();
 
-    // Verify tabs are available
     await expect(
       page.getByRole("tab", { name: /Manual Entry/i }),
     ).toBeVisible();
@@ -24,65 +24,95 @@ test.describe("Data Input Feature", () => {
       page.getByRole("tab", { name: /Manage Database/i }),
     ).toBeVisible();
 
-    // Switch to Paste tab
     await page.getByRole("tab", { name: /Paste from Excel/i }).click();
     await expect(page.getByLabel(/Spreadsheet data/i)).toBeVisible();
 
-    // Switch to File Upload tab
     await page.getByRole("tab", { name: /File Upload/i }).click();
     await expect(page.getByText(/Upload tab-separated data/i)).toBeVisible();
 
-    // Switch back to Manual tab
     await page.getByRole("tab", { name: /Manual Entry/i }).click();
   });
 
-  test("fills manual shade entry form with product selection and color preview", async ({
-    page,
-  }) => {
-    // Select product from dropdown
-    const productSelect = page.locator("select").first();
-    await productSelect.selectOption({
-      label: "Color Lab Studio · Velvet Satin Lipstick",
-    });
+  // ── CREATE: add brand ──────────────────────────────────────────────────────
+  test("creates a new brand via catalog setup dialog", async ({ page }) => {
+    const btn = page.getByRole("button", { name: /\+ Add brand/i });
+    await expect(btn).toBeVisible();
+    await btn.click();
 
-    // Fill shade fields
-    const shadeNameInput = page
-      .getByPlaceholder(/e\.g\. Ruby Velvet|name/i)
-      .first();
-    if (await shadeNameInput.isVisible()) {
-      await shadeNameInput.fill("Dusk Plum");
-    }
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toBeVisible();
+    await expect(
+      dialog.getByText(/Add a brand to the product catalog/i),
+    ).toBeVisible();
 
-    const hexInput = page.getByPlaceholder(/#aa6d78|#RRGGBB/i).first();
-    if (await hexInput.isVisible()) {
-      await hexInput.fill("#8b263e");
-    }
+    await dialog
+      .getByRole("textbox", { name: /^Name$/i })
+      .fill("Sunset Beauty");
+    await dialog.getByRole("button", { name: /Create brand/i }).click();
 
-    // Submit button is active
-    const submitBtn = page
-      .getByRole("button", { name: /Add Shade|Save/i })
-      .first();
-    await expect(submitBtn).toBeVisible();
+    await expect(page.getByText(/Brand created/i)).toBeVisible();
+    await expect(page.getByRole("dialog")).not.toBeVisible();
   });
 
-  test("opens Quick Setup dialogs for new formats and brands", async ({
+  // ── CREATE: add format ─────────────────────────────────────────────────────
+  test("creates a new product format via catalog setup dialog", async ({
     page,
   }) => {
-    // Format button
-    const newFormatBtn = page.getByRole("button", { name: /\+ Format/i });
-    if (await newFormatBtn.isVisible()) {
-      await newFormatBtn.click();
-      await expect(page.getByRole("dialog")).toBeVisible();
-      // Close dialog
-      await page.keyboard.press("Escape");
-    }
+    const btn = page.getByRole("button", { name: /\+ Add format/i });
+    await expect(btn).toBeVisible();
+    await btn.click();
 
-    // Brand button
-    const newBrandBtn = page.getByRole("button", { name: /\+ Brand/i });
-    if (await newBrandBtn.isVisible()) {
-      await newBrandBtn.click();
-      await expect(page.getByRole("dialog")).toBeVisible();
-      await page.keyboard.press("Escape");
-    }
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toBeVisible();
+
+    await dialog
+      .getByRole("textbox", { name: /Parent format name/i })
+      .fill("Eyes");
+    await dialog
+      .getByRole("textbox", { name: /Subcategory name/i })
+      .fill("Liquid Liner");
+    await dialog
+      .getByRole("textbox", { name: /Unique format code/i })
+      .fill("LL");
+    await dialog.getByRole("button", { name: /Create format/i }).click();
+
+    await expect(page.getByText(/Format created/i)).toBeVisible();
+    await expect(page.getByRole("dialog")).not.toBeVisible();
+  });
+
+  // ── CREATE: manual shade entry ─────────────────────────────────────────────
+  test("submits a new shade via manual entry form", async ({ page }) => {
+    // Select product
+    await page.locator("select").first().selectOption({ value: "prod-1" });
+
+    // Fill required name + SKU fields
+    await page.locator('input[name="name"]').fill("Dusk Plum");
+    await page.locator('input[name="sku"]').fill("DP-01");
+
+    // The HEX input already defaults to #aa6d78; just verify and click submit
+    await page.getByRole("button", { name: /\+ Add shade/i }).click();
+
+    await expect(page.getByText(/Shade added to the database/i)).toBeVisible();
+  });
+
+  // ── CREATE: paste-import preview → commit ──────────────────────────────────
+  test("previews and imports shades via paste tab", async ({ page }) => {
+    await page.getByRole("tab", { name: /Paste from Excel/i }).click();
+
+    // Select product
+    await page.locator("select").first().selectOption({ value: "prod-1" });
+
+    // Paste TSV (with header row)
+    await page
+      .getByLabel(/Spreadsheet data/i)
+      .fill("SKU\tShade name\tHEX\nDP-02\tDusk Rose\t#c05080");
+
+    // Preview
+    await page.getByRole("button", { name: /Preview & validate/i }).click();
+    await expect(page.getByText(/1 of 1 rows valid/i)).toBeVisible();
+
+    // Commit import
+    await page.getByRole("button", { name: /Import validated rows/i }).click();
+    await expect(page.getByText(/1 shades imported/i)).toBeVisible();
   });
 });

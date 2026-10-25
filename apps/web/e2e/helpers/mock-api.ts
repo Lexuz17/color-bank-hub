@@ -354,9 +354,11 @@ export async function setupApiMocks(page: Page) {
         contentType: "application/json",
         body: JSON.stringify({
           data: {
+            valid: true,
+            rowCount: body.rows.length,
             validCount: body.rows.length,
-            invalidCount: 0,
-            rows: body.rows.map((r: unknown) => ({
+            rows: body.rows.map((r: unknown, i: number) => ({
+              row: i + 1,
               valid: true,
               data: r,
               errors: [],
