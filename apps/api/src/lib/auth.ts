@@ -21,7 +21,7 @@ export const auth = betterAuth({
 
   advanced: { database: { generateId: "uuid" } },
 
-  emailAndPassword: { enabled: env.devAuth, disableSignUp: true }, // only for dev
+  emailAndPassword: { enabled: env.isDevelopment, disableSignUp: true },
   socialProviders,
 
   user: {

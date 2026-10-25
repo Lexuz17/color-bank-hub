@@ -1,13 +1,12 @@
 import { seedDevUsers } from "./dev-users.js";
 
 async function main() {
-  const isDevAuth =
-    process.env.DEV_AUTH === "true" && process.env.NODE_ENV !== "production";
+  const isDevelopment = process.env.NODE_ENV === "development";
 
-  if (isDevAuth) {
+  if (isDevelopment) {
     await seedDevUsers();
   } else {
-    console.log("DEV_AUTH tidak aktif, user dev dilewati");
+    console.log("NODE_ENV is not development, development users were skipped");
   }
 }
 

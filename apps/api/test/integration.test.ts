@@ -1,9 +1,7 @@
-import { loadEnv } from "../src/load-env.js";
 import { test, after } from "node:test";
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 // Only run database writes when an explicit integration database URL is supplied.
-loadEnv();
 const testUrl = process.env.TEST_DATABASE_URL;
 if (testUrl) {
   process.env.DATABASE_URL = testUrl;

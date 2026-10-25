@@ -4,17 +4,31 @@
     "dev": {
       "cache": false,
       "persistent": true,
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build"],
+      "passThroughEnv": [
+        "NODE_ENV",
+        "PORT",
+        "APP_PORT",
+        "HOST",
+        "BETTER_AUTH_URL",
+        "BETTER_AUTH_SECRET",
+        "WEB_ORIGIN",
+        "ALLOWED_EMAIL_DOMAIN",
+        "GOOGLE_CLIENT_ID",
+        "GOOGLE_CLIENT_SECRET",
+        "DATABASE_URL"
+      ]
     },
     "db:migrate": {
       "cache": false,
-      "env": ["DATABASE_URL"]
+      "passThroughEnv": ["DATABASE_URL"]
     },
     "db:generate": {
       "cache": false
     },
     "db:seed": {
-      "cache": false
+      "cache": false,
+      "passThroughEnv": ["NODE_ENV", "DATABASE_URL"]
     },
     "build": {
       "dependsOn": ["^build"],

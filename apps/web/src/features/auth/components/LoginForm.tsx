@@ -1,6 +1,4 @@
-// Ini jika ada perlu component"
-
-// Dipisah apabila suatu component itu memang reusable.
+// Keep login methods together in one reusable form component.
 import { Button } from "@/components/ui/button";
 import { signInWithGoogle } from "../api/sign-in.api";
 import { DevEmailLogin } from "./DevEmailLogin";

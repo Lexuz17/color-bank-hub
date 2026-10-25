@@ -1,12 +1,12 @@
-import { webOrigin } from "#api/config/env.js";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { bodyLimit } from "hono/body-limit";
 import { catalogRoutes } from "#api/routes/catalog-routes.js";
 import { reportRoutes, prototypeRoutes } from "#api/routes/workflow-routes.js";
+import { env } from "#api/env.js";
 export function createApp() {
   const app = new Hono();
-  app.use("/api/*", cors({ origin: webOrigin() }));
+  app.use("/api/*", cors({ origin: env.webOrigin }));
   app.use(
     "/api/*",
     bodyLimit({

@@ -3,7 +3,7 @@ import { and, eq } from "drizzle-orm";
 import { db } from "../index.js";
 import { accounts, users } from "../schema/index.js";
 
-export const DEV_PASSWORD = "devpassword123"; // Make sure it's the same as devLogin.
+export const DEV_PASSWORD = "devpassword123"; // Keep in sync with the development login form.
 
 const devUsers = [
   { name: "Dev Admin", email: "admin@dev.local", role: "website_admin" },
@@ -25,9 +25,9 @@ export async function seedDevUsers() {
       })
       .returning({ id: users.id });
 
-    if (!user) throw new Error(`Gagal membuat user ${email}`);
+    if (!user) throw new Error(`Failed to create user ${email}`);
 
-    // Ganti akun credential lama (kalau ada) dengan yang baru
+    // Replace an existing credential account with the development password.
     await db
       .delete(accounts)
       .where(

@@ -1,8 +1,6 @@
-import { loadEnv } from "../src/load-env.js";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createApp } from "../src/app.js";
-loadEnv();
 const app = createApp();
 async function request(path: string, method = "GET", body?: unknown) {
   return app.request(path, {

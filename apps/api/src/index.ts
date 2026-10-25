@@ -3,8 +3,6 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { auth } from "#api/lib/auth.js";
 import { env } from "./env";
-
-// loadEnv();
 const app = new Hono();
 
 app.use(
@@ -27,9 +25,6 @@ app.get("/api/me", async (c) => {
   return c.json(session.user);
 });
 
-const port = Number(env.port || 3000);
-const hostname = env.host || "0.0.0.0";
-
-serve({ fetch: app.fetch, port, hostname }, (info) => {
+serve({ fetch: app.fetch, port: env.port, hostname: env.host }, (info) => {
   console.log(`API running at http://${info.address}:${info.port}`);
 });

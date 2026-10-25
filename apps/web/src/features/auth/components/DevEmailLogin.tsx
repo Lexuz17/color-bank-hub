@@ -29,9 +29,9 @@ export function DevEmailLogin({ redirectTo }: { redirectTo: string }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Login dev</CardTitle>
+        <CardTitle>Development login</CardTitle>
         <CardDescription>
-          Hanya tampil saat development. Gunakan user hasil db:seed.
+          Available only in development. Use an account created by db:seed.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -80,12 +80,12 @@ export function DevEmailLogin({ redirectTo }: { redirectTo: string }) {
 
             {signIn.isError && (
               <FieldError>
-                Dev login failed. Make sure you have run the db:seed.
+                Development login failed. Make sure you have run db:seed.
               </FieldError>
             )}
 
             <Button type="submit" disabled={signIn.isPending}>
-              {signIn.isPending ? "Masuk..." : "Login (dev)"}
+              {signIn.isPending ? "Signing in..." : "Development login"}
             </Button>
           </FieldGroup>
         </form>
