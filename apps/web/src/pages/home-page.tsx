@@ -11,8 +11,12 @@ import {
 import { PageShell } from "@/components/layout/page-shell";
 import { SearchInput } from "@/components/shared/workspace-components";
 import { tableRows } from "@/lib/data/demo-shades";
+import { Button } from "@/components/ui/button";
+import { useSignOut } from "@/features/auth/hooks/auth-mutation";
 export function HomePage() {
   const [search, setSearch] = useState("");
+  const logout = useSignOut();
+
   return (
     <PageShell section="Home">
       <section className="relative overflow-hidden border-b bg-secondary/35 px-6 py-12 lg:px-12">
@@ -43,6 +47,15 @@ export function HomePage() {
               <Plus className="size-3" />
               Start New Mapping
             </Link>
+
+            <Button
+              type="button"
+              variant="destructive"
+              disabled={logout.isPending}
+              onClick={() => logout.mutate()}
+            >
+              {logout.isPending ? "Logging out..." : "Logout"}
+            </Button>
           </div>
           <SearchInput
             value={search}

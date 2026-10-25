@@ -129,7 +129,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-export const Route = createFileRoute("/showcase")({
+export const Route = createFileRoute("/_authenticated/showcase")({
   component: ShowcasePage,
 });
 

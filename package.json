@@ -14,6 +14,7 @@
     "dev:web": "turbo run dev --filter=web",
     "db:generate": "turbo run db:generate --filter=@color-bank-hub/db",
     "db:migrate": "turbo run db:migrate --filter=@color-bank-hub/db",
+    "db:seed": "turbo run db:seed --filter=@color-bank-hub/db",
     "docker:db": "docker compose up -d db",
     "docker:db:down": "docker compose stop db",
     "docker:db:logs": "docker compose logs -f db",

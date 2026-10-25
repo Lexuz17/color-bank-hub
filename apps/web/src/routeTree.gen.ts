@@ -9,100 +9,119 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from "./routes/__root";
-import { Route as IndexRouteImport } from "./routes/index";
-import { Route as ColorBankRouteImport } from "./routes/color-bank";
-import { Route as ColorDatabaseRouteImport } from "./routes/color-database";
-import { Route as DataInputRouteImport } from "./routes/data-input";
-import { Route as MyMappingsRouteImport } from "./routes/my-mappings";
-import { Route as ReportRouteImport } from "./routes/report";
-import { Route as ShadeMappingRouteImport } from "./routes/shade-mapping";
-import { Route as ShowcaseRouteImport } from "./routes/showcase";
-import { Route as UserManagementRouteImport } from "./routes/user-management";
+import { Route as AuthenticatedRouteImport } from "./routes/_authenticated";
+import { Route as LoginRouteImport } from "./routes/login";
+import { Route as AuthenticatedIndexRouteImport } from "./routes/_authenticated/index";
+import { Route as AuthenticatedColorBankRouteImport } from "./routes/_authenticated/color-bank";
+import { Route as AuthenticatedColorDatabaseRouteImport } from "./routes/_authenticated/color-database";
+import { Route as AuthenticatedDataInputRouteImport } from "./routes/_authenticated/data-input";
+import { Route as AuthenticatedMyMappingsRouteImport } from "./routes/_authenticated/my-mappings";
+import { Route as AuthenticatedReportRouteImport } from "./routes/_authenticated/report";
+import { Route as AuthenticatedShadeMappingRouteImport } from "./routes/_authenticated/shade-mapping";
+import { Route as AuthenticatedShowcaseRouteImport } from "./routes/_authenticated/showcase";
+import { Route as AuthenticatedUserManagementRouteImport } from "./routes/_authenticated/user-management";
 
-const IndexRoute = IndexRouteImport.update({
+const AuthenticatedRoute = AuthenticatedRouteImport.update({
+  id: "/_authenticated",
+  getParentRoute: () => rootRouteImport,
+} as any);
+const LoginRoute = LoginRouteImport.update({
+  id: "/login",
+  path: "/login",
+  getParentRoute: () => rootRouteImport,
+} as any);
+const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   id: "/",
   path: "/",
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRoute,
 } as any);
-const ColorBankRoute = ColorBankRouteImport.update({
+const AuthenticatedColorBankRoute = AuthenticatedColorBankRouteImport.update({
   id: "/color-bank",
   path: "/color-bank",
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRoute,
 } as any);
-const ColorDatabaseRoute = ColorDatabaseRouteImport.update({
-  id: "/color-database",
-  path: "/color-database",
-  getParentRoute: () => rootRouteImport,
-} as any);
-const DataInputRoute = DataInputRouteImport.update({
+const AuthenticatedColorDatabaseRoute =
+  AuthenticatedColorDatabaseRouteImport.update({
+    id: "/color-database",
+    path: "/color-database",
+    getParentRoute: () => AuthenticatedRoute,
+  } as any);
+const AuthenticatedDataInputRoute = AuthenticatedDataInputRouteImport.update({
   id: "/data-input",
   path: "/data-input",
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRoute,
 } as any);
-const MyMappingsRoute = MyMappingsRouteImport.update({
+const AuthenticatedMyMappingsRoute = AuthenticatedMyMappingsRouteImport.update({
   id: "/my-mappings",
   path: "/my-mappings",
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRoute,
 } as any);
-const ReportRoute = ReportRouteImport.update({
+const AuthenticatedReportRoute = AuthenticatedReportRouteImport.update({
   id: "/report",
   path: "/report",
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRoute,
 } as any);
-const ShadeMappingRoute = ShadeMappingRouteImport.update({
-  id: "/shade-mapping",
-  path: "/shade-mapping",
-  getParentRoute: () => rootRouteImport,
-} as any);
-const ShowcaseRoute = ShowcaseRouteImport.update({
+const AuthenticatedShadeMappingRoute =
+  AuthenticatedShadeMappingRouteImport.update({
+    id: "/shade-mapping",
+    path: "/shade-mapping",
+    getParentRoute: () => AuthenticatedRoute,
+  } as any);
+const AuthenticatedShowcaseRoute = AuthenticatedShowcaseRouteImport.update({
   id: "/showcase",
   path: "/showcase",
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRoute,
 } as any);
-const UserManagementRoute = UserManagementRouteImport.update({
-  id: "/user-management",
-  path: "/user-management",
-  getParentRoute: () => rootRouteImport,
-} as any);
+const AuthenticatedUserManagementRoute =
+  AuthenticatedUserManagementRouteImport.update({
+    id: "/user-management",
+    path: "/user-management",
+    getParentRoute: () => AuthenticatedRoute,
+  } as any);
 
 export interface FileRoutesByFullPath {
-  "/": typeof IndexRoute;
-  "/color-bank": typeof ColorBankRoute;
-  "/color-database": typeof ColorDatabaseRoute;
-  "/data-input": typeof DataInputRoute;
-  "/my-mappings": typeof MyMappingsRoute;
-  "/report": typeof ReportRoute;
-  "/shade-mapping": typeof ShadeMappingRoute;
-  "/showcase": typeof ShowcaseRoute;
-  "/user-management": typeof UserManagementRoute;
+  "/": typeof AuthenticatedIndexRoute;
+  "/login": typeof LoginRoute;
+  "/color-bank": typeof AuthenticatedColorBankRoute;
+  "/color-database": typeof AuthenticatedColorDatabaseRoute;
+  "/data-input": typeof AuthenticatedDataInputRoute;
+  "/my-mappings": typeof AuthenticatedMyMappingsRoute;
+  "/report": typeof AuthenticatedReportRoute;
+  "/shade-mapping": typeof AuthenticatedShadeMappingRoute;
+  "/showcase": typeof AuthenticatedShowcaseRoute;
+  "/user-management": typeof AuthenticatedUserManagementRoute;
 }
 export interface FileRoutesByTo {
-  "/": typeof IndexRoute;
-  "/color-bank": typeof ColorBankRoute;
-  "/color-database": typeof ColorDatabaseRoute;
-  "/data-input": typeof DataInputRoute;
-  "/my-mappings": typeof MyMappingsRoute;
-  "/report": typeof ReportRoute;
-  "/shade-mapping": typeof ShadeMappingRoute;
-  "/showcase": typeof ShowcaseRoute;
-  "/user-management": typeof UserManagementRoute;
+  "/login": typeof LoginRoute;
+  "/color-bank": typeof AuthenticatedColorBankRoute;
+  "/color-database": typeof AuthenticatedColorDatabaseRoute;
+  "/data-input": typeof AuthenticatedDataInputRoute;
+  "/my-mappings": typeof AuthenticatedMyMappingsRoute;
+  "/report": typeof AuthenticatedReportRoute;
+  "/shade-mapping": typeof AuthenticatedShadeMappingRoute;
+  "/showcase": typeof AuthenticatedShowcaseRoute;
+  "/user-management": typeof AuthenticatedUserManagementRoute;
+  "/": typeof AuthenticatedIndexRoute;
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport;
-  "/": typeof IndexRoute;
-  "/color-bank": typeof ColorBankRoute;
-  "/color-database": typeof ColorDatabaseRoute;
-  "/data-input": typeof DataInputRoute;
-  "/my-mappings": typeof MyMappingsRoute;
-  "/report": typeof ReportRoute;
-  "/shade-mapping": typeof ShadeMappingRoute;
-  "/showcase": typeof ShowcaseRoute;
-  "/user-management": typeof UserManagementRoute;
+  "/_authenticated": typeof AuthenticatedRouteWithChildren;
+  "/login": typeof LoginRoute;
+  "/_authenticated/color-bank": typeof AuthenticatedColorBankRoute;
+  "/_authenticated/color-database": typeof AuthenticatedColorDatabaseRoute;
+  "/_authenticated/data-input": typeof AuthenticatedDataInputRoute;
+  "/_authenticated/my-mappings": typeof AuthenticatedMyMappingsRoute;
+  "/_authenticated/report": typeof AuthenticatedReportRoute;
+  "/_authenticated/shade-mapping": typeof AuthenticatedShadeMappingRoute;
+  "/_authenticated/showcase": typeof AuthenticatedShowcaseRoute;
+  "/_authenticated/user-management": typeof AuthenticatedUserManagementRoute;
+  "/_authenticated/": typeof AuthenticatedIndexRoute;
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
   fullPaths:
     | "/"
+    | "/login"
     | "/color-bank"
     | "/color-database"
     | "/data-input"
@@ -113,7 +132,7 @@ export interface FileRouteTypes {
     | "/user-management";
   fileRoutesByTo: FileRoutesByTo;
   to:
-    | "/"
+    | "/login"
     | "/color-bank"
     | "/color-database"
     | "/data-input"
@@ -121,110 +140,141 @@ export interface FileRouteTypes {
     | "/report"
     | "/shade-mapping"
     | "/showcase"
-    | "/user-management";
+    | "/user-management"
+    | "/";
   id:
     | "__root__"
-    | "/"
-    | "/color-bank"
-    | "/color-database"
-    | "/data-input"
-    | "/my-mappings"
-    | "/report"
-    | "/shade-mapping"
-    | "/showcase"
-    | "/user-management";
+    | "/_authenticated"
+    | "/login"
+    | "/_authenticated/color-bank"
+    | "/_authenticated/color-database"
+    | "/_authenticated/data-input"
+    | "/_authenticated/my-mappings"
+    | "/_authenticated/report"
+    | "/_authenticated/shade-mapping"
+    | "/_authenticated/showcase"
+    | "/_authenticated/user-management"
+    | "/_authenticated/";
   fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute;
-  ColorBankRoute: typeof ColorBankRoute;
-  ColorDatabaseRoute: typeof ColorDatabaseRoute;
-  DataInputRoute: typeof DataInputRoute;
-  MyMappingsRoute: typeof MyMappingsRoute;
-  ReportRoute: typeof ReportRoute;
-  ShadeMappingRoute: typeof ShadeMappingRoute;
-  ShowcaseRoute: typeof ShowcaseRoute;
-  UserManagementRoute: typeof UserManagementRoute;
+  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren;
+  LoginRoute: typeof LoginRoute;
 }
 
 declare module "@tanstack/react-router" {
   interface FileRoutesByPath {
-    "/": {
-      id: "/";
+    "/_authenticated": {
+      id: "/_authenticated";
+      path: "";
+      fullPath: "/";
+      preLoaderRoute: typeof AuthenticatedRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/login": {
+      id: "/login";
+      path: "/login";
+      fullPath: "/login";
+      preLoaderRoute: typeof LoginRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/_authenticated/": {
+      id: "/_authenticated/";
       path: "/";
       fullPath: "/";
-      preLoaderRoute: typeof IndexRouteImport;
-      parentRoute: typeof rootRouteImport;
+      preLoaderRoute: typeof AuthenticatedIndexRouteImport;
+      parentRoute: typeof AuthenticatedRoute;
     };
-    "/color-bank": {
-      id: "/color-bank";
+    "/_authenticated/color-bank": {
+      id: "/_authenticated/color-bank";
       path: "/color-bank";
       fullPath: "/color-bank";
-      preLoaderRoute: typeof ColorBankRouteImport;
-      parentRoute: typeof rootRouteImport;
+      preLoaderRoute: typeof AuthenticatedColorBankRouteImport;
+      parentRoute: typeof AuthenticatedRoute;
     };
-    "/color-database": {
-      id: "/color-database";
+    "/_authenticated/color-database": {
+      id: "/_authenticated/color-database";
       path: "/color-database";
       fullPath: "/color-database";
-      preLoaderRoute: typeof ColorDatabaseRouteImport;
-      parentRoute: typeof rootRouteImport;
+      preLoaderRoute: typeof AuthenticatedColorDatabaseRouteImport;
+      parentRoute: typeof AuthenticatedRoute;
     };
-    "/data-input": {
-      id: "/data-input";
+    "/_authenticated/data-input": {
+      id: "/_authenticated/data-input";
       path: "/data-input";
       fullPath: "/data-input";
-      preLoaderRoute: typeof DataInputRouteImport;
-      parentRoute: typeof rootRouteImport;
+      preLoaderRoute: typeof AuthenticatedDataInputRouteImport;
+      parentRoute: typeof AuthenticatedRoute;
     };
-    "/my-mappings": {
-      id: "/my-mappings";
+    "/_authenticated/my-mappings": {
+      id: "/_authenticated/my-mappings";
       path: "/my-mappings";
       fullPath: "/my-mappings";
-      preLoaderRoute: typeof MyMappingsRouteImport;
-      parentRoute: typeof rootRouteImport;
+      preLoaderRoute: typeof AuthenticatedMyMappingsRouteImport;
+      parentRoute: typeof AuthenticatedRoute;
     };
-    "/report": {
-      id: "/report";
+    "/_authenticated/report": {
+      id: "/_authenticated/report";
       path: "/report";
       fullPath: "/report";
-      preLoaderRoute: typeof ReportRouteImport;
-      parentRoute: typeof rootRouteImport;
+      preLoaderRoute: typeof AuthenticatedReportRouteImport;
+      parentRoute: typeof AuthenticatedRoute;
     };
-    "/shade-mapping": {
-      id: "/shade-mapping";
+    "/_authenticated/shade-mapping": {
+      id: "/_authenticated/shade-mapping";
       path: "/shade-mapping";
       fullPath: "/shade-mapping";
-      preLoaderRoute: typeof ShadeMappingRouteImport;
-      parentRoute: typeof rootRouteImport;
+      preLoaderRoute: typeof AuthenticatedShadeMappingRouteImport;
+      parentRoute: typeof AuthenticatedRoute;
     };
-    "/showcase": {
-      id: "/showcase";
+    "/_authenticated/showcase": {
+      id: "/_authenticated/showcase";
       path: "/showcase";
       fullPath: "/showcase";
-      preLoaderRoute: typeof ShowcaseRouteImport;
-      parentRoute: typeof rootRouteImport;
+      preLoaderRoute: typeof AuthenticatedShowcaseRouteImport;
+      parentRoute: typeof AuthenticatedRoute;
     };
-    "/user-management": {
-      id: "/user-management";
+    "/_authenticated/user-management": {
+      id: "/_authenticated/user-management";
       path: "/user-management";
       fullPath: "/user-management";
-      preLoaderRoute: typeof UserManagementRouteImport;
-      parentRoute: typeof rootRouteImport;
+      preLoaderRoute: typeof AuthenticatedUserManagementRouteImport;
+      parentRoute: typeof AuthenticatedRoute;
     };
   }
 }
 
+interface AuthenticatedRouteChildren {
+  AuthenticatedColorBankRoute: typeof AuthenticatedColorBankRoute;
+  AuthenticatedColorDatabaseRoute: typeof AuthenticatedColorDatabaseRoute;
+  AuthenticatedDataInputRoute: typeof AuthenticatedDataInputRoute;
+  AuthenticatedMyMappingsRoute: typeof AuthenticatedMyMappingsRoute;
+  AuthenticatedReportRoute: typeof AuthenticatedReportRoute;
+  AuthenticatedShadeMappingRoute: typeof AuthenticatedShadeMappingRoute;
+  AuthenticatedShowcaseRoute: typeof AuthenticatedShowcaseRoute;
+  AuthenticatedUserManagementRoute: typeof AuthenticatedUserManagementRoute;
+  AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute;
+}
+
+const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedColorBankRoute: AuthenticatedColorBankRoute,
+  AuthenticatedColorDatabaseRoute: AuthenticatedColorDatabaseRoute,
+  AuthenticatedDataInputRoute: AuthenticatedDataInputRoute,
+  AuthenticatedMyMappingsRoute: AuthenticatedMyMappingsRoute,
+  AuthenticatedReportRoute: AuthenticatedReportRoute,
+  AuthenticatedShadeMappingRoute: AuthenticatedShadeMappingRoute,
+  AuthenticatedShowcaseRoute: AuthenticatedShowcaseRoute,
+  AuthenticatedUserManagementRoute: AuthenticatedUserManagementRoute,
+  AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+};
+
+const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
+  AuthenticatedRouteChildren,
+);
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  ColorBankRoute: ColorBankRoute,
-  ColorDatabaseRoute: ColorDatabaseRoute,
-  DataInputRoute: DataInputRoute,
-  MyMappingsRoute: MyMappingsRoute,
-  ReportRoute: ReportRoute,
-  ShadeMappingRoute: ShadeMappingRoute,
-  ShowcaseRoute: ShowcaseRoute,
-  UserManagementRoute: UserManagementRoute,
+  AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  LoginRoute: LoginRoute,
 };
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

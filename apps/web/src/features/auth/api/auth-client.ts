@@ -1,0 +1,14 @@
+// Ini buat call api nya, pakai lib http client. kek try catch
+import { inferAdditionalFields } from "better-auth/client/plugins";
+import { createAuthClient } from "better-auth/react";
+
+export const authClient = createAuthClient({
+  plugins: [
+    inferAdditionalFields({
+      user: {
+        role: { type: "string", required: false },
+        status: { type: "string", required: false },
+      },
+    }),
+  ],
+});

@@ -9,8 +9,9 @@ import { prototypeRequests } from "./prototype-requests";
 import { reports } from "./reports";
 import { shades } from "./shades";
 import { roleRequests, users } from "./users";
+import { accounts, sessions } from "./auth";
 
-// ---------- Users & audit ----------
+// Users & audit
 export const usersRelations = relations(users, ({ many }) => ({
   roleRequests: many(roleRequests, { relationName: "role_request_user" }),
   decidedRoleRequests: many(roleRequests, {
@@ -26,6 +27,8 @@ export const usersRelations = relations(users, ({ many }) => ({
     relationName: "request_decider",
   }),
   reports: many(reports, { relationName: "report_reporter" }),
+  sessions: many(sessions),
+  accounts: many(accounts),
   resolvedReports: many(reports, { relationName: "report_resolver" }),
 }));
 
@@ -46,7 +49,7 @@ export const auditLogsRelations = relations(auditLogs, ({ one }) => ({
   actor: one(users, { fields: [auditLogs.actorId], references: [users.id] }),
 }));
 
-// ---------- Catalog ----------
+// Catalog
 export const brandsRelations = relations(brands, ({ many }) => ({
   products: many(products),
 }));
@@ -79,7 +82,7 @@ export const productsRelations = relations(products, ({ one, many }) => ({
   shades: many(shades),
 }));
 
-// ---------- Classification & shades ----------
+// Classification & shades
 export const classificationConfigVersionsRelations = relations(
   classificationConfigVersions,
   ({ one, many }) => ({
@@ -111,7 +114,7 @@ export const shadesRelations = relations(shades, ({ one, many }) => ({
   }),
 }));
 
-// ---------- Mappings ----------
+// Mappings
 export const mappingsRelations = relations(mappings, ({ one, many }) => ({
   owner: one(users, { fields: [mappings.ownerId], references: [users.id] }),
   formatItem: one(productFormatItems, {
@@ -133,7 +136,7 @@ export const mappingPinsRelations = relations(mappingPins, ({ one }) => ({
   }),
 }));
 
-// ---------- Color Bank ----------
+// Color Bank
 export const prototypeRequestsRelations = relations(
   prototypeRequests,
   ({ one }) => ({
@@ -172,7 +175,7 @@ export const prototypeRequestsRelations = relations(
   }),
 );
 
-// ---------- Reports ----------
+// Reports
 export const reportsRelations = relations(reports, ({ one }) => ({
   reporter: one(users, {
     fields: [reports.reporterId],
@@ -186,4 +189,20 @@ export const reportsRelations = relations(reports, ({ one }) => ({
   }),
   brand: one(brands, { fields: [reports.brandId], references: [brands.id] }),
   shade: one(shades, { fields: [reports.shadeId], references: [shades.id] }),
+}));
+
+// Session
+export const sessionsRelations = relations(sessions, ({ one }) => ({
+  user: one(users, {
+    fields: [sessions.userId],
+    references: [users.id],
+  }),
+}));
+
+// Account
+export const accountsRelations = relations(accounts, ({ one }) => ({
+  user: one(users, {
+    fields: [accounts.userId],
+    references: [users.id],
+  }),
 }));
