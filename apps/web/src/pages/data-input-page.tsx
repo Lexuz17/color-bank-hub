@@ -374,7 +374,7 @@ export function DataInputPage() {
                                 : row.errors
                                     .map(
                                       (error) =>
-                                        `${error.path ? error.path + ": " : ""}${error.message}`,
+                                        `${error.path ? `${error.path}: ` : ""}${error.message}`,
                                     )
                                     .join("; ")}
                             </td>

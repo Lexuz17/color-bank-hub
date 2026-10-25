@@ -52,6 +52,7 @@ function ProgressIndicator({
 
 function ProgressLabel({ className, ...props }: ProgressPrimitive.Label.Props) {
   return (
+    // biome-ignore lint/a11y/noLabelWithoutControl: ProgressLabel receives its text and progress association from its caller.
     <ProgressPrimitive.Label
       className={cn("text-sm font-medium", className)}
       data-slot="progress-label"

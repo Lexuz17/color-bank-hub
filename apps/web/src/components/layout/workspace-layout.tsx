@@ -50,7 +50,7 @@ export function WorkspaceLayout({
         {sidebar && (
           <aside
             aria-label="Workspace sidebar"
-            className="hidden w-[204px] shrink-0 flex-col border-r lg:flex"
+            className="hidden w-51 shrink-0 flex-col border-r lg:flex"
           >
             <div className="min-h-0 flex-1">{sidebar}</div>
           </aside>
@@ -67,14 +67,14 @@ export function WorkspaceLayout({
         {detailPanel && (
           <aside
             aria-label="Product detail"
-            className="hidden min-h-0 w-[272px] shrink-0 self-stretch overflow-y-auto border-l bg-card xl:block"
+            className="hidden min-h-0 w-68 shrink-0 self-stretch overflow-y-auto border-l bg-card xl:block"
           >
             {detailPanel}
           </aside>
         )}
       </div>
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-        <SheetContent side="left" className="w-[260px]! gap-0">
+        <SheetContent side="left" className="w-65! gap-0">
           <SheetHeader>
             <SheetTitle>Product formats</SheetTitle>
             <SheetDescription>Select a format to explore.</SheetDescription>

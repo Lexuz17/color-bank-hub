@@ -101,6 +101,7 @@ function FieldLabel({
   ...props
 }: React.ComponentProps<typeof Label>) {
   return (
+    // biome-ignore lint/a11y/noLabelWithoutControl: FieldLabel receives its text and control association from its caller.
     <Label
       data-slot="field-label"
       className={cn(
