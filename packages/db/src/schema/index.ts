@@ -1,18 +1,18 @@
-export * from "./enums";
+export * from "./enums.js";
 
-export * from "./users";
-export * from "./auth";
-export * from "./audit-logs";
+export * from "./users.js";
+export * from "./auth.js";
+export * from "./audit-logs.js";
 
-export * from "./brands";
-export * from "./product-formats";
-export * from "./products";
+export * from "./brands.js";
+export * from "./product-formats.js";
+export * from "./products.js";
 
-export * from "./classification";
-export * from "./shades";
-export * from "./mappings";
+export * from "./classification.js";
+export * from "./shades.js";
+export * from "./mappings.js";
 
-export * from "./prototype-requests";
-export * from "./reports";
+export * from "./prototype-requests.js";
+export * from "./reports.js";
 
-export * from "./relations";
+export * from "./relations.js";

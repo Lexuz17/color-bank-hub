@@ -9,10 +9,10 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { classificationConfigVersions } from "./classification";
-import { mappingStatus, mappingView } from "./enums";
-import { productFormatItems } from "./product-formats";
-import { users } from "./users";
+import { classificationConfigVersions } from "./classification.js";
+import { mappingStatus, mappingView } from "./enums.js";
+import { productFormatItems } from "./product-formats.js";
+import { users } from "./users.js";
 
 export const mappings = pgTable(
   "mappings",

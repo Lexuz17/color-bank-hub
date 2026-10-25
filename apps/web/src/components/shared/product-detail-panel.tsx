@@ -9,10 +9,12 @@ export interface ShadeProfile {
   product: string;
   shade: string;
   hex: string;
-  undertone: "Warm" | "Neutral" | "Cool";
-  season: "Spring" | "Summer" | "Autumn" | "Winter";
+  undertone: "Warm" | "Neutral" | "Cool" | null;
+  season: "Spring" | "Summer" | "Autumn" | "Winter" | null;
   format: string;
   benchmark?: string;
+  lipPhotoUrl?: string;
+  swatchPhotoUrl?: string;
   ingredients: string;
   composition?: { name: string; percentage: number }[];
 }
@@ -44,11 +46,32 @@ export function ProductDetailPanel({
           </div>
         </div>
         <div className="flex gap-1">
-          <StatusBadge status={shade.undertone} />
-          <StatusBadge status={shade.season} />
+          {shade.undertone && <StatusBadge status={shade.undertone} />}
+          {shade.season && <StatusBadge status={shade.season} />}
+          {!shade.undertone && !shade.season && (
+            <span className="text-muted-foreground">Not classified</span>
+          )}
         </div>
         <p className="text-muted-foreground">{shade.format}</p>
       </section>
+      {(shade.lipPhotoUrl || shade.swatchPhotoUrl) && (
+        <section className="grid grid-cols-2 gap-2 border-b p-4">
+          {shade.lipPhotoUrl && (
+            <img
+              src={shade.lipPhotoUrl}
+              alt="Shade on lips"
+              className="aspect-square w-full rounded-md object-cover"
+            />
+          )}
+          {shade.swatchPhotoUrl && (
+            <img
+              src={shade.swatchPhotoUrl}
+              alt="Shade swatch"
+              className="aspect-square w-full rounded-md object-cover"
+            />
+          )}
+        </section>
+      )}
       <section className="space-y-2 border-b p-4">
         <h3 className="text-[10px] text-muted-foreground">BENCHMARK</h3>
         <Alert variant="info">

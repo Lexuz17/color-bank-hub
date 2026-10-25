@@ -1,15 +1,15 @@
 import { relations } from "drizzle-orm";
-import { auditLogs } from "./audit-logs";
-import { brands } from "./brands";
-import { classificationConfigVersions } from "./classification";
-import { mappingPins, mappings } from "./mappings";
-import { productFormatItems, productFormats } from "./product-formats";
-import { products } from "./products";
-import { prototypeRequests } from "./prototype-requests";
-import { reports } from "./reports";
-import { shades } from "./shades";
-import { roleRequests, users } from "./users";
-import { accounts, sessions } from "./auth";
+import { auditLogs } from "./audit-logs.js";
+import { brands } from "./brands.js";
+import { classificationConfigVersions } from "./classification.js";
+import { mappingPins, mappings } from "./mappings.js";
+import { productFormatItems, productFormats } from "./product-formats.js";
+import { products } from "./products.js";
+import { prototypeRequests } from "./prototype-requests.js";
+import { reports } from "./reports.js";
+import { shades } from "./shades.js";
+import { roleRequests, users } from "./users.js";
+import { accounts, sessions } from "./auth.js";
 
 // Users & audit
 export const usersRelations = relations(users, ({ many }) => ({

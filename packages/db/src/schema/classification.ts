@@ -9,8 +9,8 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { colorModel } from "./enums";
-import { users } from "./users";
+import { colorModel } from "./enums.js";
+import { users } from "./users.js";
 
 export const classificationConfigVersions = pgTable(
   "classification_config_versions",

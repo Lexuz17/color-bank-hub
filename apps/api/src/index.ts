@@ -2,7 +2,6 @@ import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { auth } from "#api/lib/auth.js";
-import { sampleItemRoutes } from "#api/routes/sample-item-routes.js";
 import { env } from "./env";
 
 // loadEnv();
@@ -28,7 +27,6 @@ app.get("/api/me", async (c) => {
   return c.json(session.user);
 });
 
-app.route("/api/sample-items", sampleItemRoutes);
 
 const port = Number(env.port || 3000);
 const hostname = env.host || "0.0.0.0";

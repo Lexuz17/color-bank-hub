@@ -8,8 +8,8 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { brands } from "./brands";
-import { productFormatItems } from "./product-formats";
+import { brands } from "./brands.js";
+import { productFormatItems } from "./product-formats.js";
 
 export const products = pgTable(
   "products",

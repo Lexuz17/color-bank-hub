@@ -1,202 +1,139 @@
 # Color Bank API
 
-REST API for Color Bank. It serves shade data, saves mappings, handles prototype requests and reports, imports Excel files, and controls who can do what.
+Hono REST API backed by the existing PostgreSQL/Drizzle schema. This first pass covers Color Database, Report, Data Input, and Color Bank. The Color Database, Report, Data Input, and Color Bank pages use these endpoints through the Vite `/api` proxy and TanStack Query. The component showcase and mapping previews remain independent demo screens.
 
-Built with [Hono](https://hono.dev) on Node.js, PostgreSQL, and TypeScript.
+Authentication and user management are deferred. The server reads its bind address from `HOST` and refuses production startup until authentication is implemented. Reports, prototypes, decisions, and audit records use a database placeholder identity with a randomly generated UUID, a disabled account, and no role. Existing NOT NULL constraints and foreign keys remain intact. This identity does not authenticate requests.
 
-> Part of the Color Bank monorepo. Run commands from the repository root unless noted.
+## Development
 
-## Tech Stack
-
-| Purpose                 | Tool                                      |
-| ----------------------- | ----------------------------------------- |
-| Web framework           | Hono                                      |
-| Validation and API docs | Zod, `@hono/zod-openapi`, Scalar          |
-| Database                | PostgreSQL, Drizzle ORM (`packages/db`)   |
-| Login and sessions      | Better Auth                               |
-| Permissions             | Own permission matrix (`packages/shared`) |
-| Logging                 | pino (JSON to stdout)                     |
-| Metrics                 | prom-client                               |
-| Build and tests         | tsup, Vitest, Biome                       |
-
-## Getting Started
+Use the existing root Turbo commands:
 
 ```bash
-pnpm install
-cp apps/api/.env.example apps/api/.env
-
-docker compose up -d postgres   # start the database
-pnpm db:migrate                 # create tables
-pnpm db:seed                    # load dummy data
-pnpm --filter api dev           # http://localhost:3000
+pnpm dev:api
+pnpm build
+pnpm typecheck
+pnpm test
+pnpm db:migrate
 ```
 
-| URL        | What it is                                                     |
-| ---------- | -------------------------------------------------------------- |
-| `/docs`    | Interactive API documentation                                  |
-| `/health`  | Returns 200 if the process is running                          |
-| `/ready`   | Returns 200 if the database is reachable                       |
-| `/metrics` | Metrics for Prometheus (keep internal, do not expose publicly) |
+Turbo builds the database package before dependent API tasks. No extra prebuild/predev commands are needed. `DATABASE_URL` must point to the Docker database's published localhost port when running on the host; Docker Compose supplies its own internal database URL to containers. Keep database credentials in `.env`.
 
-## Environment Variables
+Network settings live in the root `.env` (see `.env.example`):
 
-All variables are checked at startup (`src/config/env.ts`). The API refuses to start if one is missing or invalid.
+- `HOST`: API bind address; `APP_PORT`: API port (`PORT` may override it in containers).
+- `API_URL`: Vite's backend proxy target and the container health-check base URL.
+- `WEB_HOST`, `WEB_PORT`: Vite's bind address and port.
+- `VITE_API_BASE_URL`: browser request base, normally `/api` for the same-origin proxy.
+- `WEB_ORIGIN`: allowed CORS origin.
+- `POSTGRES_BIND_HOST`, `POSTGRES_PORT`: Docker PostgreSQL's published address and port. `POSTGRES_CONTAINER_PORT` controls its internal listening port.
+- `API_CONTAINER_HOST`: API bind address inside Docker.
 
-| Variable                                  | Description                                 |
-| ----------------------------------------- | ------------------------------------------- |
-| `NODE_ENV`                                | `development`, `test`, or `production`      |
-| `PORT`                                    | HTTP port (default `3000`)                  |
-| `LOG_LEVEL`                               | `debug`, `info`, `warn`, or `error`         |
-| `DATABASE_URL`                            | PostgreSQL connection string                |
-| `BETTER_AUTH_SECRET`                      | Secret used to sign sessions                |
-| `BETTER_AUTH_URL`                         | Public base URL of this API                 |
-| `OAUTH_ISSUER`                            | Identity provider URL                       |
-| `OAUTH_CLIENT_ID` / `OAUTH_CLIENT_SECRET` | OAuth credentials                           |
-| `ALLOWED_EMAIL_DOMAIN`                    | Only emails from this domain can sign in    |
-| `WEB_ORIGIN`                              | Web app URL allowed to call this API (CORS) |
+Required settings have no hardcoded runtime address defaults. Health: `GET /health`. Restart the dev processes after changing `.env`.
 
-## Scripts
+## Endpoints
 
-Run with `pnpm --filter api <script>`.
+All resource paths below begin with `/api`.
 
-| Script      | Description                 |
-| ----------- | --------------------------- |
-| `dev`       | Start with auto-reload      |
-| `build`     | Bundle to `dist/` with tsup |
-| `start`     | Run the built server        |
-| `test`      | Run tests                   |
-| `lint`      | Check code style            |
-| `typecheck` | Check types                 |
+| Method | Path | Purpose |
+| --- | --- | --- |
+| GET | `/brands` | Brand lookup |
+| POST | `/brands` | Create a brand; `{name, isOwn?}` |
+| GET | `/product-formats` | Categories with nested format items and actual shade counts |
+| POST | `/product-formats` | Add a format/subcategory using `{name, items:[{name, code}]}` |
+| GET | `/products` | Product lookup, capped at 1,000 records |
+| POST | `/products` | Create a product with brand, format, and ingredients |
+| GET | `/shades` | Search, filter, sort, and paginate shades |
+| GET | `/shades/:id` | Shade, product, brand, and format details |
+| POST | `/shades` | Manual shade entry with computed color metrics |
+| PATCH | `/shades/:id` | Update supported shade fields; recompute metrics when HEX changes |
+| POST | `/imports/preview` | Validate rows and references without writing |
+| POST | `/imports/commit` | Revalidate and insert all rows in one transaction |
+| GET, POST | `/reports` | List or submit reports |
+| GET, PATCH | `/reports/:id` | Read a report or update its status |
+| GET, POST | `/prototype-requests` | List or create Color Bank requests |
+| GET | `/prototype-requests/:id` | Request details |
+| PATCH | `/prototype-requests/:id/status` | Approve, decline, start formulation, or complete |
+| PATCH | `/prototype-requests/:id/formulation` | Save formulation data while formulating |
 
-Database scripts (`db:migrate`, `db:seed`) live in `packages/db` and are available from the root.
+Create products using `{brandId, formatItemId, name, ingredientsInci, baseType?}`. Product formats use database records. Data Input includes explicit format, brand, and product creation controls for an empty database. Creating a subcategory under an existing parent name reuses that parent; duplicate names/codes return a conflict.
 
-## Project Structure
-
-```
-apps/api/
-├── Dockerfile
-├── tsconfig.json
-└── src/
-    ├── controllers/         # HTTP request/response handlers (pure functions)
-    │   └── sample-item-controller.ts
-    ├── services/            # Business logic and domain operations (pure functions)
-    │   └── sample-item-service.ts
-    ├── repositories/        # Database access and query operations (pure functions)
-    │   └── sample-item-repository.ts
-    ├── routes/              # Hono endpoint definitions and middleware wiring
-    │   └── sample-item-routes.ts
-    ├── models/              # TypeScript types, interfaces, and schemas
-    │   └── sample-item.ts
-    ├── middleware/          # CORS, authentication, error-handling middleware
-    ├── config/              # Environment variables and app configuration
-    └── index.ts             # Server bootstrap and HTTP server startup
-```
-
-Shared packages used by the API:
-
-| Package                 | Used for                                               |
-| ----------------------- | ------------------------------------------------------ |
-| `packages/db`           | Table definitions, migrations, seed data               |
-| `packages/shared`       | Zod schemas shared with the web app, permission matrix |
-| `packages/color-engine` | HEX conversion and color classification                |
-
-### Layered Architecture (Functional)
-
-Data flow strictly follows a unidirectional layered model using pure functions:
-
-```
-Request -> Route -> Controller -> Service -> Repository -> Database
-```
-
-| Layer          | Responsibility                                            | Implementation Style               |
-| -------------- | --------------------------------------------------------- | ---------------------------------- |
-| `routes`       | Defines URL paths, HTTP verbs, and binds controllers      | Hono router definitions            |
-| `controllers`  | Parses request context, invokes service, returns response | Async handler functions `(c) => {}`|
-| `services`     | Core business logic, validations, calculations            | Async functions                    |
-| `repositories` | Data persistence, database queries, ORM operations        | Async query functions              |
-| `models`       | Type definitions, interfaces, domain entity shapes        | TypeScript interfaces & types      |
-
-Calls only go one way: `routes -> controllers -> services -> repositories`. Components are written with functional composition without classes.
-
-## How a Request Flows
-
-```
-request
-  -> request-id, logger, session
-  -> route: validate input, check permission
-  -> service: apply business rules
-  -> repository: query database
-  -> service: shape the result for the user's role
-  -> route: return JSON
-```
-
-If anything throws, `error-handler` turns it into a JSON response.
-
-## Errors
-
-Services throw errors from `core/errors.ts`. They never set HTTP status codes. One error handler converts them.
-
-```ts
-// in a service
-if (!shade) throw new NotFoundError("SHADE_NOT_FOUND");
-```
-
-All error responses have the same shape:
+Lists for shades, reports, and requests return:
 
 ```json
-{ "error": { "code": "SHADE_NOT_FOUND" } }
+{"data":{"items":[],"pagination":{"page":1,"pageSize":25,"total":0}}}
 ```
 
-The web app reads `code` to show the right message. Expected errors are logged as `warn`. Unexpected errors are logged as `error` and return `INTERNAL` with status 500.
+Other successful responses return `{data: ...}`. Creation returns HTTP 201. Lists accept `page` and `pageSize` (1–100).
 
-## Permissions
+Shade filters: `search` (shade/SKU/product/brand), `brandId`, `formatItemId`, `season`, `undertone`, `colorFamily`. Sorting: `sort=name|sku|createdAt|hue|lightness`, `direction=asc|desc`. Report filters: `status=pending|resolved`. Request filters: `status` and `formatItemId`. Enum values are lowercase.
 
-- Login and sessions are handled by Better Auth.
-- What a user may do is defined in the permission matrix in `packages/shared` (role -> list of permissions).
-- Routes declare the permission they need (for example `shade:create`). Code checks permissions, not role names.
-- Field-level rules (for example hiding color composition from some roles) are applied in the service, so hidden fields are never sent.
-- Role changes are written to the audit log in the same database transaction as the change.
+## Data input
 
-## Logging
+Manual entry body:
 
-- Logs are JSON, written to stdout with pino.
-- Each request log includes `requestId`, `userId`, `method`, `path`, `status`, and `durationMs`.
-- `authorization`, `cookie`, `password`, and `token` fields are masked.
-- In Docker, a log collector reads container output and sends it to Loki. The API does not talk to Loki directly.
-- The audit log is different: it is stored in the database, never deleted by log rotation, and shown in the admin UI.
-
-## Adding a Module
-
-1. Create `modules/<name>/` with the files listed above.
-2. Add tables in `packages/db` and run a migration.
-3. Create the repository and service in `container.ts`.
-4. Mount the routes in `app.ts`.
-5. Add any new permissions to `packages/shared` and write tests.
-
-## Testing
-
-| Kind       | What it checks                   | How                          |
-| ---------- | -------------------------------- | ---------------------------- |
-| Service    | Business rules                   | Fake repository, no database |
-| Route      | Input, status codes, permissions | Hono `testClient`            |
-| Repository | Real queries                     | PostgreSQL in Docker         |
-
-```bash
-pnpm --filter api test
+```json
+{
+  "productId": "UUID-from-products",
+  "sku": "EMINA-JELLY-08",
+  "name": "08 Ube Mochi",
+  "hex": "#aa6d78"
+}
 ```
 
-## Docker
+Optional shade fields: `mayContain`, `lipPhotoUrl`, `swatchPhotoUrl`, and `composition` (`[{name, percentage}]`, own brands only). Images currently use HTTP/HTTPS URLs; binary upload/storage is not implemented.
 
-Build from the repository root:
+Import body: `{rows: [/* manual-entry records */]}`, 1–500 rows, up to 2 MB total. Parse spreadsheet/TSV content into these records before calling the endpoint. XLSX file parsing is not included yet. Preview returns row numbers, normalized data, validation errors, and valid-row counts. Commit rejects the entire batch if any row fails; duplicate SKUs are rejected both within a batch and against the database. Database constraints still protect against concurrent duplicate commits.
 
-```bash
-docker build -f apps/api/Dockerfile -t color-bank-api .
-docker run --env-file apps/api/.env -p 3000:3000 color-bank-api
+HEX calculates RGB, HSL, HSV, CIE Lab, and LCh (sRGB, D65). Season, undertone, and business categories are left unclassified until business rules are configured. Editing HEX clears previous classifications to avoid stale values. External-product composition is rejected on writes and omitted on reads.
+
+## Reports
+
+Submit `{description, brandId?, shadeId?, attachmentUrls?, priority?}`. Description requires 10–20,000 characters; priority is `low|medium|high`. If both brand and shade are supplied, their relationship is validated. Update with `{status: "resolved"}` or `{status: "pending"}`. Resolution records its timestamp and the placeholder actor; reopening clears those fields. Status changes are audited.
+
+## Color Bank workflow
+
+Create:
+
+```json
+{
+  "type": "gap_filling",
+  "priority": "medium",
+  "brandNameNew": "Emina",
+  "productNameNew": "Jelly Stain",
+  "shadeNameNew": "Rosewood",
+  "targetHex": "#aa6d78",
+  "formatItemId": 1,
+  "description": "Fill a gap in the current shade range."
+}
 ```
 
-The image runs as a non-root user and has a health check on `/health`. To run the full stack, including optional Loki, Grafana, and Prometheus:
+`type`: `gap_filling|benchmark_matching`; optional `targetSeason`: `spring|summer|autumn|winter`. Format ID must exist.
 
-```bash
-docker compose up -d
-docker compose --profile observability up -d
+Allowed transitions:
+
+```text
+pending -> approved -> formulating -> completed
+pending -> declined
 ```
+
+Decline requires `declineReason`. Approval allocates a format-specific sequence and name inside a transaction with an advisory lock. Invalid or repeated transitions return 409. Status changes are audited in the same transaction.
+
+Formulation fields: `baseType`, `ingredientsInci`, `mayContain`, `composition`, `resultPhotoUrl`, `deltaE`, `resultNotes`. Completion requires a saved result photo URL. API status `completed` corresponds to the UI's “Result uploaded”; it does not automatically create a master shade. Promotion into the catalog is not implemented yet.
+
+## Validation and errors
+
+Unknown write fields are rejected. UUIDs, HEX values, URLs, pagination, percentage totals, and state transitions are validated. Errors return:
+
+```json
+{"error":{"code":"VALIDATION_ERROR","message":"Request validation failed","issues":[{"path":"hex","message":"Use a six-digit HEX code"}]}}
+```
+
+HTTP 400: malformed JSON; 404: missing resource; 409: unique constraint or workflow conflict; 413: body too large; 422: invalid input or reference; 500: unexpected failure. Internal SQL and credentials are not sent to clients.
+
+## Tests
+
+`pnpm test` runs validation, color conversion, and Hono route tests through Turbo. Database integration tests run only when `TEST_DATABASE_URL` is explicitly supplied to the Turbo test task. Use a development Docker database: tests create uniquely named fixture rows and clean up only their own records. Existing schema/migrations must be applied first. Database integration tests are not cached.
+
+## Structure
+
+`routes -> controllers -> services -> repositories -> PostgreSQL`. Transaction-dependent workflow checks stay beside the locked database updates. No authentication endpoints or user-management endpoints are added.

@@ -10,10 +10,10 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { classificationConfigVersions } from "./classification";
-import { season, undertone } from "./enums";
-import { products } from "./products";
-import { users } from "./users";
+import { classificationConfigVersions } from "./classification.js";
+import { season, undertone } from "./enums.js";
+import { products } from "./products.js";
+import { users } from "./users.js";
 
 export const shades = pgTable(
   "shades",

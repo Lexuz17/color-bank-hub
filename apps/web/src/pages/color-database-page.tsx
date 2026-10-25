@@ -1,70 +1,90 @@
 import { useState } from "react";
-import type { ColumnDef } from "@tanstack/react-table";
+import { useQuery } from "@tanstack/react-query";
 import { PageShell } from "@/components/layout/page-shell";
 import {
   PageToolbar,
-  ShadeSwatch,
-  StatusBadge,
+  EmptyState,
+  LoadingState,
 } from "@/components/shared/workspace-components";
 import { ProductDetailPanel } from "@/components/shared/product-detail-panel";
-import { DataTable } from "@/components/ui/data-table";
-import { Button } from "@/components/ui/button";
-import { tableRows, sampleProfile } from "@/lib/data/demo-shades";
+import { CatalogSidebar } from "@/components/api/catalog-sidebar";
+import { ShadeDatabase } from "@/components/api/shade-database";
+import { ApiError } from "@/components/api/api-feedback";
+import { api } from "@/services/color-bank-api";
+const tones = { warm: "Warm", neutral: "Neutral", cool: "Cool" } as const;
+const seasons = {
+  spring: "Spring",
+  summer: "Summer",
+  autumn: "Autumn",
+  winter: "Winter",
+} as const;
 export function ColorDatabasePage() {
-  const [format, setFormat] = useState("Lip Tint Gloss");
-  const [selected, setSelected] = useState(tableRows[4]);
-  const columns: ColumnDef<(typeof tableRows)[number]>[] = [
-    { accessorKey: "brand", header: "Brand" },
-    { accessorKey: "product", header: "Product name" },
-    {
-      accessorKey: "shade",
-      header: "Shade name",
-      cell: ({ row }) => (
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-auto justify-start px-0"
-          onClick={() => setSelected(row.original)}
-        >
-          <ShadeSwatch hex={row.original.hex} />
-          {row.original.shade}
-        </Button>
-      ),
-    },
-    {
-      accessorKey: "undertone",
-      header: "Undertone",
-      cell: ({ row }) => <StatusBadge status={row.original.undertone} />,
-    },
-    {
-      accessorKey: "season",
-      header: "Season",
-      cell: ({ row }) => <StatusBadge status={row.original.season} />,
-    },
-    { accessorKey: "hex", header: "HEX" },
-  ];
+  const [format, setFormat] = useState<number | null>(null);
+  const [selected, setSelected] = useState<string | null>(null);
+  const profile = useQuery({
+    queryKey: ["shade", selected],
+    queryFn: ({ signal }) => api.shade(selected!, signal),
+    enabled: !!selected,
+  });
+  const shade = profile.data;
+  const detail = profile.isFetching ? (
+    <div className="p-4">
+      <LoadingState label="Loading shade profile…" />
+    </div>
+  ) : profile.isError ? (
+    <div className="p-3">
+      <ApiError error={profile.error} retry={() => void profile.refetch()} />
+    </div>
+  ) : shade ? (
+    <ProductDetailPanel
+      key={shade.id}
+      shade={{
+        brand: shade.brand.name,
+        product: shade.product.name,
+        shade: shade.name,
+        hex: shade.hex,
+        undertone: shade.undertone ? tones[shade.undertone] : null,
+        season: shade.season ? seasons[shade.season] : null,
+        format: shade.formatItem.name,
+        ingredients:
+          shade.product.ingredientsInci ?? "No ingredients recorded.",
+        composition: shade.composition ?? undefined,
+        lipPhotoUrl: shade.lipPhotoUrl ?? undefined,
+        swatchPhotoUrl: shade.swatchPhotoUrl ?? undefined,
+      }}
+      canViewComposition={shade.brand.isOwn}
+    />
+  ) : (
+    <EmptyState
+      title="Product detail"
+      description="Select a shade to view its profile, ingredients, and composition."
+    />
+  );
   return (
     <PageShell
       section="Color Database"
-      format={format}
-      onFormatChange={setFormat}
+      sidebar={
+        <CatalogSidebar
+          value={format}
+          onChange={(value) => {
+            setFormat(value);
+            setSelected(null);
+          }}
+        />
+      }
+      detailPanel={detail}
     >
       <PageToolbar
-        title={`Color Database · ${format}`}
-        description={`Benchmarks allowed: ${format} only`}
+        title="Color Database"
+        description="Browse products and shades from the database"
       />
       <div className="p-5">
-        <DataTable
-          columns={columns}
-          data={format === "Lip Tint Gloss" ? tableRows : []}
-          searchColumn="shade"
-          searchPlaceholder="Search shades…"
-          pageSize={12}
+        <ShadeDatabase
+          key={format ?? "all"}
+          formatItemId={format}
+          onInspect={setSelected}
         />
-        <p className="mt-3 text-[11px] text-muted-foreground">
-          Demo records are available under Lip Tint Gloss. Select a shade to
-          inspect its profile.
-        </p>
+        <div className="mt-5 rounded-md border xl:hidden">{detail}</div>
       </div>
     </PageShell>
   );

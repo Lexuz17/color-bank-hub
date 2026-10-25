@@ -7,7 +7,7 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { approvalStatus, userRole, userStatus } from "./enums";
+import { approvalStatus, userRole, userStatus } from "./enums.js";
 
 export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),

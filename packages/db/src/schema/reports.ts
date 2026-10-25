@@ -1,8 +1,8 @@
 import { index, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
-import { brands } from "./brands";
-import { priorityLevel, reportStatus } from "./enums";
-import { shades } from "./shades";
-import { users } from "./users";
+import { brands } from "./brands.js";
+import { priorityLevel, reportStatus } from "./enums.js";
+import { shades } from "./shades.js";
+import { users } from "./users.js";
 
 export const reports = pgTable(
   "reports",

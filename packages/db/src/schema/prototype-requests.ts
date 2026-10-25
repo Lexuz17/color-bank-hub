@@ -11,12 +11,12 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { brands } from "./brands";
-import { priorityLevel, requestStatus, requestType, season } from "./enums";
-import { productFormatItems } from "./product-formats";
-import { products } from "./products";
-import { shades } from "./shades";
-import { users } from "./users";
+import { brands } from "./brands.js";
+import { priorityLevel, requestStatus, requestType, season } from "./enums.js";
+import { productFormatItems } from "./product-formats.js";
+import { products } from "./products.js";
+import { shades } from "./shades.js";
+import { users } from "./users.js";
 
 export const prototypeRequests = pgTable(
   "prototype_requests",

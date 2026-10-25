@@ -8,14 +8,14 @@ services:
     container_name: color-bank-backend
     restart: unless-stopped
     ports:
-      - "${APP_PORT:-3000}:3000"
+      - "${APP_PORT:?APP_PORT is required}:${APP_PORT:?APP_PORT is required}"
     env_file:
       - .env
     environment:
-      NODE_ENV: production
-      PORT: 3000
-      HOST: 0.0.0.0
-      DATABASE_URL: postgresql://${POSTGRES_USER:-color_bank}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-color_bank_hub}
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: ${APP_PORT:?APP_PORT is required}
+      HOST: ${API_CONTAINER_HOST:?API_CONTAINER_HOST is required}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-color_bank}:${POSTGRES_PASSWORD}@db:${POSTGRES_CONTAINER_PORT:?POSTGRES_CONTAINER_PORT is required}/${POSTGRES_DB:-color_bank_hub}
     depends_on:
       db:
         condition: service_healthy
@@ -32,8 +32,9 @@ services:
     container_name: color-bank-db
     restart: unless-stopped
     ports:
-      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+      - "${POSTGRES_BIND_HOST:?POSTGRES_BIND_HOST is required}:${POSTGRES_PORT:?POSTGRES_PORT is required}:${POSTGRES_CONTAINER_PORT:?POSTGRES_CONTAINER_PORT is required}"
     environment:
+      PGPORT: ${POSTGRES_CONTAINER_PORT:?POSTGRES_CONTAINER_PORT is required}
       POSTGRES_DB: ${POSTGRES_DB:-color_bank_hub}
       POSTGRES_USER: ${POSTGRES_USER:-color_bank}
       POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:?Error: POSTGRES_PASSWORD must be configured in .env}"

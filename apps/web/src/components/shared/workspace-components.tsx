@@ -107,6 +107,8 @@ const badgeTypes = {
   Formulating: "info",
   "Result uploaded": "success",
   Closed: "neutral",
+  Resolved: "success",
+  Declined: "destructive",
   Active: "success",
   "Pending Approval": "warning",
 } as const;
@@ -151,19 +153,21 @@ export function LoadingState({
 export function WorkflowSteps({
   steps = ["Pending", "Approved", "Formulating", "Result uploaded"],
   activeStep,
+  completed = false,
 }: {
   steps?: string[];
   activeStep: number;
+  completed?: boolean;
 }) {
   return (
     <ol aria-label="Workflow progress" className="flex flex-wrap gap-1">
       {steps.map((step, index) => (
         <li
           key={step}
-          aria-current={index === activeStep ? "step" : undefined}
+          aria-current={!completed && index === activeStep ? "step" : undefined}
           className={cn(
             "flex items-center gap-1.5 rounded-sm border px-2 py-1.5 text-[10px]",
-            index < activeStep
+            completed || index < activeStep
               ? "border-success-foreground/15 bg-success text-success-foreground"
               : index === activeStep
                 ? "border-primary/30 bg-accent text-primary"
@@ -171,7 +175,11 @@ export function WorkflowSteps({
           )}
         >
           <span className="flex size-4 items-center justify-center rounded-full border">
-            {index < activeStep ? <Check className="size-2.5" /> : index + 1}
+            {completed || index < activeStep ? (
+              <Check className="size-2.5" />
+            ) : (
+              index + 1
+            )}
           </span>
           {step}
         </li>
