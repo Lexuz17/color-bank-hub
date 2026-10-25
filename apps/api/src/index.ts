@@ -27,7 +27,6 @@ app.get("/api/me", async (c) => {
   return c.json(session.user);
 });
 
-
 const port = Number(env.port || 3000);
 const hostname = env.host || "0.0.0.0";
 

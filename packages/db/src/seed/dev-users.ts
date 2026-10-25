@@ -1,7 +1,7 @@
 import { hashPassword } from "better-auth/crypto";
 import { and, eq } from "drizzle-orm";
-import { db } from "../index";
-import { accounts, users } from "../schema/index";
+import { db } from "../index.js";
+import { accounts, users } from "../schema/index.js";
 
 export const DEV_PASSWORD = "devpassword123"; // Make sure it's the same as devLogin.
 

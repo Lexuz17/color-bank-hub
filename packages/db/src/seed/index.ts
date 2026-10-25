@@ -1,4 +1,4 @@
-import { seedDevUsers } from "./dev-users";
+import { seedDevUsers } from "./dev-users.js";
 
 async function main() {
   const isDevAuth =
