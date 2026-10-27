@@ -20,8 +20,11 @@ import {
   ApiError,
   FieldSelect,
   ResultsPagination,
-} from "@/components/api/api-feedback";
-import { api, apiError } from "@/services/color-bank-api";
+} from "@/components/shared/request-feedback";
+import { catalogApi } from "@/services/catalog-api";
+import { shadesApi } from "@/services/shades-api";
+import { reportsApi } from "@/services/reports-api";
+import { apiError } from "@/services/api-error";
 import type { ReportInput, Report, Priority } from "@/types/api";
 export function ReportPage() {
   const [page, setPage] = useState(1);
@@ -33,7 +36,7 @@ export function ReportPage() {
   const reports = useQuery({
     queryKey: ["reports", { page, status }],
     queryFn: ({ signal }) =>
-      api.reports(
+      reportsApi.reports(
         {
           page,
           pageSize: 20,
@@ -45,12 +48,12 @@ export function ReportPage() {
   });
   const brands = useQuery({
     queryKey: ["brands"],
-    queryFn: ({ signal }) => api.brands(signal),
+    queryFn: ({ signal }) => catalogApi.brands(signal),
   });
   const shades = useQuery({
     queryKey: ["shades", "report-lookup", brandId, shadeSearch],
     queryFn: ({ signal }) =>
-      api.shades(
+      shadesApi.shades(
         {
           pageSize: 100,
           brandId: brandId || undefined,
@@ -60,7 +63,7 @@ export function ReportPage() {
       ),
   });
   const create = useMutation({
-    mutationFn: api.createReport,
+    mutationFn: reportsApi.createReport,
     onSuccess: async () => {
       setPage(1);
       await client.invalidateQueries({ queryKey: ["reports"] });
@@ -70,7 +73,7 @@ export function ReportPage() {
   });
   const update = useMutation({
     mutationFn: ({ id, status }: { id: string; status: Report["status"] }) =>
-      api.updateReport(id, status),
+      reportsApi.updateReport(id, status),
     onSuccess: async () => {
       await client.invalidateQueries({ queryKey: ["reports"] });
       toast.success("Report status updated");

@@ -1,6 +1,6 @@
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { apiError } from "@/services/color-bank-api";
+import { apiError } from "@/services/api-error";
 import type { ComponentProps } from "react";
 export function ApiError({
   error,

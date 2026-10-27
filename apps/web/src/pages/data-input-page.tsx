@@ -11,11 +11,13 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { ApiError, FieldSelect } from "@/components/api/api-feedback";
-import { CatalogSetup } from "@/components/api/catalog-setup";
-import { ShadeDatabase } from "@/components/api/shade-database";
-import { useCatalog } from "@/hooks/api/use-catalog";
-import { api, apiError } from "@/services/color-bank-api";
+import { ApiError, FieldSelect } from "@/components/shared/request-feedback";
+import { CatalogSetup } from "@/components/catalog/catalog-setup";
+import { ShadeDatabase } from "@/components/shades/shade-database";
+import { useCatalog } from "@/hooks/use-catalog";
+import { apiError } from "@/services/api-error";
+import { shadesApi } from "@/services/shades-api";
+import { importsApi } from "@/services/imports-api";
 import type { ShadeInput } from "@/types/api";
 export function DataInputPage() {
   const [tab, setTab] = useState("manual");
@@ -34,7 +36,7 @@ export function DataInputPage() {
     ]);
   }
   const create = useMutation({
-    mutationFn: api.createShade,
+    mutationFn: shadesApi.createShade,
     onSuccess: async () => {
       await refresh();
       toast.success("Shade added to the database");
@@ -42,11 +44,11 @@ export function DataInputPage() {
     onError: (error) => toast.error(apiError(error)),
   });
   const preview = useMutation({
-    mutationFn: api.previewImport,
+    mutationFn: importsApi.previewImport,
     onError: (error) => toast.error(apiError(error)),
   });
   const commit = useMutation({
-    mutationFn: api.commitImport,
+    mutationFn: importsApi.commitImport,
     onSuccess: async (result) => {
       setPaste("");
       setSnapshot([]);

@@ -4,9 +4,18 @@ import { bodyLimit } from "hono/body-limit";
 import { catalogRoutes } from "#api/routes/catalog-routes.js";
 import { reportRoutes, prototypeRoutes } from "#api/routes/workflow-routes.js";
 import { env } from "#api/env.js";
+import { auth } from "#api/lib/auth.js";
 export function createApp() {
   const app = new Hono();
-  app.use("/api/*", cors({ origin: env.webOrigin }));
+  app.use(
+    "/api/*",
+    cors({
+      origin: env.webOrigin,
+      allowHeaders: ["Content-Type", "Authorization"],
+      allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+      credentials: true,
+    }),
+  );
   app.use(
     "/api/*",
     bodyLimit({
@@ -26,6 +35,12 @@ export function createApp() {
   app.get("/health", (c) =>
     c.json({ status: "ok", mode: "local-prototype", authentication: false }),
   );
+  app.all("/api/auth/*", (c) => auth.handler(c.req.raw));
+  app.get("/api/me", async (c) => {
+    const session = await auth.api.getSession({ headers: c.req.raw.headers });
+    if (!session) return c.json({ error: "Unauthorized" }, 401);
+    return c.json(session.user);
+  });
   app.route("/api", catalogRoutes);
   app.route("/api/reports", reportRoutes);
   app.route("/api/prototype-requests", prototypeRoutes);

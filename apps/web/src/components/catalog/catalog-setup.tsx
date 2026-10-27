@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { useCatalog } from "@/hooks/api/use-catalog";
-import { api, apiError } from "@/services/color-bank-api";
-import { ApiError, FieldSelect } from "./api-feedback";
+import { useCatalog } from "@/hooks/use-catalog";
+import { catalogApi } from "@/services/catalog-api";
+import { apiError } from "@/services/api-error";
+import { ApiError, FieldSelect } from "@/components/shared/request-feedback";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -29,7 +30,7 @@ export function CatalogSetup({
       if (mode === "brand")
         return {
           mode: "brand" as const,
-          record: await api.createBrand({
+          record: await catalogApi.createBrand({
             name: String(data.get("name")).trim(),
             isOwn: data.get("isOwn") === "on",
           }),
@@ -37,7 +38,7 @@ export function CatalogSetup({
       if (mode === "format")
         return {
           mode: "format" as const,
-          record: await api.createFormat({
+          record: await catalogApi.createFormat({
             name: String(data.get("parent")).trim(),
             items: [
               {
@@ -49,7 +50,7 @@ export function CatalogSetup({
         };
       return {
         mode: "product" as const,
-        record: await api.createProduct({
+        record: await catalogApi.createProduct({
           brandId: String(data.get("brandId")),
           formatItemId: Number(data.get("formatItemId")),
           name: String(data.get("name")).trim(),

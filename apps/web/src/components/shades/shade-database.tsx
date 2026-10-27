@@ -7,7 +7,9 @@ import {
 } from "@tanstack/react-query";
 import { ArrowUpDown } from "lucide-react";
 import { toast } from "sonner";
-import { api, apiError } from "@/services/color-bank-api";
+import { apiError } from "@/services/api-error";
+import { catalogApi } from "@/services/catalog-api";
+import { shadesApi } from "@/services/shades-api";
 import type { Shade, ShadePatch, Season } from "@/types/api";
 import {
   SearchInput,
@@ -33,7 +35,11 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { ApiError, FieldSelect, ResultsPagination } from "./api-feedback";
+import {
+  ApiError,
+  FieldSelect,
+  ResultsPagination,
+} from "@/components/shared/request-feedback";
 const seasonLabels = {
   spring: "Spring",
   summer: "Summer",
@@ -70,16 +76,16 @@ export function ShadeDatabase({
   };
   const rows = useQuery({
     queryKey: ["shades", params],
-    queryFn: ({ signal }) => api.shades(params, signal),
+    queryFn: ({ signal }) => shadesApi.shades(params, signal),
     placeholderData: keepPreviousData,
   });
   const brands = useQuery({
     queryKey: ["brands"],
-    queryFn: ({ signal }) => api.brands(signal),
+    queryFn: ({ signal }) => catalogApi.brands(signal),
   });
   const save = useMutation({
     mutationFn: ({ id, data }: { id: string; data: ShadePatch }) =>
-      api.updateShade(id, data),
+      shadesApi.updateShade(id, data),
     onSuccess: async () => {
       await Promise.all([
         client.invalidateQueries({ queryKey: ["shades"] }),

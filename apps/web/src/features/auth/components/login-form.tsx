@@ -1,7 +1,7 @@
 // Keep login methods together in one reusable form component.
 import { Button } from "@/components/ui/button";
 import { signInWithGoogle } from "../api/sign-in.api";
-import { DevEmailLogin } from "./DevEmailLogin";
+import { DevEmailLogin } from "./dev-email-login";
 
 export function LoginForm({ redirectTo }: { redirectTo: string }) {
   return (

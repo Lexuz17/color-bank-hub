@@ -14,13 +14,13 @@ import {
   EmptyState,
   LoadingState,
 } from "@/components/shared/workspace-components";
-import { CatalogSidebar } from "@/components/api/catalog-sidebar";
-import { PrototypeDetail } from "@/components/api/prototype-detail";
+import { CatalogSidebar } from "@/components/catalog/catalog-sidebar";
+import { PrototypeDetail } from "@/components/prototypes/prototype-detail";
 import {
   ApiError,
   FieldSelect,
   ResultsPagination,
-} from "@/components/api/api-feedback";
+} from "@/components/shared/request-feedback";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -32,7 +32,9 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { api, apiError } from "@/services/color-bank-api";
+import { catalogApi } from "@/services/catalog-api";
+import { prototypesApi } from "@/services/prototypes-api";
+import { apiError } from "@/services/api-error";
 import type { PrototypeInput, RequestStatus } from "@/types/api";
 const statusLabels = {
   pending: "Pending",
@@ -50,13 +52,13 @@ export function ColorBankPage() {
   const client = useQueryClient();
   const formats = useQuery({
     queryKey: ["formats"],
-    queryFn: ({ signal }) => api.formats(signal),
+    queryFn: ({ signal }) => catalogApi.formats(signal),
   });
   const items = formats.data?.flatMap((format) => format.items) ?? [];
   const requests = useQuery({
     queryKey: ["requests", { page, format, status }],
     queryFn: ({ signal }) =>
-      api.requests(
+      prototypesApi.requests(
         {
           page,
           pageSize: 25,
@@ -70,11 +72,11 @@ export function ColorBankPage() {
   const activeId = selected ?? requests.data?.items[0]?.id ?? null;
   const request = useQuery({
     queryKey: ["request", activeId],
-    queryFn: ({ signal }) => api.request(activeId!, signal),
+    queryFn: ({ signal }) => prototypesApi.request(activeId ?? "", signal),
     enabled: !!activeId,
   });
   const create = useMutation({
-    mutationFn: api.createRequest,
+    mutationFn: prototypesApi.createRequest,
     onSuccess: async (row) => {
       setStatus("");
       setFormat(null);

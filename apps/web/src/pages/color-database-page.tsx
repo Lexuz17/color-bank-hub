@@ -7,10 +7,10 @@ import {
   LoadingState,
 } from "@/components/shared/workspace-components";
 import { ProductDetailPanel } from "@/components/shared/product-detail-panel";
-import { CatalogSidebar } from "@/components/api/catalog-sidebar";
-import { ShadeDatabase } from "@/components/api/shade-database";
-import { ApiError } from "@/components/api/api-feedback";
-import { api } from "@/services/color-bank-api";
+import { CatalogSidebar } from "@/components/catalog/catalog-sidebar";
+import { ShadeDatabase } from "@/components/shades/shade-database";
+import { ApiError } from "@/components/shared/request-feedback";
+import { shadesApi } from "@/services/shades-api";
 const tones = { warm: "Warm", neutral: "Neutral", cool: "Cool" } as const;
 const seasons = {
   spring: "Spring",
@@ -23,7 +23,7 @@ export function ColorDatabasePage() {
   const [selected, setSelected] = useState<string | null>(null);
   const profile = useQuery({
     queryKey: ["shade", selected],
-    queryFn: ({ signal }) => api.shade(selected!, signal),
+    queryFn: ({ signal }) => shadesApi.shade(selected ?? "", signal),
     enabled: !!selected,
   });
   const shade = profile.data;

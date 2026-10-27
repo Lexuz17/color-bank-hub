@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { ChevronDown, Palette } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { api } from "@/services/color-bank-api";
-import { ApiError } from "./api-feedback";
+import { catalogApi } from "@/services/catalog-api";
+import { ApiError } from "@/components/shared/request-feedback";
 import { LoadingState } from "@/components/shared/workspace-components";
 export function CatalogSidebar({
   value,
@@ -13,7 +13,7 @@ export function CatalogSidebar({
 }) {
   const formats = useQuery({
     queryKey: ["formats"],
-    queryFn: ({ signal }) => api.formats(signal),
+    queryFn: ({ signal }) => catalogApi.formats(signal),
   });
   const [collapsed, setCollapsed] = useState<number[]>([]);
   return (

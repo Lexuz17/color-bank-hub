@@ -2,12 +2,13 @@ import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import type { PrototypeRequest, RequestStatus } from "@/types/api";
-import { api, apiError } from "@/services/color-bank-api";
+import { prototypesApi } from "@/services/prototypes-api";
+import { apiError } from "@/services/api-error";
 import {
   ShadeSwatch,
   WorkflowSteps,
 } from "@/components/shared/workspace-components";
-import { ApiError } from "./api-feedback";
+import { ApiError } from "@/components/shared/request-feedback";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -53,7 +54,7 @@ export function PrototypeDetail({
     }: {
       status: Exclude<RequestStatus, "pending">;
       reason?: string;
-    }) => api.transitionRequest(request.id, status, reason),
+    }) => prototypesApi.transitionRequest(request.id, status, reason),
     onSuccess: async () => {
       setConfirm(null);
       await refresh();
@@ -62,7 +63,8 @@ export function PrototypeDetail({
     onError: (error) => toast.error(apiError(error)),
   });
   const save = useMutation({
-    mutationFn: api.saveFormulation.bind(null, request.id),
+    mutationFn: (body: Parameters<typeof prototypesApi.saveFormulation>[1]) =>
+      prototypesApi.saveFormulation(request.id, body),
     onSuccess: async () => {
       await refresh();
       toast.success("Formulation saved");
