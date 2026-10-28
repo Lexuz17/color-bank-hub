@@ -1,6 +1,3 @@
-// Ini biasa kek crud" pakai queryClient
-
-// Setealh ini dibuat, nanti dipakai di hooks lain.
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useRouter } from "@tanstack/react-router";
 import { toast } from "sonner";
@@ -20,7 +17,7 @@ export function useSignOut() {
       await navigate({ to: "/login", search: { redirect: "/" } });
     },
     onError: () => {
-      toast.error("Gagal logout, coba lagi");
+      toast.error("Failed to sign out, please try again");
     },
   });
 }

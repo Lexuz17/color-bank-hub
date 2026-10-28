@@ -1,8 +1,6 @@
 {
   "name": "color-bank-hub",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "private": true,
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
@@ -21,9 +19,6 @@
     "docker:db:logs": "docker compose logs -f db",
     "prepare": "husky || true"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "packageManager": "pnpm@10.14.0",
   "devDependencies": {
     "@biomejs/biome": "^2.5.15",

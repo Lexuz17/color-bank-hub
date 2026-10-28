@@ -1,7 +1,8 @@
 {
   "name": "@color-bank-hub/db",
   "version": "1.0.0",
-  "description": "",
+  "private": true,
+  "type": "module",
   "main": "./dist/index.js",
   "scripts": {
     "db:generate": "drizzle-kit generate",
@@ -20,10 +21,6 @@
       "import": "./dist/schema/index.js"
     }
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "packageManager": "pnpm@10.14.0",
   "dependencies": {
     "drizzle-orm": "^0.45.4",
     "postgres": "^3.4.9"
@@ -35,6 +32,5 @@
     "drizzle-kit": "^0.31.11",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2"
-  },
-  "type": "module"
+  }
 }
