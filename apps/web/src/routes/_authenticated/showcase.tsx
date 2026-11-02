@@ -1,5 +1,4 @@
-import { sectionPaths } from "@/lib/navigation";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import {
   ArrowRight,
@@ -17,7 +16,6 @@ import {
   roleLabels,
   roles,
 } from "@color-bank-hub/contracts/rbac";
-import type { AppSection } from "@/components/layout/app-header";
 import { ProductFormatSidebar } from "@/components/product-format/product-format-sidebar";
 import {
   PageToolbar,
@@ -186,7 +184,6 @@ const paletteColumns: ColumnDef<(typeof tableRows)[number]>[] = [
 
 function ShowcasePage() {
   const [progress, setProgress] = useState(68);
-  const routeNavigate = useNavigate();
   const activeSection = null;
   const [format, setFormat] = useState("Lip Tint Gloss");
   const [search, setSearch] = useState("");
@@ -195,9 +192,6 @@ function ShowcasePage() {
   const [workflow, setWorkflow] = useState(2);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [mappingName, setMappingName] = useState("");
-  const navigate = (section: AppSection) => {
-    void routeNavigate({ to: sectionPaths[section] });
-  };
 
   const form = useForm({
     defaultValues: {
@@ -215,7 +209,6 @@ function ShowcasePage() {
   return (
     <WorkspaceLayout
       activeSection={activeSection}
-      onNavigate={navigate}
       role={role}
       userName="John doe"
       onProfile={() => setProfileOpen(true)}

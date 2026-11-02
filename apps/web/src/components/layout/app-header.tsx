@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { can, type Role, roleLabels } from "@color-bank-hub/contracts/rbac";
-import { sectionPaths, sectionPermissions } from "@/lib/navigation";
-import { Menu, Home, ChevronDown, Palette } from "lucide-react";
+import { type AppSection, navItems } from "@/lib/navigation";
+import { Menu, ChevronDown, Palette } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -14,26 +14,6 @@ import {
   DropdownMenuGroup,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-
-export type AppSection =
-  | "Home"
-  | "Color Database"
-  | "Shade Mapping"
-  | "My Mappings"
-  | "Color Bank"
-  | "Report"
-  | "Data Input"
-  | "User Management";
-const sections: AppSection[] = [
-  "Home",
-  "Color Database",
-  "Shade Mapping",
-  "My Mappings",
-  "Color Bank",
-  "Report",
-  "Data Input",
-  "User Management",
-];
 
 export function BrandLogo() {
   return (
@@ -52,23 +32,20 @@ export function BrandLogo() {
 
 export function AppHeader({
   activeSection,
-  onNavigate,
   role,
   userName,
   onOpenSidebar,
   onProfile,
 }: {
   activeSection: AppSection | null;
-  onNavigate: (section: AppSection) => void;
   role: Role | null;
   userName: string;
   onOpenSidebar?: () => void;
   onProfile: () => void;
 }) {
-  const items = sections.filter((item) => {
-    const permission = sectionPermissions[item];
-    return !permission || can(role, permission);
-  });
+  const items = navItems.filter(
+    (item) => !("permission" in item) || can(role, item.permission),
+  );
   const roleLabel = role ? roleLabels[role] : "No role";
   const initials = userName
     .split(" ")
@@ -95,13 +72,13 @@ export function AppHeader({
       >
         {items.map((item) => (
           <Link
-            key={item}
-            to={sectionPaths[item]}
-            aria-current={activeSection === item ? "page" : undefined}
+            key={item.label}
+            to={item.to}
+            aria-current={activeSection === item.label ? "page" : undefined}
             className="flex shrink-0 items-center gap-1 border-b-2 border-transparent px-3 text-[11px] whitespace-nowrap text-muted-foreground transition-colors hover:bg-muted hover:text-foreground aria-[current=page]:border-primary aria-[current=page]:font-medium aria-[current=page]:text-primary"
           >
-            {item === "Home" && <Home className="size-3" />}
-            {item}
+            {"icon" in item && <item.icon className="size-3" />}
+            {item.label}
           </Link>
         ))}
       </nav>
@@ -113,8 +90,8 @@ export function AppHeader({
           </DropdownMenuTrigger>
           <DropdownMenuContent>
             {items.map((item) => (
-              <DropdownMenuItem key={item} onClick={() => onNavigate(item)}>
-                {item}
+              <DropdownMenuItem key={item.label} render={<Link to={item.to} />}>
+                {item.label}
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>

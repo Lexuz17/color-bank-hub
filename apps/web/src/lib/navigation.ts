@@ -1,17 +1,22 @@
 import type { Permission } from "@color-bank-hub/contracts/rbac";
-import type { AppSection } from "@/components/layout/app-header";
-export const sectionPaths = {
-  Home: "/",
-  "Color Database": "/color-database",
-  "Shade Mapping": "/shade-mapping",
-  "My Mappings": "/my-mappings",
-  "Color Bank": "/color-bank",
-  Report: "/report",
-  "Data Input": "/data-input",
-  "User Management": "/user-management",
-} as const satisfies Record<AppSection, string>;
-/** Sections hidden from users without the permission; keep in sync with route guards. */
-export const sectionPermissions: Partial<Record<AppSection, Permission>> = {
-  "Data Input": "catalog:write",
-  "User Management": "user:manage",
-};
+import { Home, type LucideIcon } from "lucide-react";
+
+interface NavItem {
+  label: string;
+  to: string;
+  icon?: LucideIcon;
+  permission?: Permission; //Hidden from users without it; keep in sync with the route's beforeLoad guard.
+}
+
+export const navItems = [
+  { label: "Home", to: "/", icon: Home },
+  { label: "Color Database", to: "/color-database" },
+  { label: "Shade Mapping", to: "/shade-mapping" },
+  { label: "My Mappings", to: "/my-mappings" },
+  { label: "Color Bank", to: "/color-bank" },
+  { label: "Report", to: "/report" },
+  { label: "Data Input", to: "/data-input", permission: "catalog:write" },
+  { label: "User Management", to: "/user-management", permission: "user:manage"},
+] as const satisfies readonly NavItem[];
+
+export type AppSection = (typeof navItems)[number]["label"];

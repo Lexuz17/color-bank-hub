@@ -1,9 +1,8 @@
 import type { ReactNode } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { WorkspaceLayout } from "./workspace-layout";
-import type { AppSection } from "./app-header";
 import { ProductFormatSidebar } from "@/components/product-format/product-format-sidebar";
-import { sectionPaths } from "@/lib/navigation";
+import type { AppSection } from "@/lib/navigation";
 import { useCurrentUser } from "@/features/auth/hooks/use-can";
 
 export function PageShell({
@@ -26,9 +25,6 @@ export function PageShell({
   return (
     <WorkspaceLayout
       activeSection={section}
-      onNavigate={(item) => {
-        void navigate({ to: sectionPaths[item] });
-      }}
       role={user.role}
       userName={user.name}
       onProfile={() => {
