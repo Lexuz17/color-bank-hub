@@ -3,34 +3,25 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "main": "./dist/index.js",
   "scripts": {
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:seed": "tsx src/seed/index.ts",
-    "build": "tsc -p tsconfig.json",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "db:seed": "tsx --env-file-if-exists=../../.env src/seed/index.ts",
+    "typecheck": "tsc"
   },
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    },
-    "./schema": {
-      "types": "./dist/schema/index.d.ts",
-      "import": "./dist/schema/index.js"
-    }
+    ".": "./src/index.ts"
   },
   "dependencies": {
-    "drizzle-orm": "^0.45.4",
+    "drizzle-orm": "catalog:",
     "postgres": "^3.4.9"
   },
   "devDependencies": {
-    "@types/node": "^26.6.5",
-    "better-auth": "^1.7.12",
+    "@types/node": "catalog:",
+    "better-auth": "catalog:",
     "dotenv": "^18.0.8",
     "drizzle-kit": "^0.31.11",
-    "tsx": "^4.23.15",
-    "typescript": "^7.0.2"
+    "tsx": "catalog:",
+    "typescript": "catalog:"
   }
 }

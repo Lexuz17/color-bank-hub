@@ -25,8 +25,11 @@ import { catalogApi } from "@/services/catalog-api";
 import { shadesApi } from "@/services/shades-api";
 import { reportsApi } from "@/services/reports-api";
 import { apiError } from "@/services/api-error";
-import type { ReportInput, Report, Priority } from "@/types/api";
+import { useCan } from "@/features/auth/hooks/use-can";
+import type { Priority } from "@color-bank-hub/contracts/common";
+import type { Report, ReportInput } from "@color-bank-hub/contracts/report";
 export function ReportPage() {
+  const canResolve = useCan("report:resolve");
   const [page, setPage] = useState(1);
   const [status, setStatus] = useState("");
   const [brandId, setBrandId] = useState("");
@@ -256,24 +259,26 @@ export function ReportPage() {
                         {new Date(report.createdAt).toLocaleDateString()} ·{" "}
                         {report.priority} priority
                       </p>
-                      <Button
-                        size="xs"
-                        variant="outline"
-                        disabled={update.isPending}
-                        onClick={() =>
-                          update.mutate({
-                            id: report.id,
-                            status:
-                              report.status === "pending"
-                                ? "resolved"
-                                : "pending",
-                          })
-                        }
-                      >
-                        {report.status === "pending"
-                          ? "Mark resolved"
-                          : "Reopen"}
-                      </Button>
+                      {canResolve && (
+                        <Button
+                          size="xs"
+                          variant="outline"
+                          disabled={update.isPending}
+                          onClick={() =>
+                            update.mutate({
+                              id: report.id,
+                              status:
+                                report.status === "pending"
+                                  ? "resolved"
+                                  : "pending",
+                            })
+                          }
+                        >
+                          {report.status === "pending"
+                            ? "Mark resolved"
+                            : "Reopen"}
+                        </Button>
+                      )}
                     </div>
                     {report.attachmentUrls?.map((url) => (
                       <a

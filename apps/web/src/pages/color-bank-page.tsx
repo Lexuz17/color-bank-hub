@@ -35,7 +35,11 @@ import {
 import { catalogApi } from "@/services/catalog-api";
 import { prototypesApi } from "@/services/prototypes-api";
 import { apiError } from "@/services/api-error";
-import type { PrototypeInput, RequestStatus } from "@/types/api";
+import { useCan } from "@/features/auth/hooks/use-can";
+import type {
+  PrototypeInput,
+  PrototypeStatus,
+} from "@color-bank-hub/contracts/prototype";
 const statusLabels = {
   pending: "Pending",
   approved: "Approved",
@@ -44,6 +48,7 @@ const statusLabels = {
   declined: "Declined",
 } as const;
 export function ColorBankPage() {
+  const canCreate = useCan("prototype:create");
   const [format, setFormat] = useState<number | null>(null);
   const [status, setStatus] = useState("");
   const [page, setPage] = useState(1);
@@ -63,7 +68,7 @@ export function ColorBankPage() {
           page,
           pageSize: 25,
           ...(format ? { formatItemId: format } : {}),
-          ...(status ? { status: status as RequestStatus } : {}),
+          ...(status ? { status: status as PrototypeStatus } : {}),
         },
         signal,
       ),
@@ -143,15 +148,17 @@ export function ColorBankPage() {
             </option>
           ))}
         </FieldSelect>
-        <Button
-          disabled={formats.isPending || formats.isError || !items.length}
-          onClick={() => {
-            create.reset();
-            setOpen(true);
-          }}
-        >
-          + New request
-        </Button>
+        {canCreate && (
+          <Button
+            disabled={formats.isPending || formats.isError || !items.length}
+            onClick={() => {
+              create.reset();
+              setOpen(true);
+            }}
+          >
+            + New request
+          </Button>
+        )}
       </PageToolbar>
       {formats.isError && (
         <div className="p-4">

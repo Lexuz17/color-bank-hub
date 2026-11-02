@@ -4,6 +4,7 @@ import { WorkspaceLayout } from "./workspace-layout";
 import type { AppSection } from "./app-header";
 import { ProductFormatSidebar } from "@/components/product-format/product-format-sidebar";
 import { sectionPaths } from "@/lib/navigation";
+import { useCurrentUser } from "@/features/auth/hooks/use-can";
 
 export function PageShell({
   section,
@@ -21,14 +22,15 @@ export function PageShell({
   sidebar?: ReactNode;
 }) {
   const navigate = useNavigate();
+  const user = useCurrentUser();
   return (
     <WorkspaceLayout
       activeSection={section}
       onNavigate={(item) => {
         void navigate({ to: sectionPaths[item] });
       }}
-      role="Website Admin"
-      userName="John doe"
+      role={user.role}
+      userName={user.name}
       onProfile={() => {
         void navigate({ to: "/user-management" });
       }}

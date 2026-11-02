@@ -2,7 +2,7 @@
 
 Hono REST API backed by the existing PostgreSQL/Drizzle schema. This first pass covers Color Database, Report, Data Input, and Color Bank. The Color Database, Report, Data Input, and Color Bank pages use these endpoints through the Vite `/api` proxy and TanStack Query. The component showcase and mapping previews remain independent demo screens.
 
-Better Auth is configured for Google sign-in, and the API exposes its auth handler and session endpoint. The server reads its bind address from `HOST`. Resource routes are currently guarded by session authentication, but role-based authorization and user-management endpoints are not implemented. The web app has a user-management screen, but it is not backed by API endpoints yet. Reports, prototypes, decisions, and audit records use a database placeholder identity with a randomly generated UUID, a disabled account, and no role. Existing NOT NULL constraints and foreign keys remain intact. This identity does not authenticate requests.
+Better Auth handles Google sign-in (plus email/password in development). Every `/api/*` route except `/api/auth/*` requires an active, signed-in user with a role, and write routes enforce the shared permission matrix (see [Access control](#access-control)). Reports, prototypes, decisions, and audit records are attributed to the signed-in user. User-management endpoints are not implemented yet; the web screen is not backed by the API.
 
 ## Development
 
@@ -16,19 +16,18 @@ pnpm test
 pnpm db:migrate
 ```
 
-Turbo builds the database package before dependent API tasks. No extra prebuild/predev commands are needed. `DATABASE_URL` must point to the Docker database's published localhost port when running on the host; Docker Compose supplies its own internal database URL to containers. Keep database credentials in `.env`.
+Workspace packages (`@color-bank-hub/db`, `@color-bank-hub/contracts`) are consumed as TypeScript source, so no prebuild is needed; `tsup` bundles them into `dist`. Local scripts load the root `.env` with Node's `--env-file-if-exists`, and `src/env.ts` validates it with zod at startup. `DATABASE_URL` must point to the Docker database's published localhost port when running on the host; Docker Compose supplies its own internal database URL to containers. Keep database credentials in `.env`.
 
 Network settings live in the root `.env` (see `.env.example`):
 
-- `HOST`: API bind address; `APP_PORT`: API port (`PORT` may override it in containers).
-- `API_URL`: Vite's backend proxy target and the container health-check base URL.
-- `WEB_HOST`, `WEB_PORT`: Vite's bind address and port.
+- `HOST`, `PORT`: API bind address and port (defaults `0.0.0.0`, `3000`; Compose forces `HOST=0.0.0.0`).
+- `API_URL`: Vite's backend proxy target.
+- `WEB_HOST`, `WEB_PORT`: Vite's bind address and port. Keep `WEB_HOST` and `WEB_ORIGIN` on the same host, since `localhost` and `127.0.0.1` are different origins for Better Auth.
 - `VITE_API_BASE_URL`: browser request base, normally `/api` for the same-origin proxy.
-- `WEB_ORIGIN`: allowed CORS origin.
+- `WEB_ORIGIN`: allowed CORS and Better Auth origin.
 - `POSTGRES_BIND_HOST`, `POSTGRES_PORT`: Docker PostgreSQL's published address and port. `POSTGRES_CONTAINER_PORT` controls its internal listening port.
-- `API_CONTAINER_HOST`: API bind address inside Docker.
 
-Required settings have no hardcoded runtime address defaults. Health: `GET /health`. Restart the dev processes after changing `.env`.
+Health: `GET /health` (public). Restart the dev processes after changing `.env`.
 
 ## Endpoints
 
@@ -36,6 +35,7 @@ All resource paths below begin with `/api`.
 
 | Method | Path | Purpose |
 | --- | --- | --- |
+| GET | `/me` | The signed-in user (`id`, `email`, `name`, `role`) |
 | GET | `/brands` | Brand lookup |
 | POST | `/brands` | Create a brand; `{name, isOwn?}` |
 | GET | `/product-formats` | Categories with nested format items and actual shade counts |
@@ -54,6 +54,8 @@ All resource paths below begin with `/api`.
 | GET | `/prototype-requests/:id` | Request details |
 | PATCH | `/prototype-requests/:id/status` | Approve, decline, start formulation, or complete |
 | PATCH | `/prototype-requests/:id/formulation` | Save formulation data while formulating |
+
+Request and response schemas live in `packages/contracts/src/<module>.ts` and are shared with the web app.
 
 Create products using `{brandId, formatItemId, name, ingredientsInci, baseType?}`. Product formats use database records. Data Input includes explicit format, brand, and product creation controls for an empty database. Creating a subcategory under an existing parent name reuses that parent; duplicate names/codes return a conflict.
 
@@ -84,11 +86,11 @@ Optional shade fields: `mayContain`, `lipPhotoUrl`, `swatchPhotoUrl`, and `compo
 
 Import body: `{rows: [/* manual-entry records */]}`, 1–500 rows, up to 2 MB total. Parse spreadsheet/TSV content into these records before calling the endpoint. XLSX file parsing is not included yet. Preview returns row numbers, normalized data, validation errors, and valid-row counts. Commit rejects the entire batch if any row fails; duplicate SKUs are rejected both within a batch and against the database. Database constraints still protect against concurrent duplicate commits.
 
-HEX calculates RGB, HSL, HSV, CIE Lab, and LCh (sRGB, D65). Season, undertone, and business categories are left unclassified until business rules are configured. Editing HEX clears previous classifications to avoid stale values. External-product composition is rejected on writes and omitted on reads.
+HEX calculates RGB, HSL, HSV, CIE Lab, and LCh (sRGB, D65). Season, undertone, and business categories are left unclassified until business rules are configured. Editing HEX clears previous classifications to avoid stale values. External-product composition is rejected on writes and omitted on reads. Own-brand composition is also omitted for roles without `shade:viewComposition`.
 
 ## Reports
 
-Submit `{description, brandId?, shadeId?, attachmentUrls?, priority?}`. Description requires 10–20,000 characters; priority is `low|medium|high`. If both brand and shade are supplied, their relationship is validated. Update with `{status: "resolved"}` or `{status: "pending"}`. Resolution records its timestamp and the placeholder actor; reopening clears those fields. Status changes are audited.
+Submit `{description, brandId?, shadeId?, attachmentUrls?, priority?}`. Description requires 10–20,000 characters; priority is `low|medium|high`. If both brand and shade are supplied, their relationship is validated. Update with `{status: "resolved"}` or `{status: "pending"}`. Resolution records its timestamp and the signed-in user; reopening clears those fields. Status changes are audited.
 
 ## Color Bank workflow
 
@@ -120,20 +122,54 @@ Decline requires `declineReason`. Approval allocates a format-specific sequence 
 
 Formulation fields: `baseType`, `ingredientsInci`, `mayContain`, `composition`, `resultPhotoUrl`, `deltaE`, `resultNotes`. Completion requires a saved result photo URL. API status `completed` corresponds to the UI's “Result uploaded”; it does not automatically create a master shade. Promotion into the catalog is not implemented yet.
 
+## Access control
+
+Who can do what is defined once in `packages/contracts/src/rbac.ts`; the API enforces it with `requirePermission()` on routes, and the web uses the same `can()` to hide actions. Reading data only requires an active account.
+
+| Permission | Routes | Roles |
+| --- | --- | --- |
+| `catalog:write` | `POST /brands`, `/product-formats`, `/products`, `/shades`, `/imports/*`; `PATCH /shades/:id` | website_admin, rnd |
+| `shade:viewComposition` | Field-level: `composition` in shade responses | website_admin, rnd, tsi |
+| `report:create` | `POST /reports` | all roles |
+| `report:resolve` | `PATCH /reports/:id` | website_admin, rnd |
+| `prototype:create` | `POST /prototype-requests` | website_admin, pid, tsi |
+| `prototype:process` | `PATCH /prototype-requests/:id/status`, `/formulation` | website_admin, rnd |
+| `user:manage` | Web user-management screen (no API yet) | website_admin |
+
+To change access, edit the role list in `rbac.ts`. To add a capability, add a `<resource>:<action>` key there and reference it with `requirePermission()` and `useCan()`.
+
 ## Validation and errors
 
 Unknown write fields are rejected. UUIDs, HEX values, URLs, pagination, percentage totals, and state transitions are validated. Errors return:
 
 ```json
-{"error":{"code":"VALIDATION_ERROR","message":"Request validation failed","issues":[{"path":"hex","message":"Use a six-digit HEX code"}]}}
+{"error":{"code":"VALIDATION_ERROR","message":"Request validation failed","requestId":"b1f0…","issues":[{"path":"hex","message":"Use a six-digit HEX code"}]}}
+{"error":{"code":"NOT_FOUND","reason":"SHADE_NOT_FOUND","message":"Shade not found","requestId":"b1f0…"}}
 ```
 
-HTTP 400: malformed JSON; 404: missing resource; 409: unique constraint or workflow conflict; 413: body too large; 422: invalid input or reference; 500: unexpected failure. Internal SQL and credentials are not sent to clients.
+- `code` is general and maps 1:1 to the HTTP status. The list lives in `errorStatus` in `packages/contracts/src/common.ts`. Branch on it in the client.
+- `reason` is optional and names the specific cause. Use it for specific UI handling.
+- `requestId` equals the `X-Request-Id` response header and the server log entry for 500 errors.
+- `issues` appears only with `VALIDATION_ERROR`.
+
+| `code` | HTTP | `reason` values |
+|---|---|---|
+| `BAD_REQUEST` | 400 | `INVALID_JSON` |
+| `UNAUTHORIZED` | 401 | — |
+| `FORBIDDEN` | 403 | `ACCOUNT_INACTIVE`, `MISSING_PERMISSION` |
+| `NOT_FOUND` | 404 | `ROUTE_NOT_FOUND`, `SHADE_NOT_FOUND`, `REPORT_NOT_FOUND`, `REQUEST_NOT_FOUND` |
+| `CONFLICT` | 409 | `UNIQUE_VIOLATION`, `INVALID_TRANSITION`, `NOT_FORMULATING` |
+| `PAYLOAD_TOO_LARGE` | 413 | — |
+| `VALIDATION_ERROR` | 422 | — (see `issues`) |
+| `BUSINESS_RULE` | 422 | `INVALID_PRODUCT`, `EXTERNAL_COMPOSITION`, `BRAND_SHADE_MISMATCH`, `RESULT_REQUIRED`, `IMPORT_INVALID`, `INVALID_REFERENCE` |
+| `INTERNAL` | 500 | — |
+
+Throw with `fail(code, message, reason?)` from `src/core/errors.ts`. Internal SQL and credentials are not sent to clients.
 
 ## Tests
 
-`pnpm test` runs validation, color conversion, and Hono route tests through Turbo. Database integration tests run only when `TEST_DATABASE_URL` is explicitly supplied to the Turbo test task. Use a development Docker database: tests create uniquely named fixture rows and clean up only their own records. Existing schema/migrations must be applied first. Database integration tests are not cached.
+`pnpm test` runs validation, color conversion, permission, and Hono route tests through Turbo. Route tests inject a user with `createApp({ resolveUser })` instead of a real session. Database integration tests run only when `TEST_DATABASE_URL` is explicitly supplied to the Turbo test task. Use a development Docker database: tests create uniquely named fixture rows and clean up only their own records. Existing schema/migrations must be applied first. Database integration tests are not cached.
 
 ## Structure
 
-`routes -> controllers -> services -> repositories -> PostgreSQL`. Transaction-dependent workflow checks stay beside the locked database updates. Better Auth handles sign-in and sessions; role-based authorization and user-management API endpoints remain future work.
+`routes (paths + permission guards) -> controllers (HTTP + input validation) -> services (business rules, typed input) -> repositories (SQL) -> PostgreSQL`. Only controllers touch Hono's `Context`; services and repositories never see `unknown` input. Transaction-dependent workflow checks stay beside the locked database updates. User-management API endpoints remain future work.

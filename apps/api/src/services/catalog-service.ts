@@ -1,28 +1,48 @@
-import { parse } from "#api/core/errors.js";
-import {
-  brandInput,
-  formatInput,
-  productInput,
-  shadeInput,
-  shadePatch,
-  shadeQuery,
-  uuid,
-} from "#api/models/catalog.js";
+import type {
+  BrandInput,
+  FormatInput,
+  ProductInput,
+} from "@color-bank-hub/contracts/catalog";
+import { can, type Role } from "@color-bank-hub/contracts/rbac";
+import type {
+  ShadeInput,
+  ShadePatch,
+  ShadeQuery,
+} from "@color-bank-hub/contracts/shade";
 import * as repository from "#api/repositories/catalog-repository.js";
-export const listShades = (query: unknown) =>
-  repository.listShades(parse(shadeQuery, query));
-export const findShade = (id: unknown) => repository.findShade(parse(uuid, id));
-export const listBrands = () => repository.listBrands();
-export const listFormats = () => repository.listFormats();
-export const listProducts = () => repository.listProducts();
-export const createBrand = (input: unknown) =>
-  repository.createBrand(parse(brandInput, input));
-export const createProduct = (input: unknown) =>
-  repository.createProduct(parse(productInput, input));
-export const createShade = async (input: unknown) =>
-  (await repository.createShades([parse(shadeInput, input)]))[0];
-export const updateShade = (id: unknown, input: unknown) =>
-  repository.updateShade(parse(uuid, id), parse(shadePatch, input));
 
-export const createFormat = (input: unknown) =>
-  repository.createFormat(parse(formatInput, input));
+/** Field-level RBAC: strip composition for roles that may not see it. */
+function visibleShade<T extends { composition?: unknown }>(
+  shade: T,
+  role: Role,
+) {
+  if (can(role, "shade:viewComposition")) return shade;
+  const { composition: _composition, ...rest } = shade;
+  return rest;
+}
+
+export const listBrands = () => repository.listBrands();
+export const createBrand = (input: BrandInput) => repository.createBrand(input);
+
+export const listFormats = () => repository.listFormats();
+export const createFormat = (input: FormatInput) =>
+  repository.createFormat(input);
+
+export const listProducts = () => repository.listProducts();
+export const createProduct = (input: ProductInput) =>
+  repository.createProduct(input);
+
+export const listShades = (query: ShadeQuery) => repository.listShades(query);
+
+export async function findShade(id: string, role: Role) {
+  return visibleShade(await repository.findShade(id), role);
+}
+
+export async function createShade(input: ShadeInput, role: Role) {
+  const [shade] = await repository.createShades([input]);
+  return visibleShade(shade, role);
+}
+
+export async function updateShade(id: string, input: ShadePatch, role: Role) {
+  return visibleShade(await repository.updateShade(id, input), role);
+}

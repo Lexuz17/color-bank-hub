@@ -23,8 +23,7 @@ The root `.env` is used by Vite. `WEB_HOST`, `WEB_PORT`, `API_URL`, and `VITE_AP
 | `pnpm --filter web build` | Type-check and create a production bundle |
 | `pnpm --filter web typecheck` | Run TypeScript project checks |
 | `pnpm --filter web lint` | Run Oxlint |
-| `pnpm --filter web format` | Format web source with Biome |
-| `pnpm --filter web format:check` | Check web source formatting |
+| `pnpm check` / `pnpm check:fix` (root) | Check or fix formatting and lint with Biome |
 | `pnpm --filter web preview` | Preview the production bundle |
 | `pnpm --filter web test` | Run Playwright tests in `e2e/` |
 | `pnpm --filter web test:ui` | Open Playwright UI mode |

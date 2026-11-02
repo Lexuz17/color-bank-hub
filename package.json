@@ -4,8 +4,7 @@
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
-    "lint": "turbo run lint --filter=web",
-    "format": "biome format --write .",
+    "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "test:e2e": "turbo run test --filter=web",
@@ -17,13 +16,18 @@
     "docker:db": "docker compose up -d db",
     "docker:db:down": "docker compose stop db",
     "docker:db:logs": "docker compose logs -f db",
-    "prepare": "husky || true"
+    "prepare": "husky || true",
+    "check": "biome check .",
+    "check:fix": "biome check --write ."
   },
   "packageManager": "pnpm@10.14.0",
   "devDependencies": {
     "@biomejs/biome": "^2.5.15",
     "husky": "^9.1.7",
     "turbo": "^2.11.9",
-    "typescript": "^7.0.2"
+    "typescript": "catalog:"
+  },
+  "engines": {
+    "node": ">=24"
   }
 }

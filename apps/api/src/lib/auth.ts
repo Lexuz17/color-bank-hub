@@ -1,6 +1,7 @@
 import { APIError, betterAuth } from "better-auth";
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
-import { db, schema } from "@color-bank-hub/db";
+import { schema } from "@color-bank-hub/db";
+import { db } from "#api/lib/db.js";
 import { env } from "#api/env.js";
 
 const socialProviders =

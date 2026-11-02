@@ -8,13 +8,13 @@ services:
     container_name: color-bank-backend
     restart: unless-stopped
     ports:
-      - "${APP_PORT:?APP_PORT is required}:${APP_PORT:?APP_PORT is required}"
+      - "${PORT:-3000}:${PORT:-3000}"
     env_file:
       - .env
     environment:
-      NODE_ENV: ${NODE_ENV:-development}
-      PORT: ${APP_PORT:?APP_PORT is required}
-      HOST: ${API_CONTAINER_HOST:?API_CONTAINER_HOST is required}
+      NODE_ENV: production
+      PORT: ${PORT:-3000}
+      HOST: 0.0.0.0
       DATABASE_URL: postgresql://${POSTGRES_USER:-color_bank}:${POSTGRES_PASSWORD}@db:${POSTGRES_CONTAINER_PORT:?POSTGRES_CONTAINER_PORT is required}/${POSTGRES_DB:-color_bank_hub}
     depends_on:
       db:

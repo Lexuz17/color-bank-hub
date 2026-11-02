@@ -1,12 +1,76 @@
-import { Hono } from "hono";
+import { type Context, Hono } from "hono";
 import { cors } from "hono/cors";
 import { bodyLimit } from "hono/body-limit";
+import { requestId } from "hono/request-id";
 import { catalogRoutes } from "#api/routes/catalog-routes.js";
-import { reportRoutes, prototypeRoutes } from "#api/routes/workflow-routes.js";
+import { workflowRoutes } from "#api/routes/workflow-routes.js";
 import { env } from "#api/env.js";
 import { auth } from "#api/lib/auth.js";
-export function createApp() {
-  const app = new Hono();
+import {
+  type AppEnv,
+  type ResolveUser,
+  requireAuth,
+} from "#api/middleware/auth.js";
+import { AppError } from "#api/core/errors.js";
+
+type Ctx = Context<AppEnv>;
+
+function sendError(
+  c: Ctx,
+  { code, reason, message, issues, status }: AppError,
+) {
+  return c.json(
+    {
+      error: {
+        code,
+        ...(reason ? { reason } : {}),
+        message,
+        requestId: c.get("requestId"),
+        ...(issues ? { issues } : {}),
+      },
+    },
+    status,
+  );
+}
+
+/** Maps any thrown value to a safe client error; unknown errors become INTERNAL. */
+function toAppError(error: Error, c: Ctx) {
+  if (error instanceof AppError) return error;
+  if (error instanceof SyntaxError)
+    return new AppError(
+      "BAD_REQUEST",
+      "Request body must be valid JSON",
+      "INVALID_JSON",
+    );
+  const dbCode =
+    (error as { cause?: { code?: string }; code?: string }).cause?.code ??
+    (error as { code?: string }).code;
+  if (dbCode === "23505")
+    return new AppError(
+      "CONFLICT",
+      "A record with this unique value already exists",
+      "UNIQUE_VIOLATION",
+    );
+  if (dbCode === "23503")
+    return new AppError(
+      "BUSINESS_RULE",
+      "A referenced record does not exist",
+      "INVALID_REFERENCE",
+    );
+  console.error("API request failed", {
+    requestId: c.get("requestId"),
+    method: c.req.method,
+    path: c.req.path,
+    name: error.name,
+    code: dbCode,
+    message: error.message,
+  });
+  return new AppError("INTERNAL", "Unable to process the request");
+}
+
+export function createApp(options: { resolveUser?: ResolveUser } = {}) {
+  const app = new Hono<AppEnv>();
+  app.use(requestId());
   app.use(
     "/api/*",
     cors({
@@ -21,89 +85,25 @@ export function createApp() {
     bodyLimit({
       maxSize: 2 * 1024 * 1024,
       onError: (c) =>
-        c.json(
-          {
-            error: {
-              code: "PAYLOAD_TOO_LARGE",
-              message: "Request body exceeds 2 MB",
-            },
-          },
-          413,
+        sendError(
+          c,
+          new AppError("PAYLOAD_TOO_LARGE", "Request body exceeds 2 MB"),
         ),
     }),
   );
-  app.get("/health", (c) =>
-    c.json({ status: "ok", mode: "local-prototype", authentication: false }),
-  );
+  app.get("/health", (c) => c.json({ status: "ok" }));
   app.all("/api/auth/*", (c) => auth.handler(c.req.raw));
-  app.get("/api/me", async (c) => {
-    const session = await auth.api.getSession({ headers: c.req.raw.headers });
-    if (!session) return c.json({ error: "Unauthorized" }, 401);
-    return c.json(session.user);
-  });
+  // Everything below requires an active, signed-in user.
+  app.use("/api/*", requireAuth(options.resolveUser));
+  app.get("/api/me", (c) => c.json({ data: c.get("user") }));
   app.route("/api", catalogRoutes);
-  app.route("/api/reports", reportRoutes);
-  app.route("/api/prototype-requests", prototypeRoutes);
+  app.route("/api", workflowRoutes);
   app.notFound((c) =>
-    c.json(
-      { error: { code: "NOT_FOUND", message: "Endpoint not found" } },
-      404,
+    sendError(
+      c,
+      new AppError("NOT_FOUND", "Endpoint not found", "ROUTE_NOT_FOUND"),
     ),
   );
-  app.onError((error, c) => {
-    const e = error as Error & {
-      status?: 400 | 404 | 409 | 422;
-      code?: string;
-      issues?: unknown;
-      cause?: { code?: string };
-    };
-    if (e.status && [400, 404, 409, 422].includes(e.status))
-      return c.json(
-        {
-          error: {
-            code: e.code ?? "BAD_REQUEST",
-            message: e.message,
-            ...(e.issues ? { issues: e.issues } : {}),
-          },
-        },
-        e.status,
-      );
-    if (error instanceof SyntaxError)
-      return c.json(
-        {
-          error: {
-            code: "INVALID_JSON",
-            message: "Request body must be valid JSON",
-          },
-        },
-        400,
-      );
-    const dbCode = e.cause?.code ?? e.code;
-    if (dbCode === "23505")
-      return c.json(
-        {
-          error: {
-            code: "CONFLICT",
-            message: "A record with this unique value already exists",
-          },
-        },
-        409,
-      );
-    if (dbCode === "23503")
-      return c.json(
-        {
-          error: {
-            code: "INVALID_REFERENCE",
-            message: "A referenced record does not exist",
-          },
-        },
-        422,
-      );
-    console.error("API request failed", { name: error.name, code: dbCode });
-    return c.json(
-      { error: { code: "INTERNAL", message: "Unable to process the request" } },
-      500,
-    );
-  });
+  app.onError((error, c) => sendError(c, toAppError(error, c)));
   return app;
 }

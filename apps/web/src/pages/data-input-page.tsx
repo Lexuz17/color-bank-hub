@@ -18,7 +18,7 @@ import { useCatalog } from "@/hooks/use-catalog";
 import { apiError } from "@/services/api-error";
 import { shadesApi } from "@/services/shades-api";
 import { importsApi } from "@/services/imports-api";
-import type { ShadeInput } from "@/types/api";
+import type { ShadeInput } from "@color-bank-hub/contracts/shade";
 export function DataInputPage() {
   const [tab, setTab] = useState("manual");
   const [productId, setProductId] = useState("");

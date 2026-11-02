@@ -10,15 +10,15 @@ import {
   getTableColumns,
   type SQL,
 } from "drizzle-orm";
+import { db } from "#api/lib/db.js";
 import {
-  db,
   brands,
   products,
   productFormats,
   productFormatItems,
   shades,
 } from "@color-bank-hub/db";
-import type { ShadeInput, ShadeQuery } from "#api/models/catalog.js";
+import type { ShadeInput, ShadeQuery } from "@color-bank-hub/contracts/shade";
 import { fail } from "#api/core/errors.js";
 import { colorMetrics } from "#api/services/color-service.js";
 
@@ -104,7 +104,7 @@ export async function findShade(id: string) {
       eq(productFormatItems.id, products.formatItemId),
     )
     .where(eq(shades.id, id));
-  if (!row) fail(404, "SHADE_NOT_FOUND", "Shade not found");
+  if (!row) fail("NOT_FOUND", "Shade not found", "SHADE_NOT_FOUND");
   const { composition, ...publicShade } = row.shade;
   return {
     ...publicShade,
@@ -223,12 +223,12 @@ async function insertShade(tx: Executor, input: ShadeInput) {
     .from(products)
     .innerJoin(brands, eq(brands.id, products.brandId))
     .where(eq(products.id, input.productId));
-  if (!product) fail(422, "INVALID_PRODUCT", "Product not found");
+  if (!product) fail("BUSINESS_RULE", "Product not found", "INVALID_PRODUCT");
   if (input.composition && !product.isOwn)
     fail(
-      422,
-      "EXTERNAL_COMPOSITION",
+      "BUSINESS_RULE",
       "Composition is only allowed for own brands",
+      "EXTERNAL_COMPOSITION",
     );
   const [row] = await tx
     .insert(shades)
@@ -253,7 +253,7 @@ export async function updateShade(
       .from(shades)
       .where(eq(shades.id, id))
       .for("update");
-    if (!existing) fail(404, "SHADE_NOT_FOUND", "Shade not found");
+    if (!existing) fail("NOT_FOUND", "Shade not found", "SHADE_NOT_FOUND");
     const [product] = await tx
       .select({ isOwn: brands.isOwn })
       .from(products)
@@ -261,9 +261,9 @@ export async function updateShade(
       .where(eq(products.id, existing.productId));
     if (input.composition && !product.isOwn)
       fail(
-        422,
-        "EXTERNAL_COMPOSITION",
+        "BUSINESS_RULE",
         "Composition is only allowed for own brands",
+        "EXTERNAL_COMPOSITION",
       );
     const [row] = await tx
       .update(shades)

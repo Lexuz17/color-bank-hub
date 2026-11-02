@@ -1,13 +1,15 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { colorMetrics } from "../src/services/color-service.js";
+import { composition } from "@color-bank-hub/contracts/common";
+import { can } from "@color-bank-hub/contracts/rbac";
+import { transitionInput } from "@color-bank-hub/contracts/prototype";
+import { reportInput } from "@color-bank-hub/contracts/report";
 import {
   shadeInput,
   shadePatch,
   shadeQuery,
-  composition,
-} from "../src/models/catalog.js";
-import { transitionInput, reportInput } from "../src/models/workflows.js";
+} from "@color-bank-hub/contracts/shade";
 const shade = {
   productId: "818565f8-bc7f-4c65-bd17-331c2e1d3986",
   sku: "TEST-001",
@@ -75,4 +77,14 @@ test("sRGB color conversions match primary colors and D65 neutral references", (
   assert.equal(black.hslS, 0);
   assert.equal(colorMetrics("#00ff00").hslH, 120);
   assert.equal(colorMetrics("#0000ff").hslH, 240);
+});
+test("permission matrix grants each capability only to its roles", () => {
+  assert.equal(can("website_admin", "user:manage"), true);
+  assert.equal(can("rnd", "user:manage"), false);
+  assert.equal(can("rnd", "catalog:write"), true);
+  assert.equal(can("tsi", "catalog:write"), false);
+  assert.equal(can("tsi", "shade:viewComposition"), true);
+  assert.equal(can("pid", "shade:viewComposition"), false);
+  assert.equal(can("pid", "prototype:create"), true);
+  assert.equal(can(null, "report:create"), false);
 });

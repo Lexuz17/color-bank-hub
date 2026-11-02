@@ -5,7 +5,14 @@ import {
   type ReactNode,
   type ComponentProps,
 } from "react";
-import { Search, X, Upload, Map, Check, LoaderCircle } from "lucide-react";
+import {
+  Search,
+  X,
+  Upload,
+  Map as MapIcon,
+  Check,
+  LoaderCircle,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -126,7 +133,7 @@ export function EmptyState({
 }) {
   return (
     <div className="flex min-h-40 flex-col items-center justify-center gap-2 p-6 text-center">
-      <Map className="mb-1 size-7 text-muted-foreground/50" />
+      <MapIcon className="mb-1 size-7 text-muted-foreground/50" />
       <p className="text-xs font-medium">{title}</p>
       <p className="max-w-64 text-[11px] text-muted-foreground">
         {description}

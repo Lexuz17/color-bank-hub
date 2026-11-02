@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import type { PrototypeRequest, RequestStatus } from "@/types/api";
+import type {
+  PrototypeRequest,
+  PrototypeStatus,
+} from "@color-bank-hub/contracts/prototype";
 import { prototypesApi } from "@/services/prototypes-api";
 import { apiError } from "@/services/api-error";
 import {
@@ -20,6 +23,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { useCan } from "@/features/auth/hooks/use-can";
 const stages = ["pending", "approved", "formulating", "completed"] as const;
 export function PrototypeDetail({
   request,
@@ -29,8 +33,9 @@ export function PrototypeDetail({
   formatName: string;
 }) {
   const client = useQueryClient();
+  const canProcess = useCan("prototype:process");
   const [confirm, setConfirm] = useState<Exclude<
-    RequestStatus,
+    PrototypeStatus,
     "pending"
   > | null>(null);
   const [declineReason, setDeclineReason] = useState("");
@@ -52,7 +57,7 @@ export function PrototypeDetail({
       status,
       reason,
     }: {
-      status: Exclude<RequestStatus, "pending">;
+      status: Exclude<PrototypeStatus, "pending">;
       reason?: string;
     }) => prototypesApi.transitionRequest(request.id, status, reason),
     onSuccess: async () => {
@@ -100,7 +105,7 @@ export function PrototypeDetail({
         {request.priority} priority ·{" "}
         {new Date(request.createdAt).toLocaleDateString()}
       </p>
-      {request.status === "pending" && (
+      {canProcess && request.status === "pending" && (
         <div className="flex flex-wrap gap-2">
           <Button
             size="sm"
@@ -123,7 +128,7 @@ export function PrototypeDetail({
           </Button>
         </div>
       )}
-      {request.status === "approved" && (
+      {canProcess && request.status === "approved" && (
         <Button
           disabled={transition.isPending}
           onClick={() => transition.mutate({ status: "formulating" })}
@@ -131,7 +136,7 @@ export function PrototypeDetail({
           Start formulation
         </Button>
       )}
-      {request.status === "formulating" && (
+      {canProcess && request.status === "formulating" && (
         <form
           className="space-y-4 border-t pt-4"
           onSubmit={(event) => {

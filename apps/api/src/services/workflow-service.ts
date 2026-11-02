@@ -1,33 +1,36 @@
-import { parse } from "#api/core/errors.js";
-import { uuid } from "#api/models/catalog.js";
-import {
-  reportInput,
-  reportQuery,
-  reportPatch,
-  requestInput,
-  requestQuery,
-  transitionInput,
-  formulationInput,
-} from "#api/models/workflows.js";
+import type {
+  FormulationInput,
+  PrototypeInput,
+  PrototypeQuery,
+  TransitionInput,
+} from "@color-bank-hub/contracts/prototype";
+import type {
+  ReportInput,
+  ReportQuery,
+  ReportStatus,
+} from "@color-bank-hub/contracts/report";
 import * as repository from "#api/repositories/workflow-repository.js";
-export const listReports = (query: unknown) =>
-  repository.listReports(parse(reportQuery, query));
-export const findReport = (id: unknown) =>
-  repository.findReport(parse(uuid, id));
-export const createReport = (input: unknown) =>
-  repository.createReport(parse(reportInput, input));
-export const updateReport = (id: unknown, input: unknown) =>
-  repository.updateReportStatus(
-    parse(uuid, id),
-    parse(reportPatch, input).status,
-  );
-export const listRequests = (query: unknown) =>
-  repository.listRequests(parse(requestQuery, query));
-export const findRequest = (id: unknown) =>
-  repository.findRequest(parse(uuid, id));
-export const createRequest = (input: unknown) =>
-  repository.createRequest(parse(requestInput, input));
-export const transition = (id: unknown, input: unknown) =>
-  repository.transitionRequest(parse(uuid, id), parse(transitionInput, input));
-export const formulation = (id: unknown, input: unknown) =>
-  repository.updateFormulation(parse(uuid, id), parse(formulationInput, input));
+
+export const listReports = (query: ReportQuery) =>
+  repository.listReports(query);
+export const findReport = (id: string) => repository.findReport(id);
+export const createReport = (input: ReportInput, actorId: string) =>
+  repository.createReport(input, actorId);
+export const updateReport = (
+  id: string,
+  status: ReportStatus,
+  actorId: string,
+) => repository.updateReportStatus(id, status, actorId);
+
+export const listRequests = (query: PrototypeQuery) =>
+  repository.listRequests(query);
+export const findRequest = (id: string) => repository.findRequest(id);
+export const createRequest = (input: PrototypeInput, actorId: string) =>
+  repository.createRequest(input, actorId);
+export const transition = (
+  id: string,
+  input: TransitionInput,
+  actorId: string,
+) => repository.transitionRequest(id, input, actorId);
+export const updateFormulation = (id: string, input: FormulationInput) =>
+  repository.updateFormulation(id, input);

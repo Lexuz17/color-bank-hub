@@ -1,15 +1,19 @@
 import { Hono } from "hono";
 import * as catalog from "#api/controllers/catalog-controller.js";
-export const catalogRoutes = new Hono();
-catalogRoutes.get("/brands", catalog.listBrands);
-catalogRoutes.post("/brands", catalog.createBrand);
-catalogRoutes.get("/product-formats", catalog.listFormats);
-catalogRoutes.post("/product-formats", catalog.createFormat);
-catalogRoutes.get("/products", catalog.listProducts);
-catalogRoutes.post("/products", catalog.createProduct);
-catalogRoutes.get("/shades", catalog.listShades);
-catalogRoutes.post("/shades", catalog.createShade);
-catalogRoutes.get("/shades/:id", catalog.findShade);
-catalogRoutes.patch("/shades/:id", catalog.updateShade);
-catalogRoutes.post("/imports/preview", catalog.preview);
-catalogRoutes.post("/imports/commit", catalog.commit);
+import { type AppEnv, requirePermission } from "#api/middleware/auth.js";
+
+const canWrite = requirePermission("catalog:write");
+
+export const catalogRoutes = new Hono<AppEnv>()
+  .get("/brands", catalog.listBrands)
+  .post("/brands", canWrite, catalog.createBrand)
+  .get("/product-formats", catalog.listFormats)
+  .post("/product-formats", canWrite, catalog.createFormat)
+  .get("/products", catalog.listProducts)
+  .post("/products", canWrite, catalog.createProduct)
+  .get("/shades", catalog.listShades)
+  .post("/shades", canWrite, catalog.createShade)
+  .get("/shades/:id", catalog.findShade)
+  .patch("/shades/:id", canWrite, catalog.updateShade)
+  .post("/imports/preview", canWrite, catalog.preview)
+  .post("/imports/commit", canWrite, catalog.commit);

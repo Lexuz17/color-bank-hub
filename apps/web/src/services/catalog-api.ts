@@ -1,5 +1,12 @@
+import type {
+  Brand,
+  BrandInput,
+  FormatInput,
+  Product,
+  ProductFormat,
+  ProductInput,
+} from "@color-bank-hub/contracts/catalog";
 import { get, post } from "@/services/http";
-import type { Brand, Product, ProductFormat } from "@/types/api";
 
 export const catalogApi = {
   brands: (signal?: AbortSignal) => get<Brand[]>("/brands", undefined, signal),
@@ -7,16 +14,8 @@ export const catalogApi = {
     get<Product[]>("/products", undefined, signal),
   formats: (signal?: AbortSignal) =>
     get<ProductFormat[]>("/product-formats", undefined, signal),
-  createBrand: (body: { name: string; isOwn: boolean }) =>
-    post<Brand>("/brands", body),
-  createFormat: (body: {
-    name: string;
-    items: { name: string; code: string }[];
-  }) => post<ProductFormat>("/product-formats", body),
-  createProduct: (body: {
-    brandId: string;
-    formatItemId: number;
-    name: string;
-    ingredientsInci: string;
-  }) => post<Product>("/products", body),
+  createBrand: (body: BrandInput) => post<Brand>("/brands", body),
+  createFormat: (body: FormatInput) =>
+    post<ProductFormat>("/product-formats", body),
+  createProduct: (body: ProductInput) => post<Product>("/products", body),
 };

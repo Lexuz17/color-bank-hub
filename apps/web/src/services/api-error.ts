@@ -1,13 +1,13 @@
+import type { ApiErrorBody } from "@color-bank-hub/contracts/common";
 import { isAxiosError } from "axios";
 
 export function apiError(error: unknown): string {
-  if (isAxiosError(error)) {
+  if (isAxiosError<ApiErrorBody>(error)) {
     const details = error.response?.data?.error;
     if (details?.issues?.length)
       return details.issues
         .map(
-          (issue: { path: string; message: string }) =>
-            `${issue.path ? `${issue.path}: ` : ""}${issue.message}`,
+          (issue) => `${issue.path ? `${issue.path}: ` : ""}${issue.message}`,
         )
         .join("; ");
     if (details?.message) return details.message;

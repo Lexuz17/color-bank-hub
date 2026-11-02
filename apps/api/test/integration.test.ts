@@ -6,8 +6,9 @@ const testUrl = process.env.TEST_DATABASE_URL;
 if (testUrl) {
   process.env.DATABASE_URL = testUrl;
   after(async () => {
-    const { closeDatabase } = await import("@color-bank-hub/db");
-    await closeDatabase();
+    const { closeDb } = await import("@color-bank-hub/db");
+    const { db } = await import("../src/lib/db.js");
+    await closeDb(db);
   });
 }
 
@@ -15,8 +16,8 @@ test("PostgreSQL API integration: catalog, imports, reports and prototype lifecy
   skip: !testUrl,
 }, async () => {
   const { createApp } = await import("../src/app.js");
+  const { db } = await import("../src/lib/db.js");
   const {
-    db,
     brands,
     products,
     productFormats,
@@ -38,11 +39,25 @@ test("PostgreSQL API integration: catalog, imports, reports and prototype lifecy
   };
   let formatId: number | undefined;
   let itemId: number | undefined;
-  const actorBefore = await db
-    .select({ id: users.id })
-    .from(users)
-    .where(eq(users.email, "development-api@color-bank.invalid"));
-  const app = createApp();
+  const [actor] = await db
+    .insert(users)
+    .values({
+      name: `${prefix} actor`,
+      email: `${prefix.toLowerCase()}@test.invalid`,
+      role: "website_admin",
+      status: "active",
+      emailVerified: true,
+    })
+    .returning();
+  if (!actor) throw new Error("Failed to create test actor");
+  const app = createApp({
+    resolveUser: async () => ({
+      id: actor.id,
+      email: actor.email,
+      name: actor.name,
+      role: "website_admin",
+    }),
+  });
   async function call(
     path: string,
     method = "GET",
@@ -363,22 +378,7 @@ test("PostgreSQL API integration: catalog, imports, reports and prototype lifecy
       if (formatId)
         await tx.delete(productFormats).where(eq(productFormats.id, formatId));
     });
-    if (!actorBefore.length) {
-      const [actor] = await db
-        .select({ id: users.id })
-        .from(users)
-        .where(eq(users.email, "development-api@color-bank.invalid"));
-      if (actor) {
-        const refs = await Promise.all([
-          db.select().from(reports).where(eq(reports.reporterId, actor.id)),
-          db
-            .select()
-            .from(prototypeRequests)
-            .where(eq(prototypeRequests.requesterId, actor.id)),
-        ]);
-        if (refs.every((rows) => !rows.length))
-          await db.delete(users).where(eq(users.id, actor.id));
-      }
-    }
+    await db.delete(auditLogs).where(eq(auditLogs.actorId, actor.id));
+    await db.delete(users).where(eq(users.id, actor.id));
   }
 });

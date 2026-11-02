@@ -1,25 +1,25 @@
 import { and, asc, desc, eq, count, sql } from "drizzle-orm";
+import { db } from "#api/lib/db.js";
 import {
-  db,
   reports,
   prototypeRequests,
   productFormatItems,
   auditLogs,
   shades,
 } from "@color-bank-hub/db";
-import type { z } from "zod";
 import type {
-  reportInput,
-  reportQuery,
-  requestInput,
-  requestQuery,
-  transitionInput,
-  formulationInput,
-} from "#api/models/workflows.js";
+  FormulationInput,
+  PrototypeInput,
+  PrototypeQuery,
+  TransitionInput,
+} from "@color-bank-hub/contracts/prototype";
+import type {
+  ReportInput,
+  ReportQuery,
+} from "@color-bank-hub/contracts/report";
 import { fail } from "#api/core/errors.js";
-import { developmentActorId } from "#api/repositories/development-actor-repository.js";
 
-export async function listReports(query: z.infer<typeof reportQuery>) {
+export async function listReports(query: ReportQuery) {
   const where = query.status ? eq(reports.status, query.status) : undefined;
   const [items, total] = await Promise.all([
     db
@@ -42,19 +42,22 @@ export async function listReports(query: z.infer<typeof reportQuery>) {
 }
 export async function findReport(id: string) {
   const [row] = await db.select().from(reports).where(eq(reports.id, id));
-  if (!row) fail(404, "REPORT_NOT_FOUND", "Report not found");
+  if (!row) fail("NOT_FOUND", "Report not found", "REPORT_NOT_FOUND");
   return row;
 }
-export async function createReport(input: z.infer<typeof reportInput>) {
+export async function createReport(input: ReportInput, reporterId: string) {
   if (input.shadeId && input.brandId) {
     const shade = await db.query.shades.findFirst({
       where: eq(shades.id, input.shadeId),
       with: { product: true },
     });
     if (!shade || shade.product.brandId !== input.brandId)
-      fail(422, "BRAND_SHADE_MISMATCH", "Shade does not belong to this brand");
+      fail(
+        "BUSINESS_RULE",
+        "Shade does not belong to this brand",
+        "BRAND_SHADE_MISMATCH",
+      );
   }
-  const reporterId = await developmentActorId();
   const [row] = await db
     .insert(reports)
     .values({ ...input, reporterId })
@@ -64,15 +67,15 @@ export async function createReport(input: z.infer<typeof reportInput>) {
 export async function updateReportStatus(
   id: string,
   status: "pending" | "resolved",
+  actorId: string,
 ) {
-  const actorId = await developmentActorId();
   return db.transaction(async (tx) => {
     const [current] = await tx
       .select()
       .from(reports)
       .where(eq(reports.id, id))
       .for("update");
-    if (!current) fail(404, "REPORT_NOT_FOUND", "Report not found");
+    if (!current) fail("NOT_FOUND", "Report not found", "REPORT_NOT_FOUND");
     const [row] = await tx
       .update(reports)
       .set({
@@ -93,7 +96,7 @@ export async function updateReportStatus(
     return row;
   });
 }
-export async function listRequests(query: z.infer<typeof requestQuery>) {
+export async function listRequests(query: PrototypeQuery) {
   const where = and(
     query.status ? eq(prototypeRequests.status, query.status) : undefined,
     query.formatItemId
@@ -124,11 +127,14 @@ export async function findRequest(id: string) {
     .select()
     .from(prototypeRequests)
     .where(eq(prototypeRequests.id, id));
-  if (!row) fail(404, "REQUEST_NOT_FOUND", "Prototype request not found");
+  if (!row)
+    fail("NOT_FOUND", "Prototype request not found", "REQUEST_NOT_FOUND");
   return row;
 }
-export async function createRequest(input: z.infer<typeof requestInput>) {
-  const requesterId = await developmentActorId();
+export async function createRequest(
+  input: PrototypeInput,
+  requesterId: string,
+) {
   const [row] = await db
     .insert(prototypeRequests)
     .values({ ...input, requesterId })
@@ -137,16 +143,17 @@ export async function createRequest(input: z.infer<typeof requestInput>) {
 }
 export async function transitionRequest(
   id: string,
-  input: z.infer<typeof transitionInput>,
+  input: TransitionInput,
+  actorId: string,
 ) {
-  const actorId = await developmentActorId();
   return db.transaction(async (tx) => {
     const [current] = await tx
       .select()
       .from(prototypeRequests)
       .where(eq(prototypeRequests.id, id))
       .for("update");
-    if (!current) fail(404, "REQUEST_NOT_FOUND", "Prototype request not found");
+    if (!current)
+      fail("NOT_FOUND", "Prototype request not found", "REQUEST_NOT_FOUND");
     const allowed: Record<string, string[]> = {
       pending: ["approved", "declined"],
       approved: ["formulating"],
@@ -156,17 +163,17 @@ export async function transitionRequest(
     };
     if (!allowed[current.status].includes(input.status))
       fail(
-        409,
-        "INVALID_TRANSITION",
+        "CONFLICT",
         `Cannot move from ${current.status} to ${input.status}`,
+        "INVALID_TRANSITION",
       );
     if (input.status === "completed" && !current.resultPhotoUrl)
       fail(
-        422,
-        "RESULT_REQUIRED",
+        "BUSINESS_RULE",
         "Upload a result photo URL before marking the result uploaded",
+        "RESULT_REQUIRED",
       );
-    let naming: {} | { sequenceNo: number; autoName: string } = {};
+    let naming: { sequenceNo?: number; autoName?: string } = {};
     if (input.status === "approved") {
       await tx.execute(
         sql`select pg_advisory_xact_lock(1847, ${current.formatItemId})`,
@@ -209,22 +216,20 @@ export async function transitionRequest(
     return row;
   });
 }
-export async function updateFormulation(
-  id: string,
-  input: z.infer<typeof formulationInput>,
-) {
+export async function updateFormulation(id: string, input: FormulationInput) {
   return db.transaction(async (tx) => {
     const [current] = await tx
       .select()
       .from(prototypeRequests)
       .where(eq(prototypeRequests.id, id))
       .for("update");
-    if (!current) fail(404, "REQUEST_NOT_FOUND", "Prototype request not found");
+    if (!current)
+      fail("NOT_FOUND", "Prototype request not found", "REQUEST_NOT_FOUND");
     if (current.status !== "formulating")
       fail(
-        409,
-        "NOT_FORMULATING",
+        "CONFLICT",
         "Formulation can only be edited while formulating",
+        "NOT_FORMULATING",
       );
     const [row] = await tx
       .update(prototypeRequests)

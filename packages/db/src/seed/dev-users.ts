@@ -1,6 +1,6 @@
 import { hashPassword } from "better-auth/crypto";
 import { and, eq } from "drizzle-orm";
-import { db } from "../index.js";
+import type { Database } from "../index.js";
 import { accounts, users } from "../schema/index.js";
 
 export const DEV_PASSWORD = "devpassword123"; // Keep in sync with the development login form.
@@ -12,7 +12,7 @@ const devUsers = [
   { name: "Dev TSI", email: "tsi@dev.local", role: "tsi" },
 ] as const;
 
-export async function seedDevUsers() {
+export async function seedDevUsers(db: Database) {
   const password = await hashPassword(DEV_PASSWORD);
 
   for (const { name, email, role } of devUsers) {

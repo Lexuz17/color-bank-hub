@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { sectionPaths } from "@/lib/navigation";
+import { can, type Role, roleLabels } from "@color-bank-hub/contracts/rbac";
+import { sectionPaths, sectionPermissions } from "@/lib/navigation";
 import { Menu, Home, ChevronDown, Palette } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -23,7 +24,6 @@ export type AppSection =
   | "Report"
   | "Data Input"
   | "User Management";
-export type Role = "PID" | "R&D" | "TSI" | "Website Admin";
 const sections: AppSection[] = [
   "Home",
   "Color Database",
@@ -60,14 +60,16 @@ export function AppHeader({
 }: {
   activeSection: AppSection | null;
   onNavigate: (section: AppSection) => void;
-  role: Role;
+  role: Role | null;
   userName: string;
   onOpenSidebar?: () => void;
   onProfile: () => void;
 }) {
-  const items = sections.filter(
-    (item) => item !== "User Management" || role === "Website Admin",
-  );
+  const items = sections.filter((item) => {
+    const permission = sectionPermissions[item];
+    return !permission || can(role, permission);
+  });
+  const roleLabel = role ? roleLabels[role] : "No role";
   const initials = userName
     .split(" ")
     .map((name) => name[0])
@@ -120,7 +122,7 @@ export function AppHeader({
       </div>
       <div className="flex shrink-0 items-center gap-3">
         <Badge variant="secondary" className="hidden xl:inline-flex">
-          {role === "Website Admin" ? "admin" : role}
+          {roleLabel}
         </Badge>
         <DropdownMenu>
           <DropdownMenuTrigger
@@ -142,7 +144,7 @@ export function AppHeader({
                 {userName}
               </DropdownMenuLabel>
               <p className="px-2 pb-2 text-[11px] text-muted-foreground">
-                {role} · Local preview
+                {roleLabel}
               </p>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />

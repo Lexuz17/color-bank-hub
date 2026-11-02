@@ -1,8 +1,5 @@
+import type { ApiResponse } from "@color-bank-hub/contracts/common";
 import { httpClient } from "@/lib/http-client";
-
-interface ApiResponse<T> {
-  data: T;
-}
 
 export async function get<T>(
   path: string,

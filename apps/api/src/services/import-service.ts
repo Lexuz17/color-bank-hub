@@ -1,4 +1,4 @@
-import { shadeInput, type ShadeInput } from "#api/models/catalog.js";
+import { shadeInput, type ShadeInput } from "@color-bank-hub/contracts/shade";
 import {
   createShades,
   validateShadeRows,
@@ -6,9 +6,9 @@ import {
 import { fail } from "#api/core/errors.js";
 export async function previewImport(rows: unknown[]) {
   const parsed = rows.map((row) => shadeInput.safeParse(row));
-  const validRows = parsed
-    .filter((result) => result.success)
-    .map((result) => result.data!);
+  const validRows = parsed.flatMap((result) =>
+    result.success ? [result.data] : [],
+  );
   const databaseErrors = await validateShadeRows(validRows);
   let validIndex = 0;
   const seen = new Set<string>();
@@ -45,9 +45,9 @@ export async function commitImport(rows: unknown[]) {
   const preview = await previewImport(rows);
   if (!preview.valid)
     fail(
-      422,
-      "IMPORT_INVALID",
+      "BUSINESS_RULE",
       "Import contains invalid rows. Preview and correct all rows before committing.",
+      "IMPORT_INVALID",
     );
   const items = await createShades(
     preview.rows.map((row) => row.data as ShadeInput),

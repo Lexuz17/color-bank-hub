@@ -43,7 +43,7 @@ pnpm db:seed                # load development data
 pnpm dev                    # start web and API
 ```
 
-The web app runs at the configured `WEB_HOST` and `WEB_PORT` (defaults to `127.0.0.1:5173`). The API listens on `APP_PORT` (default `3000`). API documentation is served at `/docs`.
+The web app runs at the configured `WEB_HOST` and `WEB_PORT` (defaults to `localhost:5173`). The API listens on `PORT` (default `3000`). API endpoints are documented in [apps/api/README.md](apps/api/README.md).
 
 ## Environment Variables
 
@@ -55,7 +55,8 @@ Copy the root `.env.example` to `.env`. Both apps read their configuration from 
 | `BETTER_AUTH_SECRET` / `BETTER_AUTH_URL` | Better Auth session secret and public API URL |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Google OAuth credentials (optional in development; required otherwise) |
 | `ALLOWED_EMAIL_DOMAIN` | Email domain allowed to sign in |
-| `WEB_ORIGIN` | Allowed web app origin for CORS |
+| `WEB_ORIGIN` | Allowed web app origin for CORS and Better Auth (same host as `WEB_HOST`) |
+| `HOST` / `PORT` | API bind address and port |
 | `API_URL` | API target used by the Vite `/api` proxy |
 | `WEB_HOST` / `WEB_PORT` | Vite bind address and port |
 | `VITE_API_BASE_URL` | Browser API base path, normally `/api` |
@@ -66,10 +67,10 @@ Copy the root `.env.example` to `.env`. Both apps read their configuration from 
 | Command | Description |
 | --- | --- |
 | `pnpm dev` | Run web and API in watch mode |
-| `pnpm build` | Build workspace packages and apps |
+| `pnpm build` | Build the apps (packages are consumed as source) |
 | `pnpm test` | Run workspace tests |
-| `pnpm lint` | Run Oxlint for the web workspace |
-| `pnpm format` | Format repository files with Biome |
+| `pnpm lint` | Run Oxlint (web) through Turbo |
+| `pnpm check` / `pnpm check:fix` | Check or fix formatting and lint with Biome |
 | `pnpm typecheck` | Type-check configured workspaces |
 | `pnpm db:generate` | Generate Drizzle migrations |
 | `pnpm db:migrate` | Apply database migrations |
@@ -88,16 +89,15 @@ apps/
     src/lib/           HTTP client, utilities, and demo data
     src/pages/         Page components
     src/routes/        TanStack Router route tree
-  api/                 Hono API (layered architecture)
-    src/controllers/   HTTP request/response handlers
-    src/services/      Business logic and domain operations
+  api/                 Hono API
+    src/routes/        Paths + permission guards, mapped to controllers
+    src/controllers/   HTTP layer: read request, validate with contracts, send response
+    src/services/      Business rules on typed input (field-level RBAC, import)
     src/repositories/  Database access and queries
-    src/routes/        Hono route definitions
-    src/models/        API model types
+    src/middleware/    Auth and RBAC middleware
 packages/
-  contracts/           Shared API contracts and Zod schemas
+  contracts/           Shared Zod schemas, API types and RBAC, one file per module
   db/                  Drizzle schema, migrations, and seed
-  shared/              Shared TypeScript package
 ```
 
 See [apps/api/README.md](apps/api/README.md) for API endpoints and workflow details, and [apps/web/README.md](apps/web/README.md) for web-specific commands and structure.

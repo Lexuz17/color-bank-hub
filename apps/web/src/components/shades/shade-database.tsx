@@ -10,7 +10,12 @@ import { toast } from "sonner";
 import { apiError } from "@/services/api-error";
 import { catalogApi } from "@/services/catalog-api";
 import { shadesApi } from "@/services/shades-api";
-import type { Shade, ShadePatch, Season } from "@/types/api";
+import type { Season } from "@color-bank-hub/contracts/common";
+import type {
+  Shade,
+  ShadePatch,
+  ShadeSort,
+} from "@color-bank-hub/contracts/shade";
 import {
   SearchInput,
   ShadeSwatch,
@@ -60,7 +65,7 @@ export function ShadeDatabase({
   const [brandId, setBrandId] = useState("");
   const [season, setSeason] = useState("");
   const [page, setPage] = useState(1);
-  const [sort, setSort] = useState("name");
+  const [sort, setSort] = useState<ShadeSort>("name");
   const [direction, setDirection] = useState<"asc" | "desc">("asc");
   const [editing, setEditing] = useState<Shade | null>(null);
   const client = useQueryClient();
@@ -96,7 +101,7 @@ export function ShadeDatabase({
     },
     onError: (error) => toast.error(apiError(error)),
   });
-  function sortBy(column: string) {
+  function sortBy(column: ShadeSort) {
     setSort(column);
     setDirection(sort === column && direction === "asc" ? "desc" : "asc");
     setPage(1);

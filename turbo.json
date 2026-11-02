@@ -1,51 +1,29 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "envMode": "loose",
+  "globalDependencies": [".env"],
   "tasks": {
     "dev": {
       "cache": false,
-      "persistent": true,
-      "dependsOn": ["^build"],
-      "passThroughEnv": [
-        "NODE_ENV",
-        "PORT",
-        "APP_PORT",
-        "HOST",
-        "BETTER_AUTH_URL",
-        "BETTER_AUTH_SECRET",
-        "WEB_ORIGIN",
-        "ALLOWED_EMAIL_DOMAIN",
-        "GOOGLE_CLIENT_ID",
-        "GOOGLE_CLIENT_SECRET",
-        "DATABASE_URL"
-      ]
-    },
-    "db:migrate": {
-      "cache": false,
-      "passThroughEnv": ["DATABASE_URL"]
-    },
-    "db:generate": {
-      "cache": false
-    },
-    "db:seed": {
-      "cache": false,
-      "passThroughEnv": ["NODE_ENV", "DATABASE_URL"]
+      "persistent": true
     },
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
-    "lint": {
-      "dependsOn": ["^lint"]
-    },
-    "typecheck": {
-      "dependsOn": ["^build", "^typecheck"]
-    },
+    "typecheck": {},
+    "lint": {},
     "test": {
-      "dependsOn": ["^build"],
-      "outputs": ["coverage/**"],
-      "env": ["TEST_DATABASE_URL"],
+      "cache": false
+    },
+    "db:generate": {
+      "cache": false
+    },
+    "db:migrate": {
+      "cache": false
+    },
+    "db:seed": {
       "cache": false
     }
-  },
-  "globalDependencies": [".env", ".env.example"]
+  }
 }

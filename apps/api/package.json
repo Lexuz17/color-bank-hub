@@ -3,34 +3,29 @@
   "private": true,
   "type": "module",
   "imports": {
-    "#api/*": {
-      "development": "./src/*",
-      "default": "./dist/*"
-    }
+    "#api/*": "./src/*"
   },
   "scripts": {
-    "dev": "NODE_ENV=development tsx watch --conditions=development src/index.ts",
+    "dev": "NODE_ENV=development tsx watch --env-file-if-exists=../../.env src/index.ts",
     "build": "tsup",
-    "typecheck": "tsc --noEmit",
-    "format": "biome format --write src",
-    "format:check": "biome format src",
-    "start": "node dist/index.js",
-    "test": "node --conditions=development --import tsx --test test/*.test.ts"
+    "typecheck": "tsc",
+    "start": "node --env-file-if-exists=../../.env dist/index.js",
+    "test": "node --env-file-if-exists=../../.env --import tsx --test test/*.test.ts"
   },
   "dependencies": {
     "@better-auth/drizzle-adapter": "^1.7.12",
     "@color-bank-hub/contracts": "workspace:*",
     "@color-bank-hub/db": "workspace:*",
     "@hono/node-server": "^2.1.3",
-    "better-auth": "^1.7.12",
-    "drizzle-orm": "0.45.4",
+    "better-auth": "catalog:",
+    "drizzle-orm": "catalog:",
     "hono": "^4.13.13",
-    "zod": "^4.6.7"
+    "zod": "catalog:"
   },
   "devDependencies": {
-    "@types/node": "^26.1.1",
+    "@types/node": "catalog:",
     "tsup": "^9.0.0",
-    "tsx": "^4.23.0",
-    "typescript": "^7.0.2"
+    "tsx": "catalog:",
+    "typescript": "catalog:"
   }
 }

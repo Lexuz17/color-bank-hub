@@ -1,55 +1,45 @@
-import fs from "node:fs";
-import path from "node:path";
-import { parseEnv } from "node:util";
+import { z } from "zod";
 
-// Load the monorepo env file for Turbo and direct package commands. Existing
-// process variables take precedence, and Vite-only values stay out of process.env.
-const rootEnv = path.resolve(import.meta.dirname, "../../../.env");
-if (fs.existsSync(rootEnv)) {
-  const fileEnv = parseEnv(fs.readFileSync(rootEnv, "utf8"));
-  for (const [name, value] of Object.entries(fileEnv)) {
-    if (name.startsWith("VITE_")) continue;
-    if (process.env[name] === undefined) process.env[name] = value;
-  }
-}
-
-function required(name: string): string {
-  const value = process.env[name];
-  if (!value) {
-    throw new Error(`Environment variable ${name} is required`);
-  }
-  return value;
-}
-
-function optional(name: string): string | undefined {
-  return process.env[name] || undefined;
-}
-
+// Local scripts load the root .env with --env-file-if-exists; containers pass real env vars.
 const isDevelopment = process.env.NODE_ENV === "development";
 
-const port = Number(process.env.PORT || process.env.APP_PORT || 3000);
-if (!Number.isInteger(port) || port < 1 || port > 65535) {
-  throw new Error("PORT / APP_PORT must be an integer between 1 and 65535");
-}
+// Google OAuth is optional in development and required everywhere else.
+const googleCredential = isDevelopment
+  ? z.string().optional()
+  : z.string().min(1);
 
-const googleClientId = optional("GOOGLE_CLIENT_ID");
-const googleClientSecret = optional("GOOGLE_CLIENT_SECRET");
-if (isDevelopment && Boolean(googleClientId) !== Boolean(googleClientSecret)) {
-  throw new Error(
-    "GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET must be configured together",
-  );
+const schema = z
+  .object({
+    PORT: z.coerce.number().int().min(1).max(65535).default(3000),
+    HOST: z.string().min(1).default("0.0.0.0"),
+    DATABASE_URL: z.string().min(1),
+    BETTER_AUTH_URL: z.url(),
+    BETTER_AUTH_SECRET: z.string().min(1),
+    WEB_ORIGIN: z.url(),
+    ALLOWED_EMAIL_DOMAIN: z.string().min(1),
+    GOOGLE_CLIENT_ID: googleCredential,
+    GOOGLE_CLIENT_SECRET: googleCredential,
+  })
+  .refine((value) => !value.GOOGLE_CLIENT_ID === !value.GOOGLE_CLIENT_SECRET, {
+    message:
+      "GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET must be configured together",
+  });
+
+const result = schema.safeParse(process.env);
+if (!result.success) {
+  throw new Error(`Invalid environment:\n${z.prettifyError(result.error)}`);
 }
+const value = result.data;
 
 export const env = {
-  port,
-  host: process.env.HOST || "0.0.0.0",
   isDevelopment,
-  betterAuthUrl: required("BETTER_AUTH_URL"),
-  betterAuthSecret: required("BETTER_AUTH_SECRET"),
-  webOrigin: required("WEB_ORIGIN"),
-  allowedEmailDomain: required("ALLOWED_EMAIL_DOMAIN"),
-  googleClientId: isDevelopment ? googleClientId : required("GOOGLE_CLIENT_ID"),
-  googleClientSecret: isDevelopment
-    ? googleClientSecret
-    : required("GOOGLE_CLIENT_SECRET"),
+  port: value.PORT,
+  host: value.HOST,
+  databaseUrl: value.DATABASE_URL,
+  betterAuthUrl: value.BETTER_AUTH_URL,
+  betterAuthSecret: value.BETTER_AUTH_SECRET,
+  webOrigin: value.WEB_ORIGIN,
+  allowedEmailDomain: value.ALLOWED_EMAIL_DOMAIN,
+  googleClientId: value.GOOGLE_CLIENT_ID || undefined,
+  googleClientSecret: value.GOOGLE_CLIENT_SECRET || undefined,
 };

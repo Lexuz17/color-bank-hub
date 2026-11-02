@@ -1,12 +1,12 @@
-import { get, patch, post } from "@/services/http";
+import type { Page } from "@color-bank-hub/contracts/common";
 import type {
-  Page,
   Shade,
   ShadeInput,
   ShadeParams,
   ShadePatch,
   StoredShade,
-} from "@/types/api";
+} from "@color-bank-hub/contracts/shade";
+import { get, patch, post } from "@/services/http";
 
 export const shadesApi = {
   shades: (params: ShadeParams, signal?: AbortSignal) =>

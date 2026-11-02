@@ -6,9 +6,19 @@
       "!**/dist",
       "!**/node_modules",
       "!**/.turbo",
+      "!**/public",
+      "!**/graphify-out",
+      "!**/test-results",
+      "!**/playwright-report",
       "!**/routeTree.gen.ts"
     ]
   },
+  "overrides": [
+    {
+      "includes": ["apps/web/src/components/ui/**"],
+      "linter": { "enabled": false }
+    }
+  ],
   "formatter": {
     "enabled": true,
     "indentStyle": "space"
@@ -28,6 +38,10 @@
   "linter": {
     "rules": {
       "a11y": {
+        "useValidAriaRole": {
+          "level": "error",
+          "options": { "ignoreNonDom": true }
+        },
         "noLabelWithoutControl": {
           "level": "error",
           "options": {

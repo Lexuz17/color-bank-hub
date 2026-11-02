@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from "react";
-import { AppHeader, type AppSection, type Role } from "./app-header";
+import type { Role } from "@color-bank-hub/contracts/rbac";
+import { AppHeader, type AppSection } from "./app-header";
 import {
   Sheet,
   SheetContent,
@@ -25,7 +26,7 @@ export function WorkspaceLayout({
   footer?: ReactNode;
   activeSection: AppSection | null;
   onNavigate: (section: AppSection) => void;
-  role: Role;
+  role: Role | null;
   userName: string;
   onProfile: () => void;
 }) {

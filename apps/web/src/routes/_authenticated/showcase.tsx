@@ -11,7 +11,13 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { WorkspaceLayout } from "@/components/layout/workspace-layout";
-import type { AppSection, Role } from "@/components/layout/app-header";
+import {
+  can,
+  type Role,
+  roleLabels,
+  roles,
+} from "@color-bank-hub/contracts/rbac";
+import type { AppSection } from "@/components/layout/app-header";
 import { ProductFormatSidebar } from "@/components/product-format/product-format-sidebar";
 import {
   PageToolbar,
@@ -25,7 +31,7 @@ import {
 } from "@/components/shared/workspace-components";
 import { ProductDetailPanel } from "@/components/shared/product-detail-panel";
 import { useForm } from "@tanstack/react-form";
-import { type ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
 import { DataTable } from "@/components/ui/data-table";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -184,7 +190,7 @@ function ShowcasePage() {
   const activeSection = null;
   const [format, setFormat] = useState("Lip Tint Gloss");
   const [search, setSearch] = useState("");
-  const [role, setRole] = useState<Role>("Website Admin");
+  const [role, setRole] = useState<Role>("website_admin");
   const [profileOpen, setProfileOpen] = useState(false);
   const [workflow, setWorkflow] = useState(2);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -245,7 +251,7 @@ function ShowcasePage() {
       detailPanel={
         <ProductDetailPanel
           shade={sampleProfile}
-          canViewComposition={role === "Website Admin" || role === "R&D"}
+          canViewComposition={can(role, "shade:viewComposition")}
         />
       }
     >
@@ -434,16 +440,16 @@ function ShowcasePage() {
                 }}
               >
                 <SelectTrigger aria-label="Preview role" className="w-full">
-                  <SelectValue />
+                  <SelectValue>
+                    {(value: Role) => roleLabels[value]}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  {(["PID", "R&D", "TSI", "Website Admin"] as const).map(
-                    (item) => (
-                      <SelectItem key={item} value={item}>
-                        {item}
-                      </SelectItem>
-                    ),
-                  )}
+                  {roles.map((item) => (
+                    <SelectItem key={item} value={item}>
+                      {roleLabels[item]}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <p className="text-[10px] text-muted-foreground">
@@ -867,7 +873,7 @@ function ShowcasePage() {
             <CardContent>
               <ProductDetailPanel
                 shade={sampleProfile}
-                canViewComposition={role === "Website Admin" || role === "R&D"}
+                canViewComposition={can(role, "shade:viewComposition")}
               />
             </CardContent>
           </Card>
@@ -915,7 +921,7 @@ function ShowcasePage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Preview identity</DialogTitle>
-            <DialogDescription>John doe · {role}</DialogDescription>
+            <DialogDescription>John doe · {roleLabels[role]}</DialogDescription>
           </DialogHeader>
           <Alert variant="info">
             <Info />

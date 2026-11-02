@@ -1,18 +1,17 @@
+import { closeDb, createDb } from "../index.js";
 import { seedDevUsers } from "./dev-users.js";
 
-async function main() {
-  const isDevelopment = process.env.NODE_ENV === "development";
+const connectionString = process.env.DATABASE_URL;
+if (!connectionString) throw new Error("DATABASE_URL is required");
 
-  if (isDevelopment) {
-    await seedDevUsers();
+const db = createDb(connectionString);
+
+try {
+  if (process.env.NODE_ENV === "development") {
+    await seedDevUsers(db);
   } else {
     console.log("NODE_ENV is not development, development users were skipped");
   }
+} finally {
+  await closeDb(db);
 }
-
-main()
-  .then(() => process.exit(0))
-  .catch((error) => {
-    console.error(error);
-    process.exit(1);
-  });
