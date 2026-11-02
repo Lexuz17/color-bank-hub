@@ -25,7 +25,7 @@ Network settings live in the root `.env` (see `.env.example`):
 - `WEB_HOST`, `WEB_PORT`: Vite's bind address and port. Keep `WEB_HOST` and `WEB_ORIGIN` on the same host, since `localhost` and `127.0.0.1` are different origins for Better Auth.
 - `VITE_API_BASE_URL`: browser request base, normally `/api` for the same-origin proxy.
 - `WEB_ORIGIN`: allowed CORS and Better Auth origin.
-- `POSTGRES_BIND_HOST`, `POSTGRES_PORT`: Docker PostgreSQL's published address and port. `POSTGRES_CONTAINER_PORT` controls its internal listening port.
+- `POSTGRES_BIND_HOST`, `POSTGRES_PORT`: host address and port where Docker publishes PostgreSQL (defaults `127.0.0.1:5432`). Inside Docker it always listens on 5432.
 
 Health: `GET /health` (public). Restart the dev processes after changing `.env`.
 
