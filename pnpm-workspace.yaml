@@ -2,7 +2,9 @@ packages:
   - "apps/*"
   - "packages/*"
 
-# Shared dependency versions.
+catalogMode: prefer
+
+# Shared dependency versions (deps used by 2+ packages).
 catalog:
   "@types/node": ^24.19.2
   better-auth: ^1.7.12

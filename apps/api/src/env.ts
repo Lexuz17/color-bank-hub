@@ -19,6 +19,11 @@ const schema = z
     ALLOWED_EMAIL_DOMAIN: z.string().min(1),
     GOOGLE_CLIENT_ID: googleCredential,
     GOOGLE_CLIENT_SECRET: googleCredential,
+    S3_ENDPOINT: z.url(),
+    S3_REGION: z.string().min(1).default("auto"),
+    S3_BUCKET: z.string().min(1),
+    S3_ACCESS_KEY_ID: z.string().min(1),
+    S3_SECRET_ACCESS_KEY: z.string().min(1),
   })
   .refine((value) => !value.GOOGLE_CLIENT_ID === !value.GOOGLE_CLIENT_SECRET, {
     message:
@@ -42,4 +47,11 @@ export const env = {
   allowedEmailDomain: value.ALLOWED_EMAIL_DOMAIN,
   googleClientId: value.GOOGLE_CLIENT_ID || undefined,
   googleClientSecret: value.GOOGLE_CLIENT_SECRET || undefined,
+  s3: {
+    endpoint: value.S3_ENDPOINT,
+    region: value.S3_REGION,
+    bucket: value.S3_BUCKET,
+    accessKeyId: value.S3_ACCESS_KEY_ID,
+    secretAccessKey: value.S3_SECRET_ACCESS_KEY,
+  },
 };

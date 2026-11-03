@@ -122,3 +122,28 @@ test("/api/me returns the signed-in user", async () => {
   assert.equal(response.status, 200);
   assert.equal((await response.json()).data.role, "website_admin");
 });
+test("uploads validate type, size and per-purpose permission", async () => {
+  const tsi = createApp({ resolveUser: async () => userWith("tsi") });
+  const upload = (body: object, target = app) =>
+    request(
+      "/api/uploads",
+      "POST",
+      {
+        purpose: "shade-photo",
+        contentType: "image/webp",
+        size: 1024,
+        ...body,
+      },
+      target,
+    );
+
+  const ok = await upload({});
+  assert.equal(ok.status, 201);
+  const { data } = await ok.json();
+  assert.match(data.key, /^shade-photo\/[0-9a-f-]{36}\.webp$/);
+
+  assert.equal((await upload({ contentType: "application/pdf" })).status, 422); // wrong file type
+  assert.equal((await upload({ size: 6 * 1024 ** 2 })).status, 422); // too large
+  assert.equal((await upload({ purpose: "avatar" })).status, 422); // unknown purpose
+  assert.equal((await upload({}, tsi)).status, 403); // no permission
+});
