@@ -4,6 +4,7 @@ import { bodyLimit } from "hono/body-limit";
 import { requestId } from "hono/request-id";
 import { catalogRoutes } from "#api/routes/catalog-routes.js";
 import { uploadRoutes } from "#api/routes/upload-routes.js";
+import { userRoutes } from "#api/routes/user-routes.js";
 import { workflowRoutes } from "#api/routes/workflow-routes.js";
 import { env } from "#api/env.js";
 import { auth } from "#api/lib/auth.js";
@@ -100,6 +101,7 @@ export function createApp(options: { resolveUser?: ResolveUser } = {}) {
   app.route("/api", catalogRoutes);
   app.route("/api", workflowRoutes);
   app.route("/api", uploadRoutes);
+  app.route("/api", userRoutes);
   app.notFound((c) =>
     sendError(
       c,

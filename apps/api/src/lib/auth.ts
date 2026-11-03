@@ -3,6 +3,7 @@ import { drizzleAdapter } from "@better-auth/drizzle-adapter";
 import { schema } from "@color-bank-hub/db";
 import { db } from "#api/lib/db.js";
 import { env } from "#api/env.js";
+import { updateLastLogin } from "#api/repositories/user-repository.js";
 
 const socialProviders =
   env.googleClientId && env.googleClientSecret
@@ -33,6 +34,11 @@ export const auth = betterAuth({
   },
 
   databaseHooks: {
+    session: {
+      create: {
+        after: (session) => updateLastLogin(session.userId),
+      },
+    },
     user: {
       create: {
         before: async (user) => {
