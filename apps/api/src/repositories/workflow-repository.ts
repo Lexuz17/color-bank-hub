@@ -99,8 +99,8 @@ export async function updateReportStatus(
 export async function listRequests(query: PrototypeQuery) {
   const where = and(
     query.status ? eq(prototypeRequests.status, query.status) : undefined,
-    query.formatItemId
-      ? eq(prototypeRequests.formatItemId, query.formatItemId)
+    query.productFormatItemId
+      ? eq(prototypeRequests.productFormatItemId, query.productFormatItemId)
       : undefined,
   );
   const [items, total] = await Promise.all([
@@ -176,18 +176,23 @@ export async function transitionRequest(
     let naming: { sequenceNo?: number; autoName?: string } = {};
     if (input.status === "approved") {
       await tx.execute(
-        sql`select pg_advisory_xact_lock(1847, ${current.formatItemId})`,
+        sql`select pg_advisory_xact_lock(1847, ${current.productFormatItemId})`,
       );
       const [format] = await tx
         .select()
         .from(productFormatItems)
-        .where(eq(productFormatItems.id, current.formatItemId));
+        .where(eq(productFormatItems.id, current.productFormatItemId));
       const [sequence] = await tx
         .select({
           next: sql<number>`coalesce(max(${prototypeRequests.sequenceNo}), 0)::int + 1`,
         })
         .from(prototypeRequests)
-        .where(eq(prototypeRequests.formatItemId, current.formatItemId));
+        .where(
+          eq(
+            prototypeRequests.productFormatItemId,
+            current.productFormatItemId,
+          ),
+        );
       naming = {
         sequenceNo: sequence.next,
         autoName: `${format.code}-${String(sequence.next).padStart(4, "0")}`,

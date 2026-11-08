@@ -10,7 +10,7 @@ export interface ShadeProfile {
   shade: string;
   hex: string;
   undertone: "Warm" | "Neutral" | "Cool" | null;
-  season: "Spring" | "Summer" | "Autumn" | "Winter" | null;
+  season: "Spring" | "Summer" | "Autumn" | "Winter" | "Neutral" | null;
   format: string;
   benchmark?: string;
   lipPhotoUrl?: string;

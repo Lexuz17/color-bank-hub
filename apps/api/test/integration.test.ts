@@ -37,7 +37,7 @@ test("PostgreSQL API integration: catalog, imports, reports and prototype lifecy
     reports: [] as string[],
     requests: [] as string[],
   };
-  let formatId: number | undefined;
+  let productFormatId: number | undefined;
   let itemId: number | undefined;
   const [actor] = await db
     .insert(users)
@@ -98,7 +98,7 @@ test("PostgreSQL API integration: catalog, imports, reports and prototype lifecy
         201,
       )
     ).data;
-    formatId = format.id;
+    productFormatId = format.id;
     itemId = format.items[0].id;
     const own = (
       await call(
@@ -119,7 +119,7 @@ test("PostgreSQL API integration: catalog, imports, reports and prototype lifecy
         "POST",
         {
           brandId: own.id,
-          formatItemId: itemId,
+          productFormatItemId: itemId,
           name: `${prefix} Tint`,
           ingredientsInci: "Aqua, Glycerin",
         },
@@ -133,7 +133,7 @@ test("PostgreSQL API integration: catalog, imports, reports and prototype lifecy
         "POST",
         {
           brandId: external.id,
-          formatItemId: itemId,
+          productFormatItemId: itemId,
           name: `${prefix} External tint`,
           ingredientsInci: "Aqua",
         },
@@ -159,8 +159,11 @@ test("PostgreSQL API integration: catalog, imports, reports and prototype lifecy
       1,
     );
     assert.equal(
-      (await call(`/api/shades?brandId=${own.id}&formatItemId=${itemId}`)).data
-        .items.length,
+      (
+        await call(
+          `/api/shades?brandId=${own.id}&productFormatItemId=${itemId}`,
+        )
+      ).data.items.length,
       1,
     );
     assert.ok((await call(`/api/shades/${shade.id}`)).data.composition);
@@ -241,7 +244,7 @@ test("PostgreSQL API integration: catalog, imports, reports and prototype lifecy
     assert.equal(imported.imported, 1);
     const formats = (await call("/api/product-formats")).data;
     assert.equal(
-      formats.find((item: { id: number }) => item.id === formatId).count,
+      formats.find((item: { id: number }) => item.id === productFormatId).count,
       3,
     );
     const report = (
@@ -270,7 +273,7 @@ test("PostgreSQL API integration: catalog, imports, reports and prototype lifecy
     );
     const prototypeBody = {
       type: "gap_filling",
-      formatItemId: itemId,
+      productFormatItemId: itemId,
       brandNameNew: "Test brand",
       productNameNew: "Test tint",
       shadeNameNew: "Test rose",
@@ -348,7 +351,7 @@ test("PostgreSQL API integration: catalog, imports, reports and prototype lifecy
       409,
     );
     assert.equal(
-      (await call(`/api/prototype-requests?formatItemId=${itemId}`)).data
+      (await call(`/api/prototype-requests?productFormatItemId=${itemId}`)).data
         .pagination.total,
       2,
     );
@@ -375,8 +378,10 @@ test("PostgreSQL API integration: catalog, imports, reports and prototype lifecy
         await tx
           .delete(productFormatItems)
           .where(eq(productFormatItems.id, itemId));
-      if (formatId)
-        await tx.delete(productFormats).where(eq(productFormats.id, formatId));
+      if (productFormatId)
+        await tx
+          .delete(productFormats)
+          .where(eq(productFormats.id, productFormatId));
     });
     await db.delete(auditLogs).where(eq(auditLogs.actorId, actor.id));
     await db.delete(users).where(eq(users.id, actor.id));

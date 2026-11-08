@@ -7,7 +7,7 @@ import { productFormatItems, productFormats } from "./product-formats.js";
 import { products } from "./products.js";
 import { prototypeRequests } from "./prototype-requests.js";
 import { reports } from "./reports.js";
-import { shades } from "./shades.js";
+import { shadeBenchmarks, shades } from "./shades.js";
 import { roleRequests, users } from "./users.js";
 import { accounts, sessions } from "./auth.js";
 
@@ -58,6 +58,7 @@ export const productFormatsRelations = relations(
   productFormats,
   ({ many }) => ({
     items: many(productFormatItems),
+    classificationConfigs: many(classificationConfigVersions),
   }),
 );
 
@@ -65,7 +66,7 @@ export const productFormatItemsRelations = relations(
   productFormatItems,
   ({ one, many }) => ({
     format: one(productFormats, {
-      fields: [productFormatItems.formatId],
+      fields: [productFormatItems.productFormatId],
       references: [productFormats.id],
     }),
     products: many(products),
@@ -76,7 +77,7 @@ export const productFormatItemsRelations = relations(
 export const productsRelations = relations(products, ({ one, many }) => ({
   brand: one(brands, { fields: [products.brandId], references: [brands.id] }),
   formatItem: one(productFormatItems, {
-    fields: [products.formatItemId],
+    fields: [products.productFormatItemId],
     references: [productFormatItems.id],
   }),
   shades: many(shades),
@@ -86,6 +87,10 @@ export const productsRelations = relations(products, ({ one, many }) => ({
 export const classificationConfigVersionsRelations = relations(
   classificationConfigVersions,
   ({ one, many }) => ({
+    format: one(productFormats, {
+      fields: [classificationConfigVersions.productFormatId],
+      references: [productFormats.id],
+    }),
     creator: one(users, {
       fields: [classificationConfigVersions.createdBy],
       references: [users.id],
@@ -101,10 +106,14 @@ export const shadesRelations = relations(shades, ({ one, many }) => ({
     references: [products.id],
   }),
   classificationConfig: one(classificationConfigVersions, {
-    fields: [shades.classificationConfigId],
+    fields: [shades.classificationConfigVersionId],
     references: [classificationConfigVersions.id],
   }),
   creator: one(users, { fields: [shades.createdBy], references: [users.id] }),
+  /** external shades this own shade is benchmarked to */
+  benchmarkedTo: many(shadeBenchmarks, { relationName: "benchmark_shade" }),
+  /** own shades that use this shade as their benchmark */
+  benchmarkFor: many(shadeBenchmarks, { relationName: "benchmark_target" }),
   reports: many(reports),
   requestsAsReference: many(prototypeRequests, {
     relationName: "request_shade",
@@ -114,15 +123,31 @@ export const shadesRelations = relations(shades, ({ one, many }) => ({
   }),
 }));
 
+export const shadeBenchmarksRelations = relations(
+  shadeBenchmarks,
+  ({ one }) => ({
+    shade: one(shades, {
+      fields: [shadeBenchmarks.shadeId],
+      references: [shades.id],
+      relationName: "benchmark_shade",
+    }),
+    benchmark: one(shades, {
+      fields: [shadeBenchmarks.benchmarkShadeId],
+      references: [shades.id],
+      relationName: "benchmark_target",
+    }),
+  }),
+);
+
 // Mappings
 export const mappingsRelations = relations(mappings, ({ one, many }) => ({
   owner: one(users, { fields: [mappings.ownerId], references: [users.id] }),
   formatItem: one(productFormatItems, {
-    fields: [mappings.formatItemId],
+    fields: [mappings.productFormatItemId],
     references: [productFormatItems.id],
   }),
   classificationConfig: one(classificationConfigVersions, {
-    fields: [mappings.classificationConfigId],
+    fields: [mappings.classificationConfigVersionId],
     references: [classificationConfigVersions.id],
   }),
   pins: many(mappingPins),
@@ -169,7 +194,7 @@ export const prototypeRequestsRelations = relations(
       relationName: "request_result_shade",
     }),
     formatItem: one(productFormatItems, {
-      fields: [prototypeRequests.formatItemId],
+      fields: [prototypeRequests.productFormatItemId],
       references: [productFormatItems.id],
     }),
   }),

@@ -20,7 +20,7 @@ import {
 } from "@color-bank-hub/db";
 import type { ShadeInput, ShadeQuery } from "@color-bank-hub/contracts/shade";
 import { fail } from "#api/core/errors.js";
-import { colorMetrics } from "#api/services/color-service.js";
+import { colorMetrics } from "@color-bank-hub/contracts/color";
 
 type Executor = Parameters<Parameters<typeof db.transaction>[0]>[0];
 // Composition is returned only on own-brand detail records, never on external products.
@@ -33,8 +33,8 @@ const view = {
 export async function listShades(query: ShadeQuery) {
   const filters: (SQL | undefined)[] = [
     query.brandId ? eq(brands.id, query.brandId) : undefined,
-    query.formatItemId
-      ? eq(products.formatItemId, query.formatItemId)
+    query.productFormatItemId
+      ? eq(products.productFormatItemId, query.productFormatItemId)
       : undefined,
     query.season ? eq(shades.season, query.season) : undefined,
     query.undertone ? eq(shades.undertone, query.undertone) : undefined,
@@ -68,7 +68,7 @@ export async function listShades(query: ShadeQuery) {
       .innerJoin(brands, eq(brands.id, products.brandId))
       .innerJoin(
         productFormatItems,
-        eq(productFormatItems.id, products.formatItemId),
+        eq(productFormatItems.id, products.productFormatItemId),
       )
       .where(where)
       .orderBy(order(sortColumn), asc(shades.id))
@@ -101,7 +101,7 @@ export async function findShade(id: string) {
     .innerJoin(brands, eq(brands.id, products.brandId))
     .innerJoin(
       productFormatItems,
-      eq(productFormatItems.id, products.formatItemId),
+      eq(productFormatItems.id, products.productFormatItemId),
     )
     .where(eq(shades.id, id));
   if (!row) fail("NOT_FOUND", "Shade not found", "SHADE_NOT_FOUND");
@@ -131,10 +131,10 @@ export async function listFormats() {
       },
     }),
     db
-      .select({ id: products.formatItemId, count: count() })
+      .select({ id: products.productFormatItemId, count: count() })
       .from(shades)
       .innerJoin(products, eq(products.id, shades.productId))
-      .groupBy(products.formatItemId),
+      .groupBy(products.productFormatItemId),
   ]);
   const totals = new Map(counts.map((row) => [row.id, row.count]));
   return formats.map((format) => ({
@@ -169,7 +169,9 @@ export async function createFormat(input: {
       )[0];
     const items = await tx
       .insert(productFormatItems)
-      .values(input.items.map((item) => ({ ...item, formatId: format.id })))
+      .values(
+        input.items.map((item) => ({ ...item, productFormatId: format.id })),
+      )
       .returning();
     return {
       ...format,
@@ -198,7 +200,7 @@ export async function validateShadeRows(rows: ShadeInput[]) {
         .innerJoin(brands, eq(brands.id, products.brandId))
         .where(inArray(products.id, ids))
     : [];
-  const skus = rows.map((row) => row.sku);
+  const skus = rows.flatMap((row) => (row.sku ? [row.sku] : []));
   const existingSkus = skus.length
     ? await db
         .select({ sku: shades.sku })
@@ -212,7 +214,7 @@ export async function validateShadeRows(rows: ShadeInput[]) {
       ? "Product not found"
       : row.composition && !productMap.get(row.productId)?.isOwn
         ? "Composition is only allowed for own brands"
-        : duplicates.has(row.sku)
+        : row.sku && duplicates.has(row.sku)
           ? "SKU already exists"
           : null,
   );
@@ -274,12 +276,13 @@ export async function updateShade(
               ...colorMetrics(input.hex),
               undertone: null,
               season: null,
+              hueMunsell: null,
               colorFamily: null,
               colorSub: null,
               valueClass: null,
               chromaClass: null,
               depthLevel: null,
-              classificationConfigId: null,
+              classificationConfigVersionId: null,
             }
           : {}),
       })

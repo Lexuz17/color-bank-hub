@@ -32,7 +32,7 @@ export const prototypeInput = z
     productNameNew: name,
     shadeNameNew: name,
     targetHex: hex,
-    formatItemId: z.number().int().positive(),
+    productFormatItemId: z.number().int().positive(),
     targetSeason: season.optional(),
   })
   .strict();
@@ -40,7 +40,7 @@ export type PrototypeInput = z.infer<typeof prototypeInput>;
 
 export const prototypeQuery = pagination.extend({
   status: prototypeStatus.optional(),
-  formatItemId: z.coerce.number().int().positive().optional(),
+  productFormatItemId: z.coerce.number().int().positive().optional(),
 });
 export type PrototypeQuery = z.infer<typeof prototypeQuery>;
 export type PrototypeParams = z.input<typeof prototypeQuery>;
@@ -83,7 +83,7 @@ export interface PrototypeRequest {
   productNameNew: string | null;
   shadeNameNew: string | null;
   targetHex: string | null;
-  formatItemId: number;
+  productFormatItemId: number;
   targetSeason: Season | null;
   autoName: string | null;
   status: PrototypeStatus;

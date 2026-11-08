@@ -4,9 +4,11 @@ import {
   jsonb,
   numeric,
   pgTable,
+  primaryKey,
   smallint,
   text,
   timestamp,
+  uniqueIndex,
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
@@ -22,18 +24,19 @@ export const shades = pgTable(
     productId: uuid("product_id")
       .notNull()
       .references(() => products.id),
-    sku: varchar("sku").notNull().unique(),
+    /** own products only; external benchmark shades have none */
+    sku: varchar("sku").unique(),
     name: varchar("name").notNull(),
     hex: char("hex", { length: 7 }).notNull(),
     mayContain: text("may_contain"),
-    lipPhotoUrl: text("lip_photo_url"),
-    swatchPhotoUrl: text("swatch_photo_url"),
+    /** storage object keys, see contracts/upload.ts */
+    lipPhotoKey: text("lip_photo_key"),
+    swatchPhotoKey: text("swatch_photo_key"),
 
     /** own brand only, hidden from PID */
     composition: jsonb("composition"),
-    benchmarks: jsonb("benchmarks"),
 
-    // computed from hex by color-engine
+    // computed from hex, see contracts/color.ts
     r: smallint("r"),
     g: smallint("g"),
     b: smallint("b"),
@@ -52,6 +55,8 @@ export const shades = pgTable(
     // classification (computed, driven by classification_config_versions)
     undertone: undertone("undertone"),
     season: season("season"),
+    /** e.g. Red, Yellow-Red, Red-Purple */
+    hueMunsell: varchar("hue_munsell"),
     colorFamily: varchar("color_family"),
     /** warm / neutral / cool within a family */
     colorSub: varchar("color_sub"),
@@ -59,7 +64,9 @@ export const shades = pgTable(
     chromaClass: varchar("chroma_class"),
     depthLevel: smallint("depth_level"),
 
-    classificationConfigId: uuid("classification_config_id").references(
+    classificationConfigVersionId: uuid(
+      "classification_config_version_id",
+    ).references(
       /** config used when computed */
       () => classificationConfigVersions.id,
     ),
@@ -76,6 +83,7 @@ export const shades = pgTable(
       .$onUpdate(() => new Date()),
   },
   (t) => [
+    uniqueIndex("shades_product_name_uq").on(t.productId, t.name),
     index("shades_product_idx").on(t.productId),
     index("shades_season_idx").on(t.season),
     index("shades_undertone_idx").on(t.undertone),
@@ -85,5 +93,29 @@ export const shades = pgTable(
   ],
 );
 
+/**
+ * Own shade "benchmarked to" an external shade. Read the other way it is
+ * "benchmark for". A shade is flagged `benchmarked` when it has a row here.
+ */
+export const shadeBenchmarks = pgTable(
+  "shade_benchmarks",
+  {
+    shadeId: uuid("shade_id")
+      .notNull()
+      .references(() => shades.id, { onDelete: "cascade" }),
+    benchmarkShadeId: uuid("benchmark_shade_id")
+      .notNull()
+      .references(() => shades.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.shadeId, t.benchmarkShadeId] }),
+    index("shade_benchmarks_benchmark_idx").on(t.benchmarkShadeId),
+  ],
+);
+
 export type Shade = typeof shades.$inferSelect;
 export type NewShade = typeof shades.$inferInsert;
+export type ShadeBenchmark = typeof shadeBenchmarks.$inferSelect;

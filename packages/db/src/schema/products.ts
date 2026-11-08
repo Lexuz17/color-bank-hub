@@ -18,12 +18,10 @@ export const products = pgTable(
     brandId: uuid("brand_id")
       .notNull()
       .references(() => brands.id),
-    formatItemId: integer("format_item_id")
+    productFormatItemId: integer("product_format_item_id")
       .notNull()
       .references(() => productFormatItems.id),
     name: varchar("name").notNull(),
-    /** Anhydrous / Emulsion / Semisolid / Oil-based */
-    baseType: varchar("base_type"),
     ingredientsInci: text("ingredients_inci"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
@@ -35,7 +33,7 @@ export const products = pgTable(
   },
   (t) => [
     uniqueIndex("products_brand_name_uq").on(t.brandId, t.name),
-    index("products_format_item_idx").on(t.formatItemId),
+    index("products_product_format_item_idx").on(t.productFormatItemId),
   ],
 );
 

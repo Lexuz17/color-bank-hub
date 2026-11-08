@@ -23,7 +23,7 @@ export const mappings = pgTable(
       .references(() => users.id),
     name: varchar("name").notNull(),
     /** locked sub-category */
-    formatItemId: integer("format_item_id")
+    productFormatItemId: integer("product_format_item_id")
       .notNull()
       .references(() => productFormatItems.id),
     /** shades inside this mapping (no FK possible on arrays) */
@@ -37,9 +37,9 @@ export const mappings = pgTable(
     /** draft = owner only, published = everyone */
     status: mappingStatus("status").notNull().default("draft"),
     /** frozen so pinned mapping stays the same */
-    classificationConfigId: uuid("classification_config_id").references(
-      () => classificationConfigVersions.id,
-    ),
+    classificationConfigVersionId: uuid(
+      "classification_config_version_id",
+    ).references(() => classificationConfigVersions.id),
     thumbnailUrl: text("thumbnail_url"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
@@ -51,7 +51,7 @@ export const mappings = pgTable(
   },
   (t) => [
     index("mappings_owner_idx").on(t.ownerId),
-    index("mappings_format_item_idx").on(t.formatItemId),
+    index("mappings_product_format_item_idx").on(t.productFormatItemId),
     index("mappings_status_idx").on(t.status),
   ],
 );

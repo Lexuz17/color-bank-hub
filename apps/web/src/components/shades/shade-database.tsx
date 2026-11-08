@@ -50,14 +50,15 @@ const seasonLabels = {
   summer: "Summer",
   autumn: "Autumn",
   winter: "Winter",
+  neutral: "Neutral",
 } as const;
 const toneLabels = { warm: "Warm", neutral: "Neutral", cool: "Cool" } as const;
 export function ShadeDatabase({
-  formatItemId = null,
+  productFormatItemId = null,
   onInspect,
   editable = false,
 }: {
-  formatItemId?: number | null;
+  productFormatItemId?: number | null;
   onInspect?: (id: string) => void;
   editable?: boolean;
 }) {
@@ -74,7 +75,7 @@ export function ShadeDatabase({
     pageSize: 25,
     search: search || undefined,
     brandId: brandId || undefined,
-    formatItemId: formatItemId ?? undefined,
+    productFormatItemId: productFormatItemId ?? undefined,
     season: season ? (season as Season) : undefined,
     sort,
     direction,
@@ -336,8 +337,7 @@ export function ShadeDatabase({
                 SKU
                 <Input
                   name="sku"
-                  defaultValue={editing.sku}
-                  required
+                  defaultValue={editing.sku ?? ""}
                   maxLength={255}
                 />
               </label>

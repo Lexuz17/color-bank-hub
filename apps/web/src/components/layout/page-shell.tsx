@@ -40,7 +40,7 @@ export function PageShell({
       detailPanel={detailPanel}
       footer={
         <footer className="mx-5 flex flex-wrap justify-between gap-2 border-t py-3 text-[10px] text-muted-foreground">
-          <span>Color Bank & Shade Mapping Hub · Local prototype</span>
+          <span>Color Bank by DariData</span>
           <Link to="/showcase" className="text-primary hover:underline">
             Component showcase
           </Link>

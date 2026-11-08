@@ -52,7 +52,7 @@ export function CatalogSetup({
         mode: "product" as const,
         record: await catalogApi.createProduct({
           brandId: String(data.get("brandId")),
-          formatItemId: Number(data.get("formatItemId")),
+          productFormatItemId: Number(data.get("productFormatItemId")),
           name: String(data.get("name")).trim(),
           ingredientsInci: String(data.get("ingredients")).trim(),
         }),
@@ -153,7 +153,11 @@ export function CatalogSetup({
                   </label>
                   <label className="grid gap-2 text-xs">
                     Product format
-                    <FieldSelect name="formatItemId" required defaultValue="">
+                    <FieldSelect
+                      name="productFormatItemId"
+                      required
+                      defaultValue=""
+                    >
                       <option value="" disabled>
                         Select a format
                       </option>

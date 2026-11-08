@@ -57,7 +57,7 @@ All resource paths below begin with `/api`.
 
 Request and response schemas live in `packages/contracts/src/<module>.ts` and are shared with the web app.
 
-Create products using `{brandId, formatItemId, name, ingredientsInci, baseType?}`. Product formats use database records. Data Input includes explicit format, brand, and product creation controls for an empty database. Creating a subcategory under an existing parent name reuses that parent; duplicate names/codes return a conflict.
+Create products using `{brandId, productFormatItemId, name, ingredientsInci, baseType?}`. Product formats use database records. Data Input includes explicit format, brand, and product creation controls for an empty database. Creating a subcategory under an existing parent name reuses that parent; duplicate names/codes return a conflict.
 
 Lists for shades, reports, and requests return:
 
@@ -67,7 +67,7 @@ Lists for shades, reports, and requests return:
 
 Other successful responses return `{data: ...}`. Creation returns HTTP 201. Lists accept `page` and `pageSize` (1–100).
 
-Shade filters: `search` (shade/SKU/product/brand), `brandId`, `formatItemId`, `season`, `undertone`, `colorFamily`. Sorting: `sort=name|sku|createdAt|hue|lightness`, `direction=asc|desc`. Report filters: `status=pending|resolved`. Request filters: `status` and `formatItemId`. Enum values are lowercase.
+Shade filters: `search` (shade/SKU/product/brand), `brandId`, `productFormatItemId`, `season`, `undertone`, `colorFamily`. Sorting: `sort=name|sku|createdAt|hue|lightness`, `direction=asc|desc`. Report filters: `status=pending|resolved`. Request filters: `status` and `productFormatItemId`. Enum values are lowercase.
 
 ## Data input
 
@@ -104,7 +104,7 @@ Create:
   "productNameNew": "Jelly Stain",
   "shadeNameNew": "Rosewood",
   "targetHex": "#aa6d78",
-  "formatItemId": 1,
+  "productFormatItemId": 1,
   "description": "Fill a gap in the current shade range."
 }
 ```

@@ -24,8 +24,8 @@ export async function previewImport(rows: unknown[]) {
       };
     const row = parsedRow.data;
     const dbError = databaseErrors[validIndex++];
-    const duplicate = seen.has(row.sku);
-    seen.add(row.sku);
+    const duplicate = !!row.sku && seen.has(row.sku);
+    if (row.sku) seen.add(row.sku);
     const error = dbError ?? (duplicate ? "Duplicate SKU within import" : null);
     return {
       row: index + 1,

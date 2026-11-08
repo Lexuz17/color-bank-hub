@@ -11,13 +11,21 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { ApiError, FieldSelect } from "@/components/shared/request-feedback";
+import { ApiError } from "@/components/shared/request-feedback";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { CatalogSetup } from "@/components/catalog/catalog-setup";
 import { ShadeDatabase } from "@/components/shades/shade-database";
 import { useCatalog } from "@/hooks/use-catalog";
 import { apiError } from "@/services/api-error";
 import { shadesApi } from "@/services/shades-api";
 import { importsApi } from "@/services/imports-api";
+import { colorMetrics } from "@color-bank-hub/contracts/color";
 import type { ShadeInput } from "@color-bank-hub/contracts/shade";
 export function DataInputPage() {
   const [tab, setTab] = useState("manual");
@@ -70,28 +78,50 @@ export function DataInputPage() {
     clearPreview();
     create.reset();
   }
+  const productLabel = (id: string) => {
+    const item = catalog.products.data?.find((entry) => entry.id === id);
+    if (!item) return "Select a product";
+    const brand = catalog.brands.data?.find(
+      (entry) => entry.id === item.brandId,
+    );
+    return `${brand?.name ?? "Brand"} · ${item.name}`;
+  };
   const productSelect = (
-    <label className="grid gap-2 text-xs">
+    <div className="grid gap-2 text-xs">
       Product
-      <FieldSelect
-        value={productId}
-        onChange={(event) => changeProduct(event.target.value)}
-        required
+      <Select
+        value={productId || null}
+        onValueChange={(value) => value && changeProduct(value)}
         disabled={
           catalog.products.isPending || catalog.products.isError || busy
         }
       >
-        <option value="">Select a product</option>
-        {catalog.products.data?.map((item) => (
-          <option key={item.id} value={item.id}>
-            {catalog.brands.data?.find((brand) => brand.id === item.brandId)
-              ?.name ?? "Brand"}{" "}
-            · {item.name}
-          </option>
-        ))}
-      </FieldSelect>
-    </label>
+        <SelectTrigger aria-label="Product" className="w-full">
+          <SelectValue>
+            {(value: string | null) => productLabel(value ?? "")}
+          </SelectValue>
+        </SelectTrigger>
+        <SelectContent>
+          {catalog.products.data?.map((item) => (
+            <SelectItem key={item.id} value={item.id}>
+              {productLabel(item.id)}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
   );
+  const color = /^#[0-9a-f]{6}$/i.test(hex) ? colorMetrics(hex) : null;
+  // Labels (undertone, season, family, chroma, value) come from the category's
+  // classification config, which the API applies on save.
+  const autoFields = [
+    ["HSL: Hue", color?.hslH],
+    ["HSL: Saturation", color?.hslS],
+    ["HSL: Lightness", color?.hslL],
+    ["LCh: Lightness", color?.lchL],
+    ["LCh: Chroma", color?.lchC],
+    ["LCh: Hue", color?.lchH],
+  ] as const;
   return (
     <PageShell section="Data Input">
       <PageToolbar
@@ -161,15 +191,11 @@ export function DataInputPage() {
                 event.preventDefault();
                 const form = event.currentTarget;
                 const data = new FormData(form);
-                const lip = String(data.get("lipPhotoUrl")).trim();
-                const swatch = String(data.get("swatchPhotoUrl")).trim();
                 const body: ShadeInput = {
                   productId,
-                  sku: String(data.get("sku")).trim(),
+                  sku: String(data.get("sku")).trim() || undefined,
                   name: String(data.get("name")).trim(),
                   hex: hex.trim(),
-                  ...(lip ? { lipPhotoUrl: lip } : {}),
-                  ...(swatch ? { swatchPhotoUrl: swatch } : {}),
                 };
                 create.mutate(body, {
                   onSuccess: () => {
@@ -188,7 +214,7 @@ export function DataInputPage() {
                 </label>
                 <label className="grid gap-2 text-xs">
                   SKU
-                  <Input name="sku" required maxLength={255} />
+                  <Input name="sku" maxLength={255} />
                 </label>
               </div>
               <h2 className="text-sm font-medium">Color input</h2>
@@ -205,33 +231,19 @@ export function DataInputPage() {
                   <ShadeSwatch hex={hex} />
                 </div>
               </label>
-              <p className="text-[11px] text-muted-foreground">
-                RGB, HSL, HSV, Lab, and LCh are computed by the API. Business
-                classifications remain unassigned until rules are configured.
-              </p>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <label className="grid gap-2 text-xs">
-                  Photo on lips URL
-                  <Input
-                    name="lipPhotoUrl"
-                    type="url"
-                    pattern="https?://.*"
-                    placeholder="https://…"
-                  />
-                </label>
-                <label className="grid gap-2 text-xs">
-                  Swatch photo URL
-                  <Input
-                    name="swatchPhotoUrl"
-                    type="url"
-                    pattern="https?://.*"
-                    placeholder="https://…"
-                  />
-                </label>
+              <div className="grid gap-3 sm:grid-cols-3">
+                {autoFields.map(([label, value]) => (
+                  <label key={label} className="grid gap-2 text-xs">
+                    {label} (auto)
+                    <Input readOnly value={value ?? "—"} />
+                  </label>
+                ))}
               </div>
-              <p className="text-[10px] text-muted-foreground">
-                Use hosted image URLs. Image file storage is not configured.
+              <p className="text-[11px] text-muted-foreground">
+                Undertone, season, family, chroma and value are set from the
+                category's classification config when the shade is saved.
               </p>
+              {/* shortcut: photo upload (uploadsApi.uploadFile, purpose "shade-photo") is left to the Data Input module. */}
               <label className="grid gap-2 text-xs">
                 Product ingredients
                 <Textarea

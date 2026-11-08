@@ -40,13 +40,13 @@ export const prototypeRequests = pgTable(
     targetHex: char("target_hex", { length: 7 }),
 
     /** sub category */
-    formatItemId: integer("format_item_id")
+    productFormatItemId: integer("product_format_item_id")
       .notNull()
       .references(() => productFormatItems.id),
     targetSeason: season("target_season"),
 
     // naming, generated on approval
-    /** running number per format_item */
+    /** running number per product_format_item */
     sequenceNo: integer("sequence_no"),
     autoName: varchar("auto_name"),
 
@@ -81,8 +81,8 @@ export const prototypeRequests = pgTable(
     index("prototype_requests_status_idx").on(t.status),
     index("prototype_requests_requester_idx").on(t.requesterId),
     index("prototype_requests_created_at_idx").on(t.createdAt),
-    uniqueIndex("prototype_requests_format_seq_uq").on(
-      t.formatItemId,
+    uniqueIndex("prototype_requests_product_format_item_seq_uq").on(
+      t.productFormatItemId,
       t.sequenceNo,
     ),
   ],

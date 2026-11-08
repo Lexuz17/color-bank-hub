@@ -23,8 +23,8 @@ export const season = pgEnum("season", [
   "summer",
   "autumn",
   "winter",
+  "neutral",
 ]);
-export const colorModel = pgEnum("color_model", ["hsl", "lab", "lch"]);
 
 export const mappingView = pgEnum("mapping_view", [
   "season",

@@ -21,14 +21,14 @@ export const mockFormats = [
     items: [
       {
         id: 1,
-        formatId: 1,
+        productFormatId: 1,
         name: "Matte Lipstick",
         code: "LIP-MATTE",
         count: 3,
       },
       {
         id: 2,
-        formatId: 1,
+        productFormatId: 1,
         name: "Liquid Tint",
         code: "LIP-TINT",
         count: 2,
@@ -42,7 +42,7 @@ export const mockFormats = [
     items: [
       {
         id: 3,
-        formatId: 2,
+        productFormatId: 2,
         name: "Silk Foundation",
         code: "FACE-FND",
         count: 4,
@@ -55,7 +55,7 @@ export const mockProducts = [
   {
     id: "prod-1",
     brandId: "brand-1",
-    formatItemId: 1,
+    productFormatItemId: 1,
     name: "Velvet Satin Lipstick",
     ingredientsInci: "Dimethicone, Silica, Red 7 Lake",
     baseType: "oil",
@@ -63,7 +63,7 @@ export const mockProducts = [
   {
     id: "prod-2",
     brandId: "brand-2",
-    formatItemId: 3,
+    productFormatItemId: 3,
     name: "Skin Glow Foundation",
     ingredientsInci: "Water, Glycerin, Titanium Dioxide",
     baseType: "emulsion",
@@ -93,14 +93,14 @@ export const mockShades = [
     product: {
       id: "prod-1",
       brandId: "brand-1",
-      formatItemId: 1,
+      productFormatItemId: 1,
       name: "Velvet Satin Lipstick",
       baseType: "oil",
       ingredientsInci: "Dimethicone, Silica, Red 7 Lake",
     },
     formatItem: {
       id: 1,
-      formatId: 1,
+      productFormatId: 1,
       name: "Matte Lipstick",
       code: "LIP-MATTE",
       count: 3,
@@ -128,14 +128,14 @@ export const mockShades = [
     product: {
       id: "prod-1",
       brandId: "brand-1",
-      formatItemId: 1,
+      productFormatItemId: 1,
       name: "Velvet Satin Lipstick",
       baseType: "oil",
       ingredientsInci: "Dimethicone, Silica, Red 7 Lake",
     },
     formatItem: {
       id: 1,
-      formatId: 1,
+      productFormatId: 1,
       name: "Matte Lipstick",
       code: "LIP-MATTE",
       count: 3,
@@ -168,7 +168,7 @@ export const mockRequests = [
     productNameNew: "Velvet Satin Lipstick",
     shadeNameNew: "Autumn Rose",
     autoName: "Autumn Rose Formulation",
-    formatItemId: 1,
+    productFormatItemId: 1,
     targetHex: "#c85a6a",
     targetDeltaE: "1.0",
     status: "pending" as const,
@@ -185,7 +185,7 @@ export const mockRequests = [
     brand: { id: "brand-1", name: "Color Lab Studio", isOwn: true },
     formatItem: {
       id: 1,
-      formatId: 1,
+      productFormatId: 1,
       name: "Matte Lipstick",
       code: "LIP-MATTE",
       count: 3,
@@ -278,7 +278,7 @@ export async function setupApiMocks(
           items: body.items.map(
             (item: { name: string; code: string }, index: number) => ({
               id: Date.now() + index,
-              formatId: Date.now(),
+              productFormatId: Date.now(),
               name: item.name,
               code: item.code,
               count: 0,

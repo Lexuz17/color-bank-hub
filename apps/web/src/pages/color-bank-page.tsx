@@ -67,7 +67,7 @@ export function ColorBankPage() {
         {
           page,
           pageSize: 25,
-          ...(format ? { formatItemId: format } : {}),
+          ...(format ? { productFormatItemId: format } : {}),
           ...(status ? { status: status as PrototypeStatus } : {}),
         },
         signal,
@@ -111,8 +111,8 @@ export function ColorBankPage() {
       key={`${request.data.id}:${request.data.status}`}
       request={request.data}
       formatName={
-        items.find((item) => item.id === request.data.formatItemId)?.name ??
-        "Product format"
+        items.find((item) => item.id === request.data.productFormatItemId)
+          ?.name ?? "Product format"
       }
     />
   );
@@ -259,7 +259,7 @@ export function ColorBankPage() {
                 productNameNew: String(data.get("product")).trim(),
                 shadeNameNew: String(data.get("shade")).trim(),
                 targetHex: String(data.get("hex")).trim(),
-                formatItemId: Number(data.get("format")),
+                productFormatItemId: Number(data.get("format")),
                 description: String(data.get("notes")).trim(),
               };
               create.mutate(body);

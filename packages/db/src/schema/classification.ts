@@ -9,17 +9,19 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { colorModel } from "./enums.js";
+import { productFormats } from "./product-formats.js";
 import { users } from "./users.js";
 
+/** Classification thresholds per category; cut-offs can differ per category. */
 export const classificationConfigVersions = pgTable(
   "classification_config_versions",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    colorModel: colorModel("color_model").notNull(),
+    productFormatId: integer("product_format_id")
+      .notNull()
+      .references(() => productFormats.id),
     version: integer("version").notNull(),
-    schemaVersion: integer("schema_version").notNull().default(1),
-    /** the threshold numbers */
+    /** ClassificationConfig from contracts/color-classification.ts (each label group sets its hsl/lch model) */
     config: jsonb("config").notNull(),
     isActive: boolean("is_active").notNull().default(false),
     note: varchar("note"),
@@ -31,13 +33,15 @@ export const classificationConfigVersions = pgTable(
       .defaultNow(),
   },
   (t) => [
-    uniqueIndex("classification_config_model_version_uq").on(
-      t.colorModel,
+    uniqueIndex("classification_config_versions_product_format_version_uq").on(
+      t.productFormatId,
       t.version,
     ),
-    // only one active config per color_model
-    uniqueIndex("classification_config_one_active_per_model_uq")
-      .on(t.colorModel)
+    // only one active config per category
+    uniqueIndex(
+      "classification_config_versions_one_active_per_product_format_uq",
+    )
+      .on(t.productFormatId)
       .where(sql`${t.isActive}`),
   ],
 );

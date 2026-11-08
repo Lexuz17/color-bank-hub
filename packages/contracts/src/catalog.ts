@@ -32,9 +32,8 @@ export type FormatInput = z.infer<typeof formatInput>;
 export const productInput = z
   .object({
     brandId: uuid,
-    formatItemId: z.number().int().positive(),
+    productFormatItemId: z.number().int().positive(),
     name,
-    baseType: name.optional(),
     ingredientsInci: z.string().trim().min(1).max(20000),
   })
   .strict();
@@ -47,9 +46,10 @@ export interface Brand {
 }
 export interface FormatItem {
   id: number;
-  formatId: number;
+  productFormatId: number;
   name: string;
   code: string;
+  baseType: string | null;
   count: number;
 }
 export interface ProductFormat {
@@ -61,8 +61,7 @@ export interface ProductFormat {
 export interface Product {
   id: string;
   brandId: string;
-  formatItemId: number;
+  productFormatItemId: number;
   name: string;
-  baseType: string | null;
   ingredientsInci: string | null;
 }

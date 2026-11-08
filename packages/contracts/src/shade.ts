@@ -10,19 +10,18 @@ import {
   pagination,
   season,
   undertone,
-  url,
   uuid,
 } from "./common.js";
 
 export const shadeInput = z
   .object({
     productId: uuid,
-    sku: name,
+    sku: name.optional(),
     name,
     hex,
     mayContain: z.string().max(20000).optional(),
-    lipPhotoUrl: url.optional(),
-    swatchPhotoUrl: url.optional(),
+    lipPhotoKey: z.string().max(500).optional(),
+    swatchPhotoKey: z.string().max(500).optional(),
     composition: composition.optional(),
   })
   .strict();
@@ -49,7 +48,7 @@ export type ShadeSort = z.infer<typeof shadeSort>;
 export const shadeQuery = pagination.extend({
   search: z.string().trim().max(255).optional(),
   brandId: uuid.optional(),
-  formatItemId: z.coerce.number().int().positive().optional(),
+  productFormatItemId: z.coerce.number().int().positive().optional(),
   undertone: undertone.optional(),
   season: season.optional(),
   colorFamily: name.optional(),
@@ -64,17 +63,21 @@ export type ShadeParams = z.input<typeof shadeQuery>;
 export interface StoredShade {
   id: string;
   productId: string;
-  sku: string;
+  sku: string | null;
   name: string;
   hex: string;
   undertone: Undertone | null;
   season: Season | null;
+  hueMunsell: string | null;
   colorFamily: string | null;
   valueClass: string | null;
   chromaClass: string | null;
   hslH: number | null;
   hslS: number | null;
   hslL: number | null;
+  lipPhotoKey: string | null;
+  swatchPhotoKey: string | null;
+  /** Signed URLs for display, null without a photo. */
   lipPhotoUrl: string | null;
   swatchPhotoUrl: string | null;
   mayContain: string | null;

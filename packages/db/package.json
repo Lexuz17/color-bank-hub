@@ -17,6 +17,7 @@
     "postgres": "^3.4.9"
   },
   "devDependencies": {
+    "@color-bank-hub/contracts": "workspace:*",
     "@types/node": "catalog:",
     "better-auth": "catalog:",
     "dotenv": "^18.0.8",

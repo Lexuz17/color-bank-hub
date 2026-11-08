@@ -22,7 +22,13 @@ export const composition = z
   );
 export type CompositionItem = z.infer<typeof composition>[number];
 
-export const season = z.enum(["spring", "summer", "autumn", "winter"]);
+export const season = z.enum([
+  "spring",
+  "summer",
+  "autumn",
+  "winter",
+  "neutral",
+]);
 export type Season = z.infer<typeof season>;
 export const undertone = z.enum(["warm", "neutral", "cool"]);
 export type Undertone = z.infer<typeof undertone>;

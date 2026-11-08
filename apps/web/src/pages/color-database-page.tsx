@@ -17,6 +17,7 @@ const seasons = {
   summer: "Summer",
   autumn: "Autumn",
   winter: "Winter",
+  neutral: "Neutral",
 } as const;
 export function ColorDatabasePage() {
   const [format, setFormat] = useState<number | null>(null);
@@ -81,7 +82,7 @@ export function ColorDatabasePage() {
       <div className="p-5">
         <ShadeDatabase
           key={format ?? "all"}
-          formatItemId={format}
+          productFormatItemId={format}
           onInspect={setSelected}
         />
         <div className="mt-5 rounded-md border xl:hidden">{detail}</div>

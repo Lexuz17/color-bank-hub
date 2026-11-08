@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { colorMetrics } from "../src/services/color-service.js";
+import { colorMetrics } from "@color-bank-hub/contracts/color";
 import { composition } from "@color-bank-hub/contracts/common";
 import { can } from "@color-bank-hub/contracts/rbac";
 import { transitionInput } from "@color-bank-hub/contracts/prototype";
