@@ -24,6 +24,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { useCan } from "@/features/auth/hooks/use-can";
+import { formatDate } from "@/lib/date";
 const stages = ["pending", "approved", "formulating", "completed"] as const;
 export function PrototypeDetail({
   request,
@@ -102,8 +103,7 @@ export function PrototypeDetail({
         {request.description}
       </p>
       <p className="text-[10px] text-muted-foreground">
-        {request.priority} priority ·{" "}
-        {new Date(request.createdAt).toLocaleDateString()}
+        {request.priority} priority · {formatDate(request.createdAt)}
       </p>
       {canProcess && request.status === "pending" && (
         <div className="flex flex-wrap gap-2">

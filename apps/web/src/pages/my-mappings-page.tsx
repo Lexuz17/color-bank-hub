@@ -26,6 +26,7 @@ import {
   type SavedMapping,
 } from "@/lib/data/local-mappings";
 import { tableRows } from "@/lib/data/demo-shades";
+import { formatDate } from "@/lib/date";
 export function MyMappingsPage() {
   const navigate = useNavigate();
   const [items, setItems] = useState(readMappings);
@@ -103,7 +104,7 @@ export function MyMappingsPage() {
               <h2 className="text-sm font-medium">{item.name}</h2>
               <p className="my-2 text-[11px] text-muted-foreground">
                 By season · {item.shadeNames.length} shades ·{" "}
-                {new Date(item.updated).toLocaleDateString()}
+                {formatDate(item.updated)}
               </p>
               <div className="flex gap-2">
                 <Button

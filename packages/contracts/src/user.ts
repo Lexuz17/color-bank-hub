@@ -1,8 +1,8 @@
-import type { Role } from "./rbac.js";
+import { z } from "zod";
+import { type Role, roles } from "./rbac.js";
 
 export type UserStatus = "pending" | "active" | "disabled";
 
-/** Row returned by GET /api/users. */
 export interface UserAccount {
   id: string;
   name: string;
@@ -13,3 +13,11 @@ export interface UserAccount {
   lastLoginAt: string | null;
   createdAt: string;
 }
+
+export const userPatch = z
+  .object({
+    role: z.enum(roles).optional(),
+    status: z.literal("active").optional(),
+  })
+  .strict();
+export type UserPatch = z.infer<typeof userPatch>;

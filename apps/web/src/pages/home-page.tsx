@@ -12,7 +12,7 @@ import { PageShell } from "@/components/layout/page-shell";
 import { SearchInput } from "@/components/shared/workspace-components";
 import { tableRows } from "@/lib/data/demo-shades";
 import { Button } from "@/components/ui/button";
-import { useSignOut } from "@/features/auth/hooks/auth-mutation";
+import { useSignOut } from "@/features/auth/hooks/auth-mutations";
 export function HomePage() {
   const [search, setSearch] = useState("");
   const logout = useSignOut();

@@ -14,7 +14,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { useSignInWithEmail } from "../hooks/auth-mutation";
+import { useSignInWithEmail } from "../hooks/auth-mutations";
 
 export function DevEmailLogin({ redirectTo }: { redirectTo: string }) {
   const signIn = useSignInWithEmail(redirectTo);

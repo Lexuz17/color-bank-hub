@@ -28,6 +28,7 @@ import { apiError } from "@/services/api-error";
 import { useCan } from "@/features/auth/hooks/use-can";
 import type { Priority } from "@color-bank-hub/contracts/common";
 import type { Report, ReportInput } from "@color-bank-hub/contracts/report";
+import { formatDate } from "@/lib/date";
 export function ReportPage() {
   const canResolve = useCan("report:resolve");
   const [page, setPage] = useState(1);
@@ -256,8 +257,8 @@ export function ReportPage() {
                     </p>
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <p className="text-[10px] text-muted-foreground">
-                        {new Date(report.createdAt).toLocaleDateString()} ·{" "}
-                        {report.priority} priority
+                        {formatDate(report.createdAt)} · {report.priority}{" "}
+                        priority
                       </p>
                       {canResolve && (
                         <Button

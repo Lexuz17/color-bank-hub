@@ -118,6 +118,7 @@ const badgeTypes = {
   Declined: "destructive",
   Active: "success",
   "Pending Approval": "warning",
+  Disabled: "destructive",
 } as const;
 export function StatusBadge({ status }: { status: keyof typeof badgeTypes }) {
   return <Badge variant={badgeTypes[status]}>{status}</Badge>;
