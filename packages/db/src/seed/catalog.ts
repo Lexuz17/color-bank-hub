@@ -372,7 +372,6 @@ export async function seedCatalog(db: Database) {
     .select({
       id: productFormatItems.id,
       code: productFormatItems.code,
-      configId: classificationConfigVersions.id,
       config: classificationConfigVersions.config,
     })
     .from(productFormatItems)
@@ -424,7 +423,6 @@ export async function seedCatalog(db: Database) {
             hex,
             sku:
               skuPrefix && `${skuPrefix}-${String(index + 1).padStart(2, "0")}`,
-            classificationConfigVersionId: item.configId,
           };
         }),
       )

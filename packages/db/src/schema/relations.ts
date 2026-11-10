@@ -86,7 +86,7 @@ export const productsRelations = relations(products, ({ one, many }) => ({
 // Classification & shades
 export const classificationConfigVersionsRelations = relations(
   classificationConfigVersions,
-  ({ one, many }) => ({
+  ({ one }) => ({
     format: one(productFormats, {
       fields: [classificationConfigVersions.productFormatId],
       references: [productFormats.id],
@@ -95,8 +95,6 @@ export const classificationConfigVersionsRelations = relations(
       fields: [classificationConfigVersions.createdBy],
       references: [users.id],
     }),
-    shades: many(shades),
-    mappings: many(mappings),
   }),
 );
 
@@ -104,10 +102,6 @@ export const shadesRelations = relations(shades, ({ one, many }) => ({
   product: one(products, {
     fields: [shades.productId],
     references: [products.id],
-  }),
-  classificationConfig: one(classificationConfigVersions, {
-    fields: [shades.classificationConfigVersionId],
-    references: [classificationConfigVersions.id],
   }),
   creator: one(users, { fields: [shades.createdBy], references: [users.id] }),
   /** external shades this own shade is benchmarked to */
@@ -145,10 +139,6 @@ export const mappingsRelations = relations(mappings, ({ one, many }) => ({
   formatItem: one(productFormatItems, {
     fields: [mappings.productFormatItemId],
     references: [productFormatItems.id],
-  }),
-  classificationConfig: one(classificationConfigVersions, {
-    fields: [mappings.classificationConfigVersionId],
-    references: [classificationConfigVersions.id],
   }),
   pins: many(mappingPins),
 }));

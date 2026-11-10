@@ -16,7 +16,11 @@ export const navItems = [
   { label: "Color Bank", to: "/color-bank" },
   { label: "Report", to: "/report" },
   { label: "Data Input", to: "/data-input", permission: "catalog:write" },
-  { label: "User Management", to: "/user-management", permission: "user:manage"},
+  {
+    label: "User Management",
+    to: "/user-management",
+    permission: "user:manage",
+  },
 ] as const satisfies readonly NavItem[];
 
 export type AppSection = (typeof navItems)[number]["label"];

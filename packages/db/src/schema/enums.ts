@@ -31,7 +31,6 @@ export const mappingView = pgEnum("mapping_view", [
   "color_family",
   "custom",
 ]);
-export const mappingStatus = pgEnum("mapping_status", ["draft", "published"]);
 
 export const priorityLevel = pgEnum("priority_level", [
   "low",

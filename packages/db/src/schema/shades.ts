@@ -12,7 +12,6 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { classificationConfigVersions } from "./classification.js";
 import { season, undertone } from "./enums.js";
 import { products } from "./products.js";
 import { users } from "./users.js";
@@ -52,7 +51,7 @@ export const shades = pgTable(
     lchC: numeric("lch_c", { precision: 6, scale: 2, mode: "number" }),
     lchH: numeric("lch_h", { precision: 5, scale: 2, mode: "number" }),
 
-    // classification (computed, driven by classification_config_versions)
+    // classification (computed from the category's active classification_config_versions row; recomputed when a new version is activated)
     undertone: undertone("undertone"),
     season: season("season"),
     /** e.g. Red, Yellow-Red, Red-Purple */
@@ -63,13 +62,6 @@ export const shades = pgTable(
     valueClass: varchar("value_class"),
     chromaClass: varchar("chroma_class"),
     depthLevel: smallint("depth_level"),
-
-    classificationConfigVersionId: uuid(
-      "classification_config_version_id",
-    ).references(
-      /** config used when computed */
-      () => classificationConfigVersions.id,
-    ),
 
     createdBy: uuid("created_by").references(() => users.id, {
       onDelete: "set null",

@@ -282,7 +282,6 @@ export async function updateShade(
               valueClass: null,
               chromaClass: null,
               depthLevel: null,
-              classificationConfigVersionId: null,
             }
           : {}),
       })

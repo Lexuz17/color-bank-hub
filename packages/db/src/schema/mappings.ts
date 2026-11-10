@@ -1,5 +1,6 @@
 import {
   boolean,
+  jsonb,
   index,
   integer,
   pgTable,
@@ -9,8 +10,7 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { classificationConfigVersions } from "./classification.js";
-import { mappingStatus, mappingView } from "./enums.js";
+import { mappingView } from "./enums.js";
 import { productFormatItems } from "./product-formats.js";
 import { users } from "./users.js";
 
@@ -34,12 +34,10 @@ export const mappings = pgTable(
     axisY: varchar("axis_y"),
     showPhoto: boolean("show_photo").notNull().default(false),
     hideProductName: boolean("hide_product_name").notNull().default(false),
-    /** draft = owner only, published = everyone */
-    status: mappingStatus("status").notNull().default("draft"),
-    /** frozen so pinned mapping stays the same */
-    classificationConfigVersionId: uuid(
-      "classification_config_version_id",
-    ).references(() => classificationConfigVersions.id),
+    /** this mapping's own cut-offs (ClassificationConfig): the active config copied at save, then edited by the user */
+    classificationConfig: jsonb("classification_config"),
+    /** true = Default (category's active config, read live), false = classificationConfig above */
+    useActiveConfig: boolean("use_active_config").notNull().default(true),
     thumbnailUrl: text("thumbnail_url"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
@@ -52,7 +50,6 @@ export const mappings = pgTable(
   (t) => [
     index("mappings_owner_idx").on(t.ownerId),
     index("mappings_product_format_item_idx").on(t.productFormatItemId),
-    index("mappings_status_idx").on(t.status),
   ],
 );
 
