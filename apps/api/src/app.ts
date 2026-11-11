@@ -3,6 +3,7 @@ import { cors } from "hono/cors";
 import { bodyLimit } from "hono/body-limit";
 import { requestId } from "hono/request-id";
 import { catalogRoutes } from "#api/routes/catalog-routes.js";
+import { reportRoutes } from "#api/routes/report-routes.js";
 import { uploadRoutes } from "#api/routes/upload-routes.js";
 import { userRoutes } from "#api/routes/user-routes.js";
 import { workflowRoutes } from "#api/routes/workflow-routes.js";
@@ -99,6 +100,7 @@ export function createApp(options: { resolveUser?: ResolveUser } = {}) {
   app.use("/api/*", requireAuth(options.resolveUser));
   app.get("/api/me", (c) => c.json({ data: c.get("user") }));
   app.route("/api", catalogRoutes);
+  app.route("/api", reportRoutes);
   app.route("/api", workflowRoutes);
   app.route("/api", uploadRoutes);
   app.route("/api", userRoutes);

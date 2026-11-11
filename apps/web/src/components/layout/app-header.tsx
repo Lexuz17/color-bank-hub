@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { can, type Role, roleLabels } from "@color-bank-hub/contracts/rbac";
 import { type AppSection, navItems } from "@/lib/navigation";
-import { Menu, ChevronDown, Palette } from "lucide-react";
+import { Menu, ChevronDown, LogOut, Palette } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +14,7 @@ import {
   DropdownMenuGroup,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import { useSignOut } from "@/features/auth/hooks/auth-mutations";
 
 export function BrandLogo() {
   return (
@@ -43,6 +44,7 @@ export function AppHeader({
   onOpenSidebar?: () => void;
   onProfile: () => void;
 }) {
+  const logout = useSignOut();
   const items = navItems.filter(
     (item) => !("permission" in item) || can(role, item.permission),
   );
@@ -128,6 +130,14 @@ export function AppHeader({
             <DropdownMenuItem onClick={onProfile}>
               <Palette />
               Preview identity & permissions
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              variant="destructive"
+              disabled={logout.isPending}
+              onClick={() => logout.mutate()}
+            >
+              <LogOut />
+              {logout.isPending ? "Logging out…" : "Log out"}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
