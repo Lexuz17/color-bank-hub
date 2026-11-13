@@ -12,9 +12,9 @@ export function apiError(error: unknown): string {
         .join("; ");
     if (details?.message) return details.message;
     if (!error.response)
-      return "Cannot reach the API. Check that the API and database are running.";
+      return "Cannot reach the server. Check your connection and try again.";
     if (error.response.status >= 500)
-      return "The API could not load this data. Check its database connection and retry.";
+      return "Server error. Please try again or contact admin.";
   }
   return error instanceof Error
     ? error.message

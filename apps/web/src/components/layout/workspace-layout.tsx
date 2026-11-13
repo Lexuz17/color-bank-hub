@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from "react";
 import type { Role } from "@color-bank-hub/contracts/rbac";
 import { AppHeader } from "./app-header";
-import type { AppSection } from "@/lib/navigation";
+import type { AppSection } from "./app-header";
 import {
   Sheet,
   SheetContent,
@@ -13,6 +13,7 @@ import {
 export function WorkspaceLayout({
   children,
   sidebar,
+  wideSidebar = false,
   detailPanel,
   footer,
   activeSection,
@@ -22,6 +23,7 @@ export function WorkspaceLayout({
 }: {
   children: ReactNode;
   sidebar?: ReactNode;
+  wideSidebar?: boolean;
   detailPanel?: ReactNode;
   footer?: ReactNode;
   activeSection: AppSection | null;
@@ -49,7 +51,7 @@ export function WorkspaceLayout({
         {sidebar && (
           <aside
             aria-label="Workspace sidebar"
-            className="hidden w-51 shrink-0 flex-col border-r lg:flex"
+            className={`hidden shrink-0 flex-col border-r lg:flex ${wideSidebar ? "w-76" : "w-51"}`}
           >
             <div className="min-h-0 flex-1">{sidebar}</div>
           </aside>

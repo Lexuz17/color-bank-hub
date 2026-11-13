@@ -52,6 +52,7 @@ export const shadeQuery = pagination.extend({
   undertone: undertone.optional(),
   season: season.optional(),
   colorFamily: name.optional(),
+  hueMunsell: name.optional(),
   sort: shadeSort.default("name"),
   direction: z.enum(["asc", "desc"]).default("asc"),
 });

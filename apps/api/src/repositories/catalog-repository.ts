@@ -39,6 +39,7 @@ export async function listShades(query: ShadeQuery) {
     query.season ? eq(shades.season, query.season) : undefined,
     query.undertone ? eq(shades.undertone, query.undertone) : undefined,
     query.colorFamily ? eq(shades.colorFamily, query.colorFamily) : undefined,
+    query.hueMunsell ? eq(shades.hueMunsell, query.hueMunsell) : undefined,
   ];
   if (query.search) {
     const pattern = `%${query.search.replace(/[\\%_]/g, "\\$&")}%`;

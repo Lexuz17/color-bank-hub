@@ -1,11 +1,4 @@
 import { useState } from "react";
-import {
-  keepPreviousData,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
-import { toast } from "sonner";
 import { PageShell } from "@/components/layout/page-shell";
 import {
   PageToolbar,
@@ -21,10 +14,13 @@ import {
   FieldSelect,
   ResultsPagination,
 } from "@/components/shared/request-feedback";
-import { catalogApi } from "@/services/catalog-api";
-import { shadesApi } from "@/services/shades-api";
-import { reportsApi } from "@/services/reports-api";
-import { apiError } from "@/services/api-error";
+import { useBrands } from "@/api/brands/brand-queries";
+import { useShades } from "@/api/shades/shade-queries";
+import { useReports } from "@/api/reports/report-queries";
+import {
+  useCreateReport,
+  useUpdateReport,
+} from "@/features/report/hooks/report-mutations";
 import { useCan } from "@/features/auth/hooks/use-can";
 import type { Priority } from "@color-bank-hub/contracts/common";
 import type { Report, ReportInput } from "@color-bank-hub/contracts/report";
@@ -36,54 +32,19 @@ export function ReportPage() {
   const [brandId, setBrandId] = useState("");
   const [shadeSearch, setShadeSearch] = useState("");
   const [shadeId, setShadeId] = useState("");
-  const client = useQueryClient();
-  const reports = useQuery({
-    queryKey: ["reports", { page, status }],
-    queryFn: ({ signal }) =>
-      reportsApi.reports(
-        {
-          page,
-          pageSize: 20,
-          status: status ? (status as Report["status"]) : undefined,
-        },
-        signal,
-      ),
-    placeholderData: keepPreviousData,
+  const reports = useReports({
+    page,
+    pageSize: 20,
+    status: status ? (status as Report["status"]) : undefined,
   });
-  const brands = useQuery({
-    queryKey: ["brands"],
-    queryFn: ({ signal }) => catalogApi.brands(signal),
+  const brands = useBrands();
+  const shades = useShades({
+    pageSize: 100,
+    brandId: brandId || undefined,
+    search: shadeSearch || undefined,
   });
-  const shades = useQuery({
-    queryKey: ["shades", "report-lookup", brandId, shadeSearch],
-    queryFn: ({ signal }) =>
-      shadesApi.shades(
-        {
-          pageSize: 100,
-          brandId: brandId || undefined,
-          search: shadeSearch || undefined,
-        },
-        signal,
-      ),
-  });
-  const create = useMutation({
-    mutationFn: reportsApi.createReport,
-    onSuccess: async () => {
-      setPage(1);
-      await client.invalidateQueries({ queryKey: ["reports"] });
-      toast.success("Report submitted");
-    },
-    onError: (error) => toast.error(apiError(error)),
-  });
-  const update = useMutation({
-    mutationFn: ({ id, status }: { id: string; status: Report["status"] }) =>
-      reportsApi.updateReport(id, status),
-    onSuccess: async () => {
-      await client.invalidateQueries({ queryKey: ["reports"] });
-      toast.success("Report status updated");
-    },
-    onError: (error) => toast.error(apiError(error)),
-  });
+  const create = useCreateReport();
+  const update = useUpdateReport();
   return (
     <PageShell section="Report">
       <PageToolbar
@@ -108,6 +69,7 @@ export function ReportPage() {
             };
             create.mutate(body, {
               onSuccess: () => {
+                setPage(1);
                 form.reset();
                 setShadeId("");
                 setBrandId("");

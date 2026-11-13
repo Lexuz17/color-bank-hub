@@ -1,5 +1,5 @@
 import type { UserAccount, UserPatch } from "@color-bank-hub/contracts/user";
-import { get, patch } from "@/services/http";
+import { get, patch } from "@/lib/http";
 
 export function getUsers(signal?: AbortSignal) {
   return get<UserAccount[]>("/users", {}, signal);

@@ -2,7 +2,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useRouter } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { signInWithEmail, signOut } from "../api/sign-in.api";
-import { sessionQueryOptions } from "./auth-queries";
 
 export function useSignOut() {
   const queryClient = useQueryClient();
@@ -14,7 +13,7 @@ export function useSignOut() {
       if (error) throw error;
     },
     onSuccess: async () => {
-      queryClient.removeQueries({ queryKey: sessionQueryOptions.queryKey });
+      queryClient.clear();
       await navigate({ to: "/login", search: { redirect: "/" } });
     },
     onError: () => {
@@ -33,7 +32,7 @@ export function useSignInWithEmail(redirectTo: string) {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.removeQueries({ queryKey: sessionQueryOptions.queryKey });
+      queryClient.clear();
       router.history.push(redirectTo);
     },
   });

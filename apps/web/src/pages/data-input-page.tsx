@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { PageShell } from "@/components/layout/page-shell";
 import {
@@ -21,10 +20,12 @@ import {
 } from "@/components/ui/select";
 import { CatalogSetup } from "@/components/catalog/catalog-setup";
 import { ShadeDatabase } from "@/components/shades/shade-database";
-import { useCatalog } from "@/hooks/use-catalog";
-import { apiError } from "@/services/api-error";
-import { shadesApi } from "@/services/shades-api";
-import { importsApi } from "@/services/imports-api";
+import { useCatalog } from "@/features/data-input/hooks/catalog-queries";
+import {
+  useCommitImport,
+  useCreateShade,
+  usePreviewImport,
+} from "@/features/data-input/hooks/data-input-mutations";
 import { colorMetrics } from "@color-bank-hub/contracts/color";
 import type { ShadeInput } from "@color-bank-hub/contracts/shade";
 export function DataInputPage() {
@@ -35,37 +36,10 @@ export function DataInputPage() {
   const [snapshot, setSnapshot] = useState<ShadeInput[]>([]);
   const [parseError, setParseError] = useState("");
   const catalog = useCatalog();
-  const client = useQueryClient();
   const product = catalog.products.data?.find((item) => item.id === productId);
-  async function refresh() {
-    await Promise.all([
-      client.invalidateQueries({ queryKey: ["shades"] }),
-      client.invalidateQueries({ queryKey: ["formats"] }),
-    ]);
-  }
-  const create = useMutation({
-    mutationFn: shadesApi.createShade,
-    onSuccess: async () => {
-      await refresh();
-      toast.success("Shade added to the database");
-    },
-    onError: (error) => toast.error(apiError(error)),
-  });
-  const preview = useMutation({
-    mutationFn: importsApi.previewImport,
-    onError: (error) => toast.error(apiError(error)),
-  });
-  const commit = useMutation({
-    mutationFn: importsApi.commitImport,
-    onSuccess: async (result) => {
-      setPaste("");
-      setSnapshot([]);
-      preview.reset();
-      await refresh();
-      toast.success(`${result.imported} shades imported`);
-    },
-    onError: (error) => toast.error(apiError(error)),
-  });
+  const create = useCreateShade();
+  const preview = usePreviewImport();
+  const commit = useCommitImport();
   const busy = preview.isPending || commit.isPending;
   function clearPreview() {
     setSnapshot([]);
@@ -243,7 +217,7 @@ export function DataInputPage() {
                 Undertone, season, family, chroma and value are set from the
                 category's classification config when the shade is saved.
               </p>
-              {/* shortcut: photo upload (uploadsApi.uploadFile, purpose "shade-photo") is left to the Data Input module. */}
+              {/* shortcut: photo upload (uploadFile in lib/upload.ts, purpose "shade-photo") is left to the Data Input module. */}
               <label className="grid gap-2 text-xs">
                 Product ingredients
                 <Textarea
@@ -338,7 +312,15 @@ export function DataInputPage() {
                 <Button
                   variant="outline"
                   disabled={!preview.data?.valid || !snapshot.length || busy}
-                  onClick={() => commit.mutate(snapshot)}
+                  onClick={() =>
+                    commit.mutate(snapshot, {
+                      onSuccess: () => {
+                        setPaste("");
+                        setSnapshot([]);
+                        preview.reset();
+                      },
+                    })
+                  }
                 >
                   {commit.isPending ? "Importing…" : "Import validated rows"}
                 </Button>

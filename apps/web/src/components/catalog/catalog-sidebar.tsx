@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { ChevronDown, Palette } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { catalogApi } from "@/services/catalog-api";
+import { useProductFormats } from "@/api/product-formats/product-format-queries";
 import { ApiError } from "@/components/shared/request-feedback";
 import { LoadingState } from "@/components/shared/workspace-components";
 export function CatalogSidebar({
@@ -11,10 +10,7 @@ export function CatalogSidebar({
   value: number | null;
   onChange: (id: number | null) => void;
 }) {
-  const formats = useQuery({
-    queryKey: ["formats"],
-    queryFn: ({ signal }) => catalogApi.formats(signal),
-  });
+  const formats = useProductFormats();
   const [collapsed, setCollapsed] = useState<number[]>([]);
   return (
     <nav

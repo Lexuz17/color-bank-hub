@@ -1,21 +1,10 @@
 import { useState } from "react";
-import {
-  keepPreviousData,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
 import { ArrowUpDown } from "lucide-react";
-import { toast } from "sonner";
-import { apiError } from "@/services/api-error";
-import { catalogApi } from "@/services/catalog-api";
-import { shadesApi } from "@/services/shades-api";
+import { useBrands } from "@/api/brands/brand-queries";
+import { useShades } from "@/api/shades/shade-queries";
+import { useUpdateShade } from "@/features/color-database/hooks/shade-mutations";
 import type { Season } from "@color-bank-hub/contracts/common";
-import type {
-  Shade,
-  ShadePatch,
-  ShadeSort,
-} from "@color-bank-hub/contracts/shade";
+import type { Shade, ShadeSort } from "@color-bank-hub/contracts/shade";
 import {
   SearchInput,
   ShadeSwatch,
@@ -69,7 +58,6 @@ export function ShadeDatabase({
   const [sort, setSort] = useState<ShadeSort>("name");
   const [direction, setDirection] = useState<"asc" | "desc">("asc");
   const [editing, setEditing] = useState<Shade | null>(null);
-  const client = useQueryClient();
   const params = {
     page,
     pageSize: 25,
@@ -80,28 +68,9 @@ export function ShadeDatabase({
     sort,
     direction,
   };
-  const rows = useQuery({
-    queryKey: ["shades", params],
-    queryFn: ({ signal }) => shadesApi.shades(params, signal),
-    placeholderData: keepPreviousData,
-  });
-  const brands = useQuery({
-    queryKey: ["brands"],
-    queryFn: ({ signal }) => catalogApi.brands(signal),
-  });
-  const save = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: ShadePatch }) =>
-      shadesApi.updateShade(id, data),
-    onSuccess: async () => {
-      await Promise.all([
-        client.invalidateQueries({ queryKey: ["shades"] }),
-        client.invalidateQueries({ queryKey: ["shade"] }),
-      ]);
-      setEditing(null);
-      toast.success("Shade updated");
-    },
-    onError: (error) => toast.error(apiError(error)),
-  });
+  const rows = useShades(params);
+  const brands = useBrands();
+  const save = useUpdateShade();
   function sortBy(column: ShadeSort) {
     setSort(column);
     setDirection(sort === column && direction === "asc" ? "desc" : "asc");
@@ -314,14 +283,17 @@ export function ShadeDatabase({
               onSubmit={(event) => {
                 event.preventDefault();
                 const data = new FormData(event.currentTarget);
-                save.mutate({
-                  id: editing.id,
-                  data: {
-                    name: String(data.get("name")).trim(),
-                    sku: String(data.get("sku")).trim(),
-                    hex: String(data.get("hex")).trim(),
+                save.mutate(
+                  {
+                    id: editing.id,
+                    data: {
+                      name: String(data.get("name")).trim(),
+                      sku: String(data.get("sku")).trim(),
+                      hex: String(data.get("hex")).trim(),
+                    },
                   },
-                });
+                  { onSuccess: () => setEditing(null) },
+                );
               }}
             >
               <label className="grid gap-2 text-xs">

@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
 import type {
   PrototypeRequest,
   PrototypeStatus,
 } from "@color-bank-hub/contracts/prototype";
-import { prototypesApi } from "@/services/prototypes-api";
-import { apiError } from "@/services/api-error";
+import {
+  useSaveFormulation,
+  useTransitionRequest,
+} from "@/features/color-bank/hooks/prototype-mutations";
 import {
   ShadeSwatch,
   WorkflowSteps,
@@ -33,7 +33,6 @@ export function PrototypeDetail({
   request: PrototypeRequest;
   formatName: string;
 }) {
-  const client = useQueryClient();
   const canProcess = useCan("prototype:process");
   const [confirm, setConfirm] = useState<Exclude<
     PrototypeStatus,
@@ -47,36 +46,8 @@ export function PrototypeDetail({
     JSON.stringify(request.composition ?? [], null, 2),
   );
   const [compositionError, setCompositionError] = useState("");
-  async function refresh() {
-    await Promise.all([
-      client.invalidateQueries({ queryKey: ["requests"] }),
-      client.invalidateQueries({ queryKey: ["request", request.id] }),
-    ]);
-  }
-  const transition = useMutation({
-    mutationFn: ({
-      status,
-      reason,
-    }: {
-      status: Exclude<PrototypeStatus, "pending">;
-      reason?: string;
-    }) => prototypesApi.transitionRequest(request.id, status, reason),
-    onSuccess: async () => {
-      setConfirm(null);
-      await refresh();
-      toast.success("Request updated");
-    },
-    onError: (error) => toast.error(apiError(error)),
-  });
-  const save = useMutation({
-    mutationFn: (body: Parameters<typeof prototypesApi.saveFormulation>[1]) =>
-      prototypesApi.saveFormulation(request.id, body),
-    onSuccess: async () => {
-      await refresh();
-      toast.success("Formulation saved");
-    },
-    onError: (error) => toast.error(apiError(error)),
-  });
+  const transition = useTransitionRequest(request.id);
+  const save = useSaveFormulation(request.id);
   return (
     <section className="space-y-4 p-5">
       <h2 className="text-sm font-medium">
@@ -294,12 +265,15 @@ export function PrototypeDetail({
               }
               onClick={() => {
                 if (confirm)
-                  transition.mutate({
-                    status: confirm,
-                    ...(confirm === "declined"
-                      ? { reason: declineReason.trim() }
-                      : {}),
-                  });
+                  transition.mutate(
+                    {
+                      status: confirm,
+                      ...(confirm === "declined"
+                        ? { reason: declineReason.trim() }
+                        : {}),
+                    },
+                    { onSuccess: () => setConfirm(null) },
+                  );
               }}
             >
               {transition.isPending ? "Updating…" : "Confirm"}

@@ -1,11 +1,4 @@
 import { useState } from "react";
-import {
-  keepPreviousData,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
-import { toast } from "sonner";
 import { PageShell } from "@/components/layout/page-shell";
 import {
   PageToolbar,
@@ -32,9 +25,12 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { catalogApi } from "@/services/catalog-api";
-import { prototypesApi } from "@/services/prototypes-api";
-import { apiError } from "@/services/api-error";
+import { useProductFormats } from "@/api/product-formats/product-format-queries";
+import { useCreateRequest } from "@/features/color-bank/hooks/prototype-mutations";
+import {
+  useRequest,
+  useRequests,
+} from "@/features/color-bank/hooks/prototype-queries";
 import { useCan } from "@/features/auth/hooks/use-can";
 import type {
   PrototypeInput,
@@ -54,45 +50,17 @@ export function ColorBankPage() {
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
-  const client = useQueryClient();
-  const formats = useQuery({
-    queryKey: ["formats"],
-    queryFn: ({ signal }) => catalogApi.formats(signal),
-  });
+  const formats = useProductFormats();
   const items = formats.data?.flatMap((format) => format.items) ?? [];
-  const requests = useQuery({
-    queryKey: ["requests", { page, format, status }],
-    queryFn: ({ signal }) =>
-      prototypesApi.requests(
-        {
-          page,
-          pageSize: 25,
-          ...(format ? { productFormatItemId: format } : {}),
-          ...(status ? { status: status as PrototypeStatus } : {}),
-        },
-        signal,
-      ),
-    placeholderData: keepPreviousData,
+  const requests = useRequests({
+    page,
+    pageSize: 25,
+    ...(format ? { productFormatItemId: format } : {}),
+    ...(status ? { status: status as PrototypeStatus } : {}),
   });
   const activeId = selected ?? requests.data?.items[0]?.id ?? null;
-  const request = useQuery({
-    queryKey: ["request", activeId],
-    queryFn: ({ signal }) => prototypesApi.request(activeId ?? "", signal),
-    enabled: !!activeId,
-  });
-  const create = useMutation({
-    mutationFn: prototypesApi.createRequest,
-    onSuccess: async (row) => {
-      setStatus("");
-      setFormat(null);
-      setPage(1);
-      setSelected(row.id);
-      setOpen(false);
-      await client.invalidateQueries({ queryKey: ["requests"] });
-      toast.success("Prototype request submitted");
-    },
-    onError: (error) => toast.error(apiError(error)),
-  });
+  const request = useRequest(activeId);
+  const create = useCreateRequest();
   const detail = !activeId ? (
     <EmptyState
       title="Request detail"
@@ -262,7 +230,15 @@ export function ColorBankPage() {
                 productFormatItemId: Number(data.get("format")),
                 description: String(data.get("notes")).trim(),
               };
-              create.mutate(body);
+              create.mutate(body, {
+                onSuccess: (row) => {
+                  setStatus("");
+                  setFormat(null);
+                  setPage(1);
+                  setSelected(row.id);
+                  setOpen(false);
+                },
+              });
             }}
           >
             <div className="grid grid-cols-2 gap-3">

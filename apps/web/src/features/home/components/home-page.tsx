@@ -12,11 +12,8 @@ import { PageShell } from "@/components/layout/page-shell";
 import { SearchInput } from "@/components/shared/workspace-components";
 import { Badge } from "@/components/ui/badge";
 import { useCan } from "@/features/auth/hooks/use-can";
-import {
-  useShadeSearch,
-  useShadeTotal,
-} from "@/features/color-database/hooks/shade-queries";
-import { useReportTotal } from "@/features/report/hooks/report-queries";
+import { useShadeSearch, useShadeTotal } from "@/api/shades/shade-queries";
+import { useReportTotal } from "@/api/reports/report-queries";
 
 export function HomePage() {
   const [search, setSearch] = useState("");

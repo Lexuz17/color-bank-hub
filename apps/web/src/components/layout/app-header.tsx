@@ -1,7 +1,18 @@
 import { Link } from "@tanstack/react-router";
-import { can, type Role, roleLabels } from "@color-bank-hub/contracts/rbac";
-import { type AppSection, navItems } from "@/lib/navigation";
-import { Menu, ChevronDown, LogOut, Palette } from "lucide-react";
+import {
+  can,
+  type Permission,
+  type Role,
+  roleLabels,
+} from "@color-bank-hub/contracts/rbac";
+import {
+  Menu,
+  ChevronDown,
+  Home,
+  LogOut,
+  Palette,
+  type LucideIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +26,28 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { useSignOut } from "@/features/auth/hooks/auth-mutations";
+
+const navItems = [
+  { label: "Home", to: "/", icon: Home },
+  { label: "Color Database", to: "/color-database" },
+  { label: "Shade Mapping", to: "/shade-mapping" },
+  { label: "My Mappings", to: "/my-mappings" },
+  { label: "Color Bank", to: "/color-bank" },
+  { label: "Report", to: "/report" },
+  { label: "Data Input", to: "/data-input", permission: "catalog:write" },
+  {
+    label: "User Management",
+    to: "/user-management",
+    permission: "user:manage",
+  },
+] as const satisfies readonly {
+  label: string;
+  to: string;
+  icon?: LucideIcon;
+  permission?: Permission;
+}[];
+
+export type AppSection = (typeof navItems)[number]["label"];
 
 export function BrandLogo() {
   return (

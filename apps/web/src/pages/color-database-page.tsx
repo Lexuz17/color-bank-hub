@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { PageShell } from "@/components/layout/page-shell";
 import {
   PageToolbar,
@@ -10,7 +9,7 @@ import { ProductDetailPanel } from "@/components/shared/product-detail-panel";
 import { CatalogSidebar } from "@/components/catalog/catalog-sidebar";
 import { ShadeDatabase } from "@/components/shades/shade-database";
 import { ApiError } from "@/components/shared/request-feedback";
-import { shadesApi } from "@/services/shades-api";
+import { useShade } from "@/api/shades/shade-queries";
 const tones = { warm: "Warm", neutral: "Neutral", cool: "Cool" } as const;
 const seasons = {
   spring: "Spring",
@@ -22,11 +21,7 @@ const seasons = {
 export function ColorDatabasePage() {
   const [format, setFormat] = useState<number | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
-  const profile = useQuery({
-    queryKey: ["shade", selected],
-    queryFn: ({ signal }) => shadesApi.shade(selected ?? "", signal),
-    enabled: !!selected,
-  });
+  const profile = useShade(selected);
   const shade = profile.data;
   const detail = profile.isFetching ? (
     <div className="p-4">

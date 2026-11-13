@@ -1,7 +1,7 @@
 import type { UserPatch } from "@color-bank-hub/contracts/user";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { apiError } from "@/services/api-error";
+import { apiError } from "@/lib/api-error";
 import { updateUser } from "../api/users.api";
 import { usersQueryOptions } from "./user-queries";
 

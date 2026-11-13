@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { WorkspaceLayout } from "./workspace-layout";
 import { ProductFormatSidebar } from "@/components/product-format/product-format-sidebar";
-import type { AppSection } from "@/lib/navigation";
+import type { AppSection } from "./app-header";
 import { useCurrentUser } from "@/features/auth/hooks/use-can";
 
 export function PageShell({
@@ -12,6 +12,7 @@ export function PageShell({
   onFormatChange,
   detailPanel,
   sidebar,
+  wideSidebar,
 }: {
   section: AppSection;
   children: ReactNode;
@@ -19,6 +20,7 @@ export function PageShell({
   onFormatChange?: (format: string) => void;
   detailPanel?: ReactNode;
   sidebar?: ReactNode;
+  wideSidebar?: boolean;
 }) {
   const navigate = useNavigate();
   const user = useCurrentUser();
@@ -37,6 +39,7 @@ export function PageShell({
           sidebar
         )
       }
+      wideSidebar={wideSidebar}
       detailPanel={detailPanel}
       footer={
         <footer className="mx-5 flex flex-wrap justify-between gap-2 border-t py-3 text-[10px] text-muted-foreground">

@@ -1,5 +1,10 @@
 import type { ApiResponse } from "@color-bank-hub/contracts/common";
-import { httpClient } from "@/lib/http-client";
+import axios from "axios";
+
+const httpClient = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL || "/api",
+  timeout: 15000,
+});
 
 export async function get<T>(
   path: string,

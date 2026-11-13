@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
-import { useCatalog } from "@/hooks/use-catalog";
-import { catalogApi } from "@/services/catalog-api";
-import { apiError } from "@/services/api-error";
+import { useCatalog } from "@/features/data-input/hooks/catalog-queries";
+import {
+  type CatalogRecordMode,
+  useCreateCatalogRecord,
+} from "@/features/data-input/hooks/data-input-mutations";
 import { ApiError, FieldSelect } from "@/components/shared/request-feedback";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,7 +16,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-type Mode = "brand" | "product" | "format";
+type Mode = CatalogRecordMode;
 export function CatalogSetup({
   onProductCreated,
 }: {
@@ -24,54 +24,7 @@ export function CatalogSetup({
 }) {
   const [mode, setMode] = useState<Mode | null>(null);
   const catalog = useCatalog();
-  const client = useQueryClient();
-  const create = useMutation({
-    mutationFn: async ({ mode, data }: { mode: Mode; data: FormData }) => {
-      if (mode === "brand")
-        return {
-          mode: "brand" as const,
-          record: await catalogApi.createBrand({
-            name: String(data.get("name")).trim(),
-            isOwn: data.get("isOwn") === "on",
-          }),
-        };
-      if (mode === "format")
-        return {
-          mode: "format" as const,
-          record: await catalogApi.createFormat({
-            name: String(data.get("parent")).trim(),
-            items: [
-              {
-                name: String(data.get("name")).trim(),
-                code: String(data.get("code")).trim(),
-              },
-            ],
-          }),
-        };
-      return {
-        mode: "product" as const,
-        record: await catalogApi.createProduct({
-          brandId: String(data.get("brandId")),
-          productFormatItemId: Number(data.get("productFormatItemId")),
-          name: String(data.get("name")).trim(),
-          ingredientsInci: String(data.get("ingredients")).trim(),
-        }),
-      };
-    },
-    onSuccess: async (result) => {
-      await Promise.all([
-        client.invalidateQueries({ queryKey: ["brands"] }),
-        client.invalidateQueries({ queryKey: ["products"] }),
-        client.invalidateQueries({ queryKey: ["formats"] }),
-      ]);
-      if (result.mode === "product") onProductCreated(result.record.id);
-      setMode(null);
-      toast.success(
-        `${result.mode[0].toUpperCase() + result.mode.slice(1)} created`,
-      );
-    },
-    onError: (error) => toast.error(apiError(error)),
-  });
+  const create = useCreateCatalogRecord();
   return (
     <>
       <div className="flex flex-wrap items-center gap-2">
@@ -119,10 +72,16 @@ export function CatalogSetup({
               className="grid gap-4"
               onSubmit={(event) => {
                 event.preventDefault();
-                create.mutate({
-                  mode,
-                  data: new FormData(event.currentTarget),
-                });
+                create.mutate(
+                  { mode, data: new FormData(event.currentTarget) },
+                  {
+                    onSuccess: (result) => {
+                      if (result.mode === "product")
+                        onProductCreated(result.record.id);
+                      setMode(null);
+                    },
+                  },
+                );
               }}
             >
               {mode === "format" && (

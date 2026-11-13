@@ -1,7 +1,14 @@
-import type { Page } from "@color-bank-hub/contracts/common";
-import type { Report, ReportParams } from "@color-bank-hub/contracts/report";
-import { get } from "@/services/http";
+import type {
+  Report,
+  ReportInput,
+  ReportStatus,
+} from "@color-bank-hub/contracts/report";
+import { patch, post } from "@/lib/http";
 
-export function getReports(params: ReportParams, signal?: AbortSignal) {
-  return get<Page<Report>>("/reports", params, signal);
+export function createReport(body: ReportInput) {
+  return post<Report>("/reports", body);
+}
+
+export function updateReport(id: string, status: ReportStatus) {
+  return patch<Report>(`/reports/${id}`, { status });
 }

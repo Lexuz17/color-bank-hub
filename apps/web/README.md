@@ -34,6 +34,7 @@ The Playwright configuration starts the web dev server and uses Chromium. E2E te
 
 ```text
 src/
+  api/                   Reads shared by 2+ features (request + query hooks per resource)
   components/           Shared layout, API, product, and UI components
   features/              Feature-specific code and planning notes
     auth/                Auth API, components, hooks, and user store
@@ -42,10 +43,7 @@ src/
     report/              Report notes
     shade-mapping/       Mapping notes
     user-management/     User management notes
-  hooks/                 Shared data hooks
-  lib/                   HTTP client, utilities, and local demo data
+  lib/                   HTTP client, upload, utilities, and local demo data
   pages/                 Page components
   routes/                TanStack Router route definitions and generated tree
-  services/              API access helpers
-  types/                 API types
 ```
