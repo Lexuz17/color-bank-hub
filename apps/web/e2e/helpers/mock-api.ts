@@ -57,7 +57,6 @@ export const mockProducts = [
     brandId: "brand-1",
     productFormatItemId: 1,
     name: "Velvet Satin Lipstick",
-    ingredientsInci: "Dimethicone, Silica, Red 7 Lake",
     baseType: "oil",
   },
   {
@@ -65,7 +64,6 @@ export const mockProducts = [
     brandId: "brand-2",
     productFormatItemId: 3,
     name: "Skin Glow Foundation",
-    ingredientsInci: "Water, Glycerin, Titanium Dioxide",
     baseType: "emulsion",
   },
 ];
@@ -87,6 +85,7 @@ export const mockShades = [
     hslL: 55,
     lipPhotoUrl: null,
     swatchPhotoUrl: null,
+    ingredientsInci: "Dimethicone, Silica, Red 7 Lake",
     mayContain: null,
     composition: [{ name: "Red 7 Lake", percentage: 5.5 }],
     brand: { id: "brand-1", name: "Color Lab Studio", isOwn: true },
@@ -96,7 +95,6 @@ export const mockShades = [
       productFormatItemId: 1,
       name: "Velvet Satin Lipstick",
       baseType: "oil",
-      ingredientsInci: "Dimethicone, Silica, Red 7 Lake",
     },
     formatItem: {
       id: 1,
@@ -122,6 +120,7 @@ export const mockShades = [
     hslL: 62,
     lipPhotoUrl: null,
     swatchPhotoUrl: null,
+    ingredientsInci: "Dimethicone, Silica, Red 7 Lake",
     mayContain: null,
     composition: [{ name: "Yellow 6 Lake", percentage: 3.2 }],
     brand: { id: "brand-1", name: "Color Lab Studio", isOwn: true },
@@ -131,7 +130,6 @@ export const mockShades = [
       productFormatItemId: 1,
       name: "Velvet Satin Lipstick",
       baseType: "oil",
-      ingredientsInci: "Dimethicone, Silica, Red 7 Lake",
     },
     formatItem: {
       id: 1,

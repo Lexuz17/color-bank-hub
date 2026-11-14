@@ -121,7 +121,6 @@ test("PostgreSQL API integration: catalog, imports, reports and prototype lifecy
           brandId: own.id,
           productFormatItemId: itemId,
           name: `${prefix} Tint`,
-          ingredientsInci: "Aqua, Glycerin",
         },
         201,
       )
@@ -135,7 +134,6 @@ test("PostgreSQL API integration: catalog, imports, reports and prototype lifecy
           brandId: external.id,
           productFormatItemId: itemId,
           name: `${prefix} External tint`,
-          ingredientsInci: "Aqua",
         },
         201,
       )
@@ -146,6 +144,7 @@ test("PostgreSQL API integration: catalog, imports, reports and prototype lifecy
       sku: `${prefix}-1`,
       name: "Rose test",
       hex: "#AA6D78",
+      ingredientsInci: "Aqua, Glycerin",
       composition: [{ name: "Red", percentage: 20 }],
     };
     const shade = (await call("/api/shades", "POST", shadeInput, 201)).data;

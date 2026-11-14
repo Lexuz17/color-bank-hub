@@ -10,12 +10,14 @@ import {
   getTableColumns,
   type SQL,
 } from "drizzle-orm";
+import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import { db } from "#api/lib/db.js";
 import {
   brands,
   products,
   productFormats,
   productFormatItems,
+  shadeBenchmarks,
   shades,
 } from "@color-bank-hub/db";
 import type { ShadeInput, ShadeQuery } from "@color-bank-hub/contracts/shade";
@@ -33,6 +35,7 @@ const view = {
 export async function listShades(query: ShadeQuery) {
   const filters: (SQL | undefined)[] = [
     query.brandId ? eq(brands.id, query.brandId) : undefined,
+    query.productId ? eq(products.id, query.productId) : undefined,
     query.productFormatItemId
       ? eq(products.productFormatItemId, query.productFormatItemId)
       : undefined,
@@ -107,13 +110,34 @@ export async function findShade(id: string) {
     .where(eq(shades.id, id));
   if (!row) fail("NOT_FOUND", "Shade not found", "SHADE_NOT_FOUND");
   const { composition, ...publicShade } = row.shade;
+  const [benchmarkedTo, benchmarkFor] = await Promise.all([
+    linkedShades(shadeBenchmarks.shadeId, shadeBenchmarks.benchmarkShadeId, id),
+    linkedShades(shadeBenchmarks.benchmarkShadeId, shadeBenchmarks.shadeId, id),
+  ]);
   return {
     ...publicShade,
     ...(row.brand.isOwn ? { composition } : {}),
     product: row.product,
     brand: row.brand,
     formatItem: row.formatItem,
+    benchmarkedTo,
+    benchmarkFor,
   };
+}
+function linkedShades(own: AnyPgColumn, other: AnyPgColumn, id: string) {
+  return db
+    .select({
+      id: shades.id,
+      name: shades.name,
+      product: products.name,
+      brand: brands.name,
+    })
+    .from(shadeBenchmarks)
+    .innerJoin(shades, eq(shades.id, other))
+    .innerJoin(products, eq(products.id, shades.productId))
+    .innerJoin(brands, eq(brands.id, products.brandId))
+    .where(eq(own, id))
+    .orderBy(asc(brands.name), asc(shades.name));
 }
 export async function listBrands() {
   return db.select().from(brands).orderBy(asc(brands.name));

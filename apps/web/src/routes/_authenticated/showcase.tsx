@@ -243,8 +243,11 @@ function ShowcasePage() {
       }
       detailPanel={
         <ProductDetailPanel
-          shade={sampleProfile}
-          canViewComposition={can(role, "shade:viewComposition")}
+          shade={
+            can(role, "shade:viewComposition")
+              ? sampleProfile
+              : { ...sampleProfile, composition: undefined }
+          }
         />
       }
     >
@@ -865,8 +868,11 @@ function ShowcasePage() {
             </CardHeader>
             <CardContent>
               <ProductDetailPanel
-                shade={sampleProfile}
-                canViewComposition={can(role, "shade:viewComposition")}
+                shade={
+                  can(role, "shade:viewComposition")
+                    ? sampleProfile
+                    : { ...sampleProfile, composition: undefined }
+                }
               />
             </CardContent>
           </Card>

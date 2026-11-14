@@ -2,12 +2,13 @@ import type { ShadeParams } from "@color-bank-hub/contracts/shade";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { getShade, getShades } from "./shades.api";
 
-export const useShades = (params: ShadeParams) =>
+export const useShades = (params: ShadeParams, enabled = true) =>
   useQuery({
     queryKey: ["shades", "list", params],
     queryFn: ({ signal }) => getShades(params, signal),
     // Keep the current rows on screen while a new page or filter loads.
     placeholderData: keepPreviousData,
+    enabled,
   });
 
 export const useShade = (id: string | null) =>

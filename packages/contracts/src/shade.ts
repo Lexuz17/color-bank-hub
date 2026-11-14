@@ -19,6 +19,7 @@ export const shadeInput = z
     sku: name.optional(),
     name,
     hex,
+    ingredientsInci: z.string().trim().max(20000).optional(),
     mayContain: z.string().max(20000).optional(),
     lipPhotoKey: z.string().max(500).optional(),
     swatchPhotoKey: z.string().max(500).optional(),
@@ -48,6 +49,7 @@ export type ShadeSort = z.infer<typeof shadeSort>;
 export const shadeQuery = pagination.extend({
   search: z.string().trim().max(255).optional(),
   brandId: uuid.optional(),
+  productId: uuid.optional(),
   productFormatItemId: z.coerce.number().int().positive().optional(),
   undertone: undertone.optional(),
   season: season.optional(),
@@ -81,12 +83,24 @@ export interface StoredShade {
   /** Signed URLs for display, null without a photo. */
   lipPhotoUrl: string | null;
   swatchPhotoUrl: string | null;
+  ingredientsInci: string | null;
   mayContain: string | null;
   /** Only returned for own-brand shades. */
   composition?: CompositionItem[] | null;
+}
+/** Another shade linked as a benchmark. */
+export interface ShadeRef {
+  id: string;
+  name: string;
+  product: string;
+  brand: string;
 }
 export interface Shade extends StoredShade {
   product: Product;
   brand: Brand;
   formatItem: FormatItem;
+  /** Detail only (GET /shades/:id). External shades this one is benchmarked to. */
+  benchmarkedTo?: ShadeRef[];
+  /** Detail only. Own shades that use this one as their benchmark. */
+  benchmarkFor?: ShadeRef[];
 }

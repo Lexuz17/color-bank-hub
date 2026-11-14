@@ -27,6 +27,7 @@ export const shades = pgTable(
     sku: varchar("sku").unique(),
     name: varchar("name").notNull(),
     hex: char("hex", { length: 7 }).notNull(),
+    ingredientsInci: text("ingredients_inci"),
     mayContain: text("may_contain"),
     /** storage object keys, see contracts/upload.ts */
     lipPhotoKey: text("lip_photo_key"),

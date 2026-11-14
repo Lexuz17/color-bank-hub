@@ -7,7 +7,6 @@ import {
 import { ApiError, FieldSelect } from "@/components/shared/request-feedback";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -153,12 +152,6 @@ export function CatalogSetup({
                     className="accent-primary"
                   />
                   Own brand (allows color composition)
-                </label>
-              )}
-              {mode === "product" && (
-                <label className="grid gap-2 text-xs">
-                  Full ingredients
-                  <Textarea name="ingredients" required maxLength={20000} />
                 </label>
               )}
               {create.isError && <ApiError error={create.error} />}

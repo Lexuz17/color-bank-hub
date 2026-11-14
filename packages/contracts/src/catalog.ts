@@ -1,9 +1,7 @@
 import { z } from "zod";
 import { name, uuid } from "./common.js";
 
-export const brandInput = z
-  .object({ name, isOwn: z.boolean().default(false) })
-  .strict();
+export const brandInput = z.object({ name, isOwn: z.boolean().default(false) }).strict();
 export type BrandInput = z.infer<typeof brandInput>;
 
 export const formatInput = z
@@ -34,7 +32,6 @@ export const productInput = z
     brandId: uuid,
     productFormatItemId: z.number().int().positive(),
     name,
-    ingredientsInci: z.string().trim().min(1).max(20000),
   })
   .strict();
 export type ProductInput = z.infer<typeof productInput>;
@@ -63,5 +60,4 @@ export interface Product {
   brandId: string;
   productFormatItemId: number;
   name: string;
-  ingredientsInci: string | null;
 }

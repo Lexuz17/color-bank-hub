@@ -1,13 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
 import { useBrands } from "@/api/brands/brand-queries";
 import { useProductFormats } from "@/api/product-formats/product-format-queries";
-import { getProducts } from "../api/data-input.api";
-
-export const useProducts = () =>
-  useQuery({
-    queryKey: ["products", "list"],
-    queryFn: ({ signal }) => getProducts(signal),
-  });
+import { useProducts } from "@/api/products/product-queries";
 
 // Everything the manual form needs to pick a product.
 export function useCatalog() {

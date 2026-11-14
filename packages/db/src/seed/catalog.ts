@@ -3,7 +3,7 @@ import type {
   RuleGroup,
 } from "@color-bank-hub/contracts/color-classification";
 import { classifyColor } from "@color-bank-hub/contracts/color-classification";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import type { Database } from "../index.js";
 import {
   brands,
@@ -16,7 +16,8 @@ import {
   shades,
 } from "../schema/index.js";
 
-// Development catalog for building Shade Mapping. Safe to re-run: every insert skips existing rows.
+// Development catalog for building Shade Mapping. Safe to re-run: inserts skip existing rows, and shades
+// refresh their ingredients, may-contain and composition.
 
 // shortcut: equal 36° Munsell areas on LCh hue, replace with the client's cut-offs (DATABASE_COLOR_MAPPING.xlsx, column Z).
 const munsellAreas = ["R", "YR", "Y", "GY", "G", "BG", "B", "PB", "P", "RP"];
@@ -316,6 +317,15 @@ const productList: [
 const benchmarkList: [string, string, string, string][] = [
   ["Jelly Stain", "08 Ube Mochi", "Blur-Glowy Tint", "204 Modestia"],
   ["Jelly Stain", "05 Bubble Pop", "Glaze Bouncing Tint", "06 Berry Shower"],
+  ["Jelly Stain", "04 Cream Peach", "Glow Fixing Tint", "05 Coral"],
+  ["Jelly Stain", "07 Cherry Lit", "Glaze Bouncing Tint", "05 Bubbly"],
+  ["Glossy Stain", "01 Autumn Bell", "Blur-Glowy Tint", "207 Rhea"],
+  [
+    "Glossy Stain",
+    "04 Peach Sprinkles",
+    "Glaze Bouncing Tint",
+    "04 Peach Chou",
+  ],
   [
     "Glossy Stain",
     "03 Rainy Hazelrose",
@@ -323,6 +333,42 @@ const benchmarkList: [string, string, string, string][] = [
     "02 Rosy Mocha",
   ],
 ];
+
+/** Base INCI list per sub-category code. Illustrative, not a real formula. */
+const baseIngredients: Record<string, string> = {
+  TG: "Aqua, Phytosteryl/Isostearyl/Cetyl/Stearyl/Behenyl Dimer Dilinoleate, Octyldodecanol, Glycerin, PEG-8 Beeswax, Ethylcellulose, Hydroxyethylcellulose, Silica, Phenoxyethanol, Fragrance",
+  V: "Dimethicone, Isododecane, Trimethylsiloxysilicate, Cyclopentasiloxane, Silica Dimethyl Silylate, Kaolin, Disteardimonium Hectorite, Tocopheryl Acetate, Phenoxyethanol",
+  SM: "Ricinus Communis Seed Oil, Octyldodecanol, Euphorbia Cerifera Wax, Copernicia Cerifera Wax, Cera Alba, Isopropyl Myristate, Silica, Tocopheryl Acetate, Fragrance",
+  BP: "Talc, Mica, Zinc Stearate, Caprylic/Capric Triglyceride, Dimethicone, Silica, Magnesium Myristate, Phenoxyethanol, Ethylhexylglycerin",
+  BL: "Aqua, Cyclopentasiloxane, Glycerin, Butylene Glycol, PEG-10 Dimethicone, Dimethicone, Sodium Chloride, Disteardimonium Hectorite, Phenoxyethanol",
+};
+
+/**
+ * Plausible colorant shares (total <= 100%) for a hex. Dummy data derived from the RGB channels,
+ * to be replaced by the lab's real composition.
+ */
+function colorants(hex: string) {
+  const [r, g, b] = [1, 3, 5].map((at) =>
+    Number.parseInt(hex.slice(at, at + 2), 16),
+  );
+  const weights: [name: string, ci: string, weight: number][] = [
+    ["Red 7 Lake", "CI 15850", r - Math.max(g, b)],
+    ["Red 28 Lake", "CI 45410", b - g],
+    ["Yellow 5 Lake", "CI 19140", g - b],
+    ["Titanium Dioxide", "CI 77891", Math.min(r, g, b)],
+    ["Black Iron Oxide", "CI 77499", 255 - r],
+  ];
+  const used = weights.filter(([, , weight]) => weight > 0);
+  const total = used.reduce((sum, [, , weight]) => sum + weight, 0);
+  return used
+    .map(([name, ci, weight]) => ({
+      name,
+      ci,
+      percentage: Math.floor((weight / total) * 1000) / 10,
+    }))
+    .filter((item) => item.percentage >= 1)
+    .sort((a, z) => z.percentage - a.percentage);
+}
 
 export async function seedCatalog(db: Database) {
   // Categories, sub-categories and one active config per category.
@@ -400,7 +446,6 @@ export async function seedCatalog(db: Database) {
         brandId,
         productFormatItemId: item.id,
         name,
-        ingredientsInci: "Aqua, Glycerin, Dimethicone, Isododecane",
       })
       .onConflictDoNothing();
     const [product] = await db
@@ -414,8 +459,15 @@ export async function seedCatalog(db: Database) {
       .values(
         shadeList.map(([shade, hex], index) => {
           const color = classifyColor(hex, config);
+          const mix = colorants(hex);
           return {
             ...color,
+            ingredientsInci: baseIngredients[code] ?? baseIngredients.TG,
+            mayContain: mix.map((item) => item.ci).join(", "),
+            // Own brands only: externals never have a composition.
+            composition: skuPrefix
+              ? mix.map(({ name, percentage }) => ({ name, percentage }))
+              : null,
             undertone: color.undertone as Shade["undertone"],
             season: color.season as Shade["season"],
             productId: product.id,
@@ -426,7 +478,14 @@ export async function seedCatalog(db: Database) {
           };
         }),
       )
-      .onConflictDoNothing();
+      .onConflictDoUpdate({
+        target: [shades.productId, shades.name],
+        set: {
+          ingredientsInci: sql`excluded.ingredients_inci`,
+          mayContain: sql`excluded.may_contain`,
+          composition: sql`excluded.composition`,
+        },
+      });
 
     const rows = await db
       .select({ id: shades.id, name: shades.name })

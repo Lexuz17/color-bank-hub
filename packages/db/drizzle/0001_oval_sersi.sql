@@ -8,4 +8,6 @@ ALTER TABLE "shades" DROP CONSTRAINT "shades_classification_config_version_id_cl
 ALTER TABLE "shades" DROP COLUMN "classification_config_version_id";--> statement-breakpoint
 DROP INDEX "mappings_status_idx";--> statement-breakpoint
 ALTER TABLE "mappings" DROP COLUMN "status";--> statement-breakpoint
-DROP TYPE "public"."mapping_status";
+DROP TYPE "public"."mapping_status";--> statement-breakpoint
+ALTER TABLE "shades" ADD COLUMN "ingredients_inci" text;--> statement-breakpoint
+ALTER TABLE "products" DROP COLUMN "ingredients_inci";

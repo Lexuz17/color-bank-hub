@@ -44,16 +44,11 @@ export interface ClassificationConfig {
 }
 
 function inRange(value: number, { min, max }: Range) {
-  return min <= max
-    ? value >= min && value <= max
-    : value >= min || value <= max;
+  return min <= max ? value >= min && value <= max : value >= min || value <= max;
 }
 
 /** Label of the first rule that matches, or null when none does. */
-export function matchRule(
-  rules: ClassRule[],
-  color: { hue: number; lightness: number; saturation: number },
-) {
+export function matchRule(rules: ClassRule[], color: { hue: number; lightness: number; saturation: number }) {
   const rule = rules.find(
     (r) =>
       (!r.hue || inRange(color.hue, r.hue)) &&
@@ -89,3 +84,16 @@ export function classifyColor(hex: string, config: ClassificationConfig) {
     chromaClass: classify(config.chromaClass, metrics),
   };
 }
+
+export const munsellHues: Record<string, string> = {
+  R: "Red",
+  YR: "Yellow-Red",
+  Y: "Yellow",
+  GY: "Green-Yellow",
+  G: "Green",
+  BG: "Blue-Green",
+  B: "Blue",
+  PB: "Purple-Blue",
+  P: "Purple",
+  RP: "Red-Purple",
+};

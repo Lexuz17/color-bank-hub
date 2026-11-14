@@ -21,7 +21,8 @@
   ],
   "formatter": {
     "enabled": true,
-    "indentStyle": "space"
+    "indentStyle": "space",
+    "lineWidth": 150
   },
   "assist": {
     "actions": {
@@ -45,14 +46,7 @@
         "noLabelWithoutControl": {
           "level": "error",
           "options": {
-            "inputComponents": [
-              "Input",
-              "Textarea",
-              "FieldSelect",
-              "Checkbox",
-              "Switch",
-              "RadioGroupItem"
-            ],
+            "inputComponents": ["Input", "Textarea", "FieldSelect", "Checkbox", "Switch", "RadioGroupItem"],
             "labelComponents": ["Label"]
           }
         }

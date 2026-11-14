@@ -1,5 +1,5 @@
 {
-  "id": "26a544c4-3c67-4d13-ae67-5b75ae166aee",
+  "id": "67eccef9-4579-469b-93f5-774346937cba",
   "prevId": "921a9f53-4ecf-4d7c-b3e8-4bf3056d4c7b",
   "version": "7",
   "dialect": "postgresql",
@@ -816,12 +816,6 @@
           "primaryKey": false,
           "notNull": true
         },
-        "ingredients_inci": {
-          "name": "ingredients_inci",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp with time zone",
@@ -1128,6 +1122,12 @@
           "type": "char(7)",
           "primaryKey": false,
           "notNull": true
+        },
+        "ingredients_inci": {
+          "name": "ingredients_inci",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         },
         "may_contain": {
           "name": "may_contain",

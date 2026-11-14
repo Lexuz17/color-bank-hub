@@ -2,7 +2,6 @@ import {
   index,
   integer,
   pgTable,
-  text,
   timestamp,
   uniqueIndex,
   uuid,
@@ -22,7 +21,6 @@ export const products = pgTable(
       .notNull()
       .references(() => productFormatItems.id),
     name: varchar("name").notNull(),
-    ingredientsInci: text("ingredients_inci"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),

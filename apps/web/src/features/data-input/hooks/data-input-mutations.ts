@@ -91,7 +91,6 @@ export function useCreateCatalogRecord() {
           brandId: String(data.get("brandId")),
           productFormatItemId: Number(data.get("productFormatItemId")),
           name: String(data.get("name")).trim(),
-          ingredientsInci: String(data.get("ingredients")).trim(),
         }),
       };
     },

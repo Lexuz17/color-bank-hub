@@ -1,8 +1,4 @@
-import type {
-  ReportInput,
-  ReportQuery,
-  ReportStatus,
-} from "@color-bank-hub/contracts/report";
+import type { ReportInput, ReportQuery, ReportStatus } from "@color-bank-hub/contracts/report";
 import * as repository from "#api/repositories/report-repository.js";
 
 export const listReports = (query: ReportQuery) => repository.listReports(query);

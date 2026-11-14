@@ -70,7 +70,7 @@ export const tableRows = [
 export const sampleProfile: ShadeProfile = {
   ...tableRows[4],
   format: "Lip Tint · Lip Tint Gloss",
-  benchmark: "Dinto Blur-Glowy Tint #204 Modestia",
+  benchmarkedTo: ["Dinto Blur-Glowy Tint #204 Modestia"],
   ingredients:
     "Aqua, Phytosteryl/Isostearyl/Cetyl/Stearyl/Behenyl Dimer Dilinoleate, Octyldodecanol, Glycerin, PEG-8 Beeswax, Ethylcellulose, Hydroxyethylcellulose, Silica, Phenoxyethanol. May contain: CI 77891, CI 16035, CI 77492, CI 77499, CI 77491, CI 17200, CI 19140, CI 45380, CI 15510, CI 45410, CI 42090.",
   composition: [

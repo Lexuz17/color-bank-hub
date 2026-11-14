@@ -1,22 +1,8 @@
 // Legacy endpoints of the old Data Input page. They go away with the new flow: see apps/api/src/controllers/data-input-controller.ts.
-import type {
-  Brand,
-  BrandInput,
-  FormatInput,
-  Product,
-  ProductFormat,
-  ProductInput,
-} from "@color-bank-hub/contracts/catalog";
-import type {
-  ImportPreview,
-  ImportResult,
-} from "@color-bank-hub/contracts/import";
+import type { Brand, BrandInput, FormatInput, Product, ProductFormat, ProductInput } from "@color-bank-hub/contracts/catalog";
+import type { ImportPreview, ImportResult } from "@color-bank-hub/contracts/import";
 import type { ShadeInput, StoredShade } from "@color-bank-hub/contracts/shade";
-import { get, post } from "@/lib/http";
-
-export function getProducts(signal?: AbortSignal) {
-  return get<Product[]>("/products", undefined, signal);
-}
+import { post } from "@/lib/http";
 
 export function createBrand(body: BrandInput) {
   return post<Brand>("/brands", body);

@@ -1,23 +1,23 @@
+import { munsellHues } from "@color-bank-hub/contracts/color-classification";
 import { useState } from "react";
 import { PageShell } from "@/components/layout/page-shell";
-import {
-  PageToolbar,
-  EmptyState,
-  LoadingState,
-} from "@/components/shared/workspace-components";
+import { PageToolbar, EmptyState, LoadingState } from "@/components/shared/workspace-components";
 import { ProductDetailPanel } from "@/components/shared/product-detail-panel";
 import { CatalogSidebar } from "@/components/catalog/catalog-sidebar";
 import { ShadeDatabase } from "@/components/shades/shade-database";
 import { ApiError } from "@/components/shared/request-feedback";
 import { useShade } from "@/api/shades/shade-queries";
-const tones = { warm: "Warm", neutral: "Neutral", cool: "Cool" } as const;
-const seasons = {
+// Display labels for the stored lowercase enums.
+const labels = {
+  warm: "Warm",
+  neutral: "Neutral",
+  cool: "Cool",
   spring: "Spring",
   summer: "Summer",
   autumn: "Autumn",
   winter: "Winter",
-  neutral: "Neutral",
 } as const;
+
 export function ColorDatabasePage() {
   const [format, setFormat] = useState<number | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
@@ -39,22 +39,25 @@ export function ColorDatabasePage() {
         product: shade.product.name,
         shade: shade.name,
         hex: shade.hex,
-        undertone: shade.undertone ? tones[shade.undertone] : null,
-        season: shade.season ? seasons[shade.season] : null,
+        undertone: shade.undertone ? labels[shade.undertone] : null,
+        season: shade.season ? labels[shade.season] : null,
         format: shade.formatItem.name,
-        ingredients:
-          shade.product.ingredientsInci ?? "No ingredients recorded.",
+        tags: [
+          shade.hueMunsell && (munsellHues[shade.hueMunsell] ?? shade.hueMunsell),
+          shade.valueClass && `${shade.valueClass} Value`,
+          shade.chromaClass,
+        ].filter((tag): tag is string => !!tag),
+        benchmarkedTo: shade.benchmarkedTo?.map((ref) => `${ref.brand} ${ref.product} ${ref.name}`),
+        benchmarkFor: shade.benchmarkFor?.map((ref) => `${ref.brand} ${ref.product} ${ref.name}`),
+        ingredients: shade.ingredientsInci ?? undefined,
+        mayContain: shade.mayContain ?? undefined,
         composition: shade.composition ?? undefined,
         lipPhotoUrl: shade.lipPhotoUrl ?? undefined,
         swatchPhotoUrl: shade.swatchPhotoUrl ?? undefined,
       }}
-      canViewComposition={shade.brand.isOwn}
     />
   ) : (
-    <EmptyState
-      title="Product detail"
-      description="Select a shade to view its profile, ingredients, and composition."
-    />
+    <EmptyState title="Product detail" description="Select a shade to view its profile, ingredients, and composition." />
   );
   return (
     <PageShell
@@ -70,16 +73,9 @@ export function ColorDatabasePage() {
       }
       detailPanel={detail}
     >
-      <PageToolbar
-        title="Color Database"
-        description="Browse products and shades from the database"
-      />
+      <PageToolbar title="Color Database" description="Browse products and shades from the database" />
       <div className="p-5">
-        <ShadeDatabase
-          key={format ?? "all"}
-          productFormatItemId={format}
-          onInspect={setSelected}
-        />
+        <ShadeDatabase key={format ?? "all"} productFormatItemId={format} onInspect={setSelected} />
         <div className="mt-5 rounded-md border xl:hidden">{detail}</div>
       </div>
     </PageShell>
