@@ -1,5 +1,4 @@
 // Shades. Used by: Color Database table, Shade Mapping (select SKUs + map + detail panel), Data Input manual entry / manage.
-// Status: built in catalog-controller.ts, move the code here.
 // POST /api/shades is not called by Data Input (it uses data-input-controller); keep it only if a caller appears.
 //
 // Method Path               Handler      Permission     Input (contracts)   DB
@@ -23,4 +22,34 @@
 // Rules (service): composition only for own brands (shade:viewComposition to read it), photo keys via verifyUpload("shade-photo"),
 // return signed URLs via getFileUrl(), (productId, name) and sku unique -> CONFLICT.
 
-export {};
+import { uuid } from "@color-bank-hub/contracts/common";
+import { shadeInput, shadePatch, shadeQuery } from "@color-bank-hub/contracts/shade";
+import type { Context } from "hono";
+import { parse } from "#api/core/errors.js";
+import type { AppEnv } from "#api/middleware/auth.js";
+import * as shades from "#api/services/shade-service.js";
+
+type Ctx = Context<AppEnv>;
+
+export async function listShades(c: Ctx) {
+  const query = parse(shadeQuery, c.req.query());
+  return c.json({ data: await shades.listShades(query) });
+}
+
+export async function findShade(c: Ctx) {
+  const id = parse(uuid, c.req.param("id"));
+  return c.json({ data: await shades.findShade(id, c.get("user").role) });
+}
+
+export async function createShade(c: Ctx) {
+  const input = parse(shadeInput, await c.req.json());
+  const shade = await shades.createShade(input, c.get("user").role);
+  return c.json({ data: shade }, 201);
+}
+
+export async function updateShade(c: Ctx) {
+  const id = parse(uuid, c.req.param("id"));
+  const input = parse(shadePatch, await c.req.json());
+  const shade = await shades.updateShade(id, input, c.get("user").role);
+  return c.json({ data: shade });
+}

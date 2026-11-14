@@ -1,6 +1,6 @@
 import { can, type Role } from "@color-bank-hub/contracts/rbac";
 import type { ShadeInput, ShadePatch, ShadeQuery } from "@color-bank-hub/contracts/shade";
-import * as repository from "#api/repositories/catalog-repository.js";
+import * as repository from "#api/repositories/shade-repository.js";
 import { getFileUrl, verifyUpload } from "#api/services/upload-service.js";
 
 /** Field-level RBAC: strip composition for roles that may not see it. */
@@ -39,6 +39,9 @@ export async function createShade(input: ShadeInput, role: Role) {
   const [shade] = await repository.createShades([input]);
   return withPhotoUrls(visibleShade(shade, role));
 }
+
+// Used by data-input. Forwards only, as the old import did (no photo check yet).
+export const createShades = (rows: ShadeInput[]) => repository.createShades(rows);
 
 export async function updateShade(id: string, input: ShadePatch, role: Role) {
   await verifyPhotos(input);
