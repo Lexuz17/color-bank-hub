@@ -106,13 +106,6 @@ function linkedShades(own: AnyPgColumn, other: AnyPgColumn, id: string) {
     .where(eq(own, id))
     .orderBy(asc(brands.name), asc(shades.name));
 }
-export async function listProducts() {
-  return db.select().from(products).orderBy(asc(products.name)).limit(1000);
-}
-export async function createProduct(input: typeof products.$inferInsert) {
-  const [row] = await db.insert(products).values(input).returning();
-  return row;
-}
 export async function validateShadeRows(rows: ShadeInput[]) {
   const ids = [...new Set(rows.map((row) => row.productId))];
   const existingProducts = ids.length

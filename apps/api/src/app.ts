@@ -5,6 +5,7 @@ import { requestId } from "hono/request-id";
 import { brandRoutes } from "#api/routes/brand-routes.js";
 import { catalogRoutes } from "#api/routes/catalog-routes.js";
 import { productFormatRoutes } from "#api/routes/product-format-routes.js";
+import { productRoutes } from "#api/routes/product-routes.js";
 import { reportRoutes } from "#api/routes/report-routes.js";
 import { uploadRoutes } from "#api/routes/upload-routes.js";
 import { userRoutes } from "#api/routes/user-routes.js";
@@ -75,6 +76,7 @@ export function createApp(options: { resolveUser?: ResolveUser } = {}) {
   app.get("/api/me", (c) => c.json({ data: c.get("user") }));
   app.route("/api", brandRoutes);
   app.route("/api", productFormatRoutes);
+  app.route("/api", productRoutes);
   app.route("/api", catalogRoutes);
   app.route("/api", reportRoutes);
   app.route("/api", workflowRoutes);

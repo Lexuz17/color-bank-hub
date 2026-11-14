@@ -1,4 +1,3 @@
-import { productInput } from "@color-bank-hub/contracts/catalog";
 import { uuid } from "@color-bank-hub/contracts/common";
 import { importInput } from "@color-bank-hub/contracts/import";
 import { shadeInput, shadePatch, shadeQuery } from "@color-bank-hub/contracts/shade";
@@ -9,15 +8,6 @@ import * as catalog from "#api/services/catalog-service.js";
 import { commitImport, previewImport } from "#api/services/import-service.js";
 
 type Ctx = Context<AppEnv>;
-
-export async function listProducts(c: Ctx) {
-  return c.json({ data: await catalog.listProducts() });
-}
-
-export async function createProduct(c: Ctx) {
-  const input = parse(productInput, await c.req.json());
-  return c.json({ data: await catalog.createProduct(input) }, 201);
-}
 
 export async function listShades(c: Ctx) {
   const query = parse(shadeQuery, c.req.query());
