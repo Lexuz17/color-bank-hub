@@ -3,7 +3,7 @@ import { cors } from "hono/cors";
 import { bodyLimit } from "hono/body-limit";
 import { requestId } from "hono/request-id";
 import { brandRoutes } from "#api/routes/brand-routes.js";
-import { catalogRoutes } from "#api/routes/catalog-routes.js";
+import { dataInputRoutes } from "#api/routes/data-input-routes.js";
 import { productFormatRoutes } from "#api/routes/product-format-routes.js";
 import { productRoutes } from "#api/routes/product-routes.js";
 import { shadeRoutes } from "#api/routes/shade-routes.js";
@@ -79,7 +79,7 @@ export function createApp(options: { resolveUser?: ResolveUser } = {}) {
   app.route("/api", productFormatRoutes);
   app.route("/api", productRoutes);
   app.route("/api", shadeRoutes);
-  app.route("/api", catalogRoutes);
+  app.route("/api", dataInputRoutes);
   app.route("/api", reportRoutes);
   app.route("/api", workflowRoutes);
   app.route("/api", uploadRoutes);

@@ -1,5 +1,5 @@
 import { shadeInput, type ShadeInput } from "@color-bank-hub/contracts/shade";
-import { validateShadeRows } from "#api/repositories/catalog-repository.js";
+import { validateShadeRows } from "#api/repositories/data-input-repository.js";
 import { createShades } from "#api/services/shade-service.js";
 import { fail } from "#api/core/errors.js";
 export async function previewImport(rows: unknown[]) {
