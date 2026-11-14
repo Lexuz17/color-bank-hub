@@ -10,7 +10,7 @@ import { shadeRoutes } from "#api/routes/shade-routes.js";
 import { reportRoutes } from "#api/routes/report-routes.js";
 import { uploadRoutes } from "#api/routes/upload-routes.js";
 import { userRoutes } from "#api/routes/user-routes.js";
-import { workflowRoutes } from "#api/routes/workflow-routes.js";
+import { prototypeRequestRoutes } from "#api/routes/prototype-request-routes.js";
 import { env } from "#api/env.js";
 import { auth } from "#api/lib/auth.js";
 import { type AppEnv, type ResolveUser, requireAuth } from "#api/middleware/auth.js";
@@ -81,7 +81,7 @@ export function createApp(options: { resolveUser?: ResolveUser } = {}) {
   app.route("/api", shadeRoutes);
   app.route("/api", dataInputRoutes);
   app.route("/api", reportRoutes);
-  app.route("/api", workflowRoutes);
+  app.route("/api", prototypeRequestRoutes);
   app.route("/api", uploadRoutes);
   app.route("/api", userRoutes);
   app.notFound((c) => sendError(c, new AppError("NOT_FOUND", "Endpoint not found", "ROUTE_NOT_FOUND")));

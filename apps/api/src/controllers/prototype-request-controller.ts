@@ -1,5 +1,4 @@
 // Prototype requests (Color Bank). Used by: Color Bank list, detail, new request form, admin workflow.
-// Status: built in workflow-controller.ts, move the code here.
 //
 // Method Path                                     Handler            Permission         Input (contracts)            DB
 // GET    /api/prototype-requests                  listRequests       (auth)             prototype.prototypeQuery     read  prototype_requests
@@ -22,7 +21,7 @@
 //   PROTOTYPE_NOT_FOUND.
 // - transition to approved | declined needs can(role, "prototype:decide") -> FORBIDDEN DECIDE_NOT_ALLOWED. The permission
 //   depends on the target status, so the service checks it, not the route.
-// - Allowed moves only (already in workflow-repository): pending -> approved | declined; approved -> formulating;
+// - Allowed moves only (already in prototype-request-repository): pending -> approved | declined; approved -> formulating;
 //   formulating -> completed ("Done Formulating", needs a result photo). Anything else -> INVALID_TRANSITION.
 //   declined needs declineReason.
 // - updateFormulation only while status is formulating -> NOT_FORMULATING ("Save draft" = same call).
@@ -32,4 +31,40 @@
 // Later: result_photo_url -> photo key via upload-service (store keys, not URLs).
 // Note: the existing repository calls fail(); move those rules to prototype-request-service.
 
-export {};
+import { uuid } from "@color-bank-hub/contracts/common";
+import { formulationInput, prototypeInput, prototypeQuery, transitionInput } from "@color-bank-hub/contracts/prototype";
+import type { Context } from "hono";
+import { parse } from "#api/core/errors.js";
+import type { AppEnv } from "#api/middleware/auth.js";
+import * as requests from "#api/services/prototype-request-service.js";
+
+type Ctx = Context<AppEnv>;
+
+export async function listRequests(c: Ctx) {
+  const query = parse(prototypeQuery, c.req.query());
+  return c.json({ data: await requests.listRequests(query) });
+}
+
+export async function findRequest(c: Ctx) {
+  const id = parse(uuid, c.req.param("id"));
+  return c.json({ data: await requests.findRequest(id) });
+}
+
+export async function createRequest(c: Ctx) {
+  const input = parse(prototypeInput, await c.req.json());
+  const request = await requests.createRequest(input, c.get("user").id);
+  return c.json({ data: request }, 201);
+}
+
+export async function transition(c: Ctx) {
+  const id = parse(uuid, c.req.param("id"));
+  const input = parse(transitionInput, await c.req.json());
+  const request = await requests.transition(id, input, c.get("user").id);
+  return c.json({ data: request });
+}
+
+export async function updateFormulation(c: Ctx) {
+  const id = parse(uuid, c.req.param("id"));
+  const input = parse(formulationInput, await c.req.json());
+  return c.json({ data: await requests.updateFormulation(id, input) });
+}
