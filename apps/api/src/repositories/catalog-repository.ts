@@ -1,25 +1,7 @@
-import {
-  and,
-  asc,
-  desc,
-  eq,
-  ilike,
-  inArray,
-  or,
-  count,
-  getTableColumns,
-  type SQL,
-} from "drizzle-orm";
+import { and, asc, desc, eq, ilike, inArray, or, count, getTableColumns, type SQL } from "drizzle-orm";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import { db } from "#api/lib/db.js";
-import {
-  brands,
-  products,
-  productFormats,
-  productFormatItems,
-  shadeBenchmarks,
-  shades,
-} from "@color-bank-hub/db";
+import { brands, products, productFormats, productFormatItems, shadeBenchmarks, shades } from "@color-bank-hub/db";
 import type { ShadeInput, ShadeQuery } from "@color-bank-hub/contracts/shade";
 import { fail } from "#api/core/errors.js";
 import { colorMetrics } from "@color-bank-hub/contracts/color";
@@ -36,9 +18,7 @@ export async function listShades(query: ShadeQuery) {
   const filters: (SQL | undefined)[] = [
     query.brandId ? eq(brands.id, query.brandId) : undefined,
     query.productId ? eq(products.id, query.productId) : undefined,
-    query.productFormatItemId
-      ? eq(products.productFormatItemId, query.productFormatItemId)
-      : undefined,
+    query.productFormatItemId ? eq(products.productFormatItemId, query.productFormatItemId) : undefined,
     query.season ? eq(shades.season, query.season) : undefined,
     query.undertone ? eq(shades.undertone, query.undertone) : undefined,
     query.colorFamily ? eq(shades.colorFamily, query.colorFamily) : undefined,
@@ -46,14 +26,7 @@ export async function listShades(query: ShadeQuery) {
   ];
   if (query.search) {
     const pattern = `%${query.search.replace(/[\\%_]/g, "\\$&")}%`;
-    filters.push(
-      or(
-        ilike(shades.name, pattern),
-        ilike(shades.sku, pattern),
-        ilike(products.name, pattern),
-        ilike(brands.name, pattern),
-      ),
-    );
+    filters.push(or(ilike(shades.name, pattern), ilike(shades.sku, pattern), ilike(products.name, pattern), ilike(brands.name, pattern)));
   }
   const where = and(...filters);
   const sortColumn = {
@@ -70,10 +43,7 @@ export async function listShades(query: ShadeQuery) {
       .from(shades)
       .innerJoin(products, eq(products.id, shades.productId))
       .innerJoin(brands, eq(brands.id, products.brandId))
-      .innerJoin(
-        productFormatItems,
-        eq(productFormatItems.id, products.productFormatItemId),
-      )
+      .innerJoin(productFormatItems, eq(productFormatItems.id, products.productFormatItemId))
       .where(where)
       .orderBy(order(sortColumn), asc(shades.id))
       .limit(query.pageSize)
@@ -103,10 +73,7 @@ export async function findShade(id: string) {
     .from(shades)
     .innerJoin(products, eq(products.id, shades.productId))
     .innerJoin(brands, eq(brands.id, products.brandId))
-    .innerJoin(
-      productFormatItems,
-      eq(productFormatItems.id, products.productFormatItemId),
-    )
+    .innerJoin(productFormatItems, eq(productFormatItems.id, products.productFormatItemId))
     .where(eq(shades.id, id));
   if (!row) fail("NOT_FOUND", "Shade not found", "SHADE_NOT_FOUND");
   const { composition, ...publicShade } = row.shade;
@@ -139,19 +106,13 @@ function linkedShades(own: AnyPgColumn, other: AnyPgColumn, id: string) {
     .where(eq(own, id))
     .orderBy(asc(brands.name), asc(shades.name));
 }
-export async function listBrands() {
-  return db.select().from(brands).orderBy(asc(brands.name));
-}
 export async function listFormats() {
   const [formats, counts] = await Promise.all([
     db.query.productFormats.findMany({
       orderBy: [asc(productFormats.sortOrder), asc(productFormats.id)],
       with: {
         items: {
-          orderBy: [
-            asc(productFormatItems.sortOrder),
-            asc(productFormatItems.id),
-          ],
+          orderBy: [asc(productFormatItems.sortOrder), asc(productFormatItems.id)],
         },
       },
     }),
@@ -164,39 +125,20 @@ export async function listFormats() {
   const totals = new Map(counts.map((row) => [row.id, row.count]));
   return formats.map((format) => ({
     ...format,
-    count: format.items.reduce(
-      (sum, item) => sum + (totals.get(item.id) ?? 0),
-      0,
-    ),
+    count: format.items.reduce((sum, item) => sum + (totals.get(item.id) ?? 0), 0),
     items: format.items.map((item) => ({
       ...item,
       count: totals.get(item.id) ?? 0,
     })),
   }));
 }
-export async function createFormat(input: {
-  name: string;
-  items: { name: string; code: string }[];
-}) {
+export async function createFormat(input: { name: string; items: { name: string; code: string }[] }) {
   return db.transaction(async (tx) => {
-    const [created] = await tx
-      .insert(productFormats)
-      .values({ name: input.name })
-      .onConflictDoNothing({ target: productFormats.name })
-      .returning();
-    const format =
-      created ??
-      (
-        await tx
-          .select()
-          .from(productFormats)
-          .where(eq(productFormats.name, input.name))
-      )[0];
+    const [created] = await tx.insert(productFormats).values({ name: input.name }).onConflictDoNothing({ target: productFormats.name }).returning();
+    const format = created ?? (await tx.select().from(productFormats).where(eq(productFormats.name, input.name)))[0];
     const items = await tx
       .insert(productFormatItems)
-      .values(
-        input.items.map((item) => ({ ...item, productFormatId: format.id })),
-      )
+      .values(input.items.map((item) => ({ ...item, productFormatId: format.id })))
       .returning();
     return {
       ...format,
@@ -207,10 +149,6 @@ export async function createFormat(input: {
 }
 export async function listProducts() {
   return db.select().from(products).orderBy(asc(products.name)).limit(1000);
-}
-export async function createBrand(input: typeof brands.$inferInsert) {
-  const [row] = await db.insert(brands).values(input).returning();
-  return row;
 }
 export async function createProduct(input: typeof products.$inferInsert) {
   const [row] = await db.insert(products).values(input).returning();
@@ -226,12 +164,7 @@ export async function validateShadeRows(rows: ShadeInput[]) {
         .where(inArray(products.id, ids))
     : [];
   const skus = rows.flatMap((row) => (row.sku ? [row.sku] : []));
-  const existingSkus = skus.length
-    ? await db
-        .select({ sku: shades.sku })
-        .from(shades)
-        .where(inArray(shades.sku, skus))
-    : [];
+  const existingSkus = skus.length ? await db.select({ sku: shades.sku }).from(shades).where(inArray(shades.sku, skus)) : [];
   const productMap = new Map(existingProducts.map((row) => [row.id, row]));
   const duplicates = new Set(existingSkus.map((row) => row.sku));
   return rows.map((row) =>
@@ -251,12 +184,7 @@ async function insertShade(tx: Executor, input: ShadeInput) {
     .innerJoin(brands, eq(brands.id, products.brandId))
     .where(eq(products.id, input.productId));
   if (!product) fail("BUSINESS_RULE", "Product not found", "INVALID_PRODUCT");
-  if (input.composition && !product.isOwn)
-    fail(
-      "BUSINESS_RULE",
-      "Composition is only allowed for own brands",
-      "EXTERNAL_COMPOSITION",
-    );
+  if (input.composition && !product.isOwn) fail("BUSINESS_RULE", "Composition is only allowed for own brands", "EXTERNAL_COMPOSITION");
   const [row] = await tx
     .insert(shades)
     .values({ ...input, ...colorMetrics(input.hex) })
@@ -270,28 +198,16 @@ export async function createShades(rows: ShadeInput[]) {
     return result;
   });
 }
-export async function updateShade(
-  id: string,
-  input: Partial<Omit<ShadeInput, "productId">>,
-) {
+export async function updateShade(id: string, input: Partial<Omit<ShadeInput, "productId">>) {
   return db.transaction(async (tx) => {
-    const [existing] = await tx
-      .select()
-      .from(shades)
-      .where(eq(shades.id, id))
-      .for("update");
+    const [existing] = await tx.select().from(shades).where(eq(shades.id, id)).for("update");
     if (!existing) fail("NOT_FOUND", "Shade not found", "SHADE_NOT_FOUND");
     const [product] = await tx
       .select({ isOwn: brands.isOwn })
       .from(products)
       .innerJoin(brands, eq(brands.id, products.brandId))
       .where(eq(products.id, existing.productId));
-    if (input.composition && !product.isOwn)
-      fail(
-        "BUSINESS_RULE",
-        "Composition is only allowed for own brands",
-        "EXTERNAL_COMPOSITION",
-      );
+    if (input.composition && !product.isOwn) fail("BUSINESS_RULE", "Composition is only allowed for own brands", "EXTERNAL_COMPOSITION");
     const [row] = await tx
       .update(shades)
       .set({

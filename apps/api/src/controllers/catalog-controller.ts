@@ -1,15 +1,7 @@
-import {
-  brandInput,
-  formatInput,
-  productInput,
-} from "@color-bank-hub/contracts/catalog";
+import { formatInput, productInput } from "@color-bank-hub/contracts/catalog";
 import { uuid } from "@color-bank-hub/contracts/common";
 import { importInput } from "@color-bank-hub/contracts/import";
-import {
-  shadeInput,
-  shadePatch,
-  shadeQuery,
-} from "@color-bank-hub/contracts/shade";
+import { shadeInput, shadePatch, shadeQuery } from "@color-bank-hub/contracts/shade";
 import type { Context } from "hono";
 import { parse } from "#api/core/errors.js";
 import type { AppEnv } from "#api/middleware/auth.js";
@@ -17,15 +9,6 @@ import * as catalog from "#api/services/catalog-service.js";
 import { commitImport, previewImport } from "#api/services/import-service.js";
 
 type Ctx = Context<AppEnv>;
-
-export async function listBrands(c: Ctx) {
-  return c.json({ data: await catalog.listBrands() });
-}
-
-export async function createBrand(c: Ctx) {
-  const input = parse(brandInput, await c.req.json());
-  return c.json({ data: await catalog.createBrand(input) }, 201);
-}
 
 export async function listFormats(c: Ctx) {
   return c.json({ data: await catalog.listFormats() });

@@ -2,6 +2,7 @@ import { type Context, Hono } from "hono";
 import { cors } from "hono/cors";
 import { bodyLimit } from "hono/body-limit";
 import { requestId } from "hono/request-id";
+import { brandRoutes } from "#api/routes/brand-routes.js";
 import { catalogRoutes } from "#api/routes/catalog-routes.js";
 import { reportRoutes } from "#api/routes/report-routes.js";
 import { uploadRoutes } from "#api/routes/upload-routes.js";
@@ -9,19 +10,12 @@ import { userRoutes } from "#api/routes/user-routes.js";
 import { workflowRoutes } from "#api/routes/workflow-routes.js";
 import { env } from "#api/env.js";
 import { auth } from "#api/lib/auth.js";
-import {
-  type AppEnv,
-  type ResolveUser,
-  requireAuth,
-} from "#api/middleware/auth.js";
+import { type AppEnv, type ResolveUser, requireAuth } from "#api/middleware/auth.js";
 import { AppError } from "#api/core/errors.js";
 
 type Ctx = Context<AppEnv>;
 
-function sendError(
-  c: Ctx,
-  { code, reason, message, issues, status }: AppError,
-) {
+function sendError(c: Ctx, { code, reason, message, issues, status }: AppError) {
   return c.json(
     {
       error: {
@@ -39,27 +33,10 @@ function sendError(
 /** Maps any thrown value to a safe client error; unknown errors become INTERNAL. */
 function toAppError(error: Error, c: Ctx) {
   if (error instanceof AppError) return error;
-  if (error instanceof SyntaxError)
-    return new AppError(
-      "BAD_REQUEST",
-      "Request body must be valid JSON",
-      "INVALID_JSON",
-    );
-  const dbCode =
-    (error as { cause?: { code?: string }; code?: string }).cause?.code ??
-    (error as { code?: string }).code;
-  if (dbCode === "23505")
-    return new AppError(
-      "CONFLICT",
-      "A record with this unique value already exists",
-      "UNIQUE_VIOLATION",
-    );
-  if (dbCode === "23503")
-    return new AppError(
-      "BUSINESS_RULE",
-      "A referenced record does not exist",
-      "INVALID_REFERENCE",
-    );
+  if (error instanceof SyntaxError) return new AppError("BAD_REQUEST", "Request body must be valid JSON", "INVALID_JSON");
+  const dbCode = (error as { cause?: { code?: string }; code?: string }).cause?.code ?? (error as { code?: string }).code;
+  if (dbCode === "23505") return new AppError("CONFLICT", "A record with this unique value already exists", "UNIQUE_VIOLATION");
+  if (dbCode === "23503") return new AppError("BUSINESS_RULE", "A referenced record does not exist", "INVALID_REFERENCE");
   console.error("API request failed", {
     requestId: c.get("requestId"),
     method: c.req.method,
@@ -87,11 +64,7 @@ export function createApp(options: { resolveUser?: ResolveUser } = {}) {
     "/api/*",
     bodyLimit({
       maxSize: 2 * 1024 * 1024,
-      onError: (c) =>
-        sendError(
-          c,
-          new AppError("PAYLOAD_TOO_LARGE", "Request body exceeds 2 MB"),
-        ),
+      onError: (c) => sendError(c, new AppError("PAYLOAD_TOO_LARGE", "Request body exceeds 2 MB")),
     }),
   );
   app.get("/health", (c) => c.json({ status: "ok" }));
@@ -99,17 +72,13 @@ export function createApp(options: { resolveUser?: ResolveUser } = {}) {
   // Everything below requires an active, signed-in user.
   app.use("/api/*", requireAuth(options.resolveUser));
   app.get("/api/me", (c) => c.json({ data: c.get("user") }));
+  app.route("/api", brandRoutes);
   app.route("/api", catalogRoutes);
   app.route("/api", reportRoutes);
   app.route("/api", workflowRoutes);
   app.route("/api", uploadRoutes);
   app.route("/api", userRoutes);
-  app.notFound((c) =>
-    sendError(
-      c,
-      new AppError("NOT_FOUND", "Endpoint not found", "ROUTE_NOT_FOUND"),
-    ),
-  );
+  app.notFound((c) => sendError(c, new AppError("NOT_FOUND", "Endpoint not found", "ROUTE_NOT_FOUND")));
   app.onError((error, c) => sendError(c, toAppError(error, c)));
   return app;
 }
