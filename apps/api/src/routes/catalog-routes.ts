@@ -5,8 +5,6 @@ import { type AppEnv, requirePermission } from "#api/middleware/auth.js";
 const canWrite = requirePermission("catalog:write");
 
 export const catalogRoutes = new Hono<AppEnv>()
-  .get("/product-formats", catalog.listFormats)
-  .post("/product-formats", canWrite, catalog.createFormat)
   .get("/products", catalog.listProducts)
   .post("/products", canWrite, catalog.createProduct)
   .get("/shades", catalog.listShades)

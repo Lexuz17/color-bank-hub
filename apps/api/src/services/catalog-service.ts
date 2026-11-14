@@ -1,4 +1,4 @@
-import type { FormatInput, ProductInput } from "@color-bank-hub/contracts/catalog";
+import type { ProductInput } from "@color-bank-hub/contracts/catalog";
 import { can, type Role } from "@color-bank-hub/contracts/rbac";
 import type { ShadeInput, ShadePatch, ShadeQuery } from "@color-bank-hub/contracts/shade";
 import * as repository from "#api/repositories/catalog-repository.js";
@@ -25,9 +25,6 @@ async function withPhotoUrls<T extends PhotoKeys>(shade: T) {
 async function verifyPhotos(input: Partial<ShadeInput>) {
   for (const key of [input.lipPhotoKey, input.swatchPhotoKey]) if (key) await verifyUpload(key, "shade-photo");
 }
-
-export const listFormats = () => repository.listFormats();
-export const createFormat = (input: FormatInput) => repository.createFormat(input);
 
 export const listProducts = () => repository.listProducts();
 export const createProduct = (input: ProductInput) => repository.createProduct(input);
