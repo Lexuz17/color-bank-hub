@@ -5,6 +5,10 @@
 // - "Mine" = maps a user saved. Private: only the owner can read, edit or delete them (admin too has no access).
 // - No draft. A map that is not saved is not stored.
 //
+// Built so far: POST only (Save on Shade Mapping). The rest of this table is the plan.
+// POST copies the active config on the server (the client does not send it) and stores useActiveConfig = false.
+// A format without an active config cannot be saved: NOT_FOUND CONFIG_NOT_FOUND.
+//
 // Method Path                   Handler        Input (contracts)                       DB
 // GET    /api/mappings          listMappings   mappingQuery: library=all|pinned|mine,   all:  read shades + products + brands + product_format_items
 //                                              brandId?, productFormatId?, search?, page       (group by brand + sub-category -> one card each)
@@ -38,4 +42,15 @@
 // - Can system maps be pinned? If yes, a pin needs brand + sub-category instead of mapping_id.
 // Later: thumbnailUrl -> thumbnail key via upload-service (store keys, not URLs).
 
-export {};
+import { mappingInput } from "@color-bank-hub/contracts/mapping";
+import type { Context } from "hono";
+import { parse } from "#api/core/errors.js";
+import type { AppEnv } from "#api/middleware/auth.js";
+import * as mappings from "#api/services/mapping-service.js";
+
+type Ctx = Context<AppEnv>;
+
+export async function createMapping(c: Ctx) {
+  const input = parse(mappingInput, await c.req.json());
+  return c.json({ data: await mappings.createMapping(input, c.get("user").id) }, 201);
+}

@@ -1,7 +1,4 @@
-import type {
-  ClassificationConfig,
-  RuleGroup,
-} from "@color-bank-hub/contracts/color-classification";
+import type { ClassificationConfig, RuleGroup } from "@color-bank-hub/contracts/color-classification";
 import { classifyColor } from "@color-bank-hub/contracts/color-classification";
 import { and, eq, sql } from "drizzle-orm";
 import type { Database } from "../index.js";
@@ -33,11 +30,7 @@ const hueMunsell: RuleGroup = {
 const lipConfig: ClassificationConfig = {
   undertone: {
     model: "hsl",
-    rules: [
-      { label: "neutral", hue: { min: 355, max: 5 } },
-      { label: "warm", hue: { min: 5, max: 90 } },
-      { label: "cool" },
-    ],
+    rules: [{ label: "neutral", hue: { min: 355, max: 5 } }, { label: "warm", hue: { min: 5, max: 90 } }, { label: "cool" }],
   },
   season: {
     model: "hsl",
@@ -75,24 +68,31 @@ const lipConfig: ClassificationConfig = {
         saturation: { min: 70, max: 100 },
       },
       { label: "Peach", hue: { min: 8, max: 45 } },
-      { label: "Brown" },
+      { label: "Other" },
     ],
   },
+  // shortcut: dummy cut-offs for the sub-columns and lightness rows, replace with the client's numbers.
+  colorSub: [
+    { family: "Peach", label: "More Orange", hue: { min: 20, max: 45 } },
+    { family: "Peach", label: "More Pink" },
+    { family: "Pink", label: "Warm", hue: { min: 335, max: 350 } },
+    { family: "Pink", label: "Neutral", hue: { min: 315, max: 335 } },
+    { family: "Pink", label: "Cool" },
+  ],
   valueClass: {
     model: "lch",
     rules: [
-      { label: "Low", lightness: { min: 0, max: 40 } },
-      { label: "Medium", lightness: { min: 40, max: 70 } },
-      { label: "High" },
+      { label: "Dark", lightness: { min: 0, max: 30 } },
+      { label: "Medium Dark", lightness: { min: 30, max: 40 } },
+      { label: "Medium", lightness: { min: 40, max: 50 } },
+      { label: "Light Medium", lightness: { min: 50, max: 60 } },
+      { label: "Light", lightness: { min: 60, max: 75 } },
+      { label: "Fair" },
     ],
   },
   chromaClass: {
     model: "lch",
-    rules: [
-      { label: "Muted", saturation: { min: 0, max: 25 } },
-      { label: "Medium", saturation: { min: 25, max: 50 } },
-      { label: "Vivid" },
-    ],
+    rules: [{ label: "Muted", saturation: { min: 0, max: 25 } }, { label: "Medium", saturation: { min: 25, max: 50 } }, { label: "Vivid" }],
   },
 };
 
@@ -100,11 +100,7 @@ const lipConfig: ClassificationConfig = {
 const lchConfig: ClassificationConfig = {
   undertone: {
     model: "lch",
-    rules: [
-      { label: "neutral", hue: { min: 15, max: 30 } },
-      { label: "warm", hue: { min: 30, max: 90 } },
-      { label: "cool" },
-    ],
+    rules: [{ label: "neutral", hue: { min: 15, max: 30 } }, { label: "warm", hue: { min: 30, max: 90 } }, { label: "cool" }],
   },
   season: {
     model: "lch",
@@ -130,9 +126,18 @@ const lchConfig: ClassificationConfig = {
         saturation: { min: 45, max: 200 },
       },
       { label: "Peach", hue: { min: 35, max: 70 } },
-      { label: "Brown" },
+      // After Red: the same hues with a chroma under 45.
+      { label: "Brown", hue: { min: 20, max: 35 } },
+      { label: "Other" },
     ],
   },
+  colorSub: [
+    { family: "Peach", label: "More Orange", hue: { min: 50, max: 70 } },
+    { family: "Peach", label: "More Pink" },
+    { family: "Pink", label: "Warm", hue: { min: 5, max: 20 } },
+    { family: "Pink", label: "Neutral", hue: { min: 350, max: 5 } },
+    { family: "Pink", label: "Cool" },
+  ],
   valueClass: lipConfig.valueClass,
   chromaClass: lipConfig.chromaClass,
 };
@@ -197,13 +202,7 @@ const brandList: [string, boolean][] = [
 ];
 
 /** [brand, product, sub-category code, SKU prefix (own brands only), shades [name, hex]] */
-const productList: [
-  string,
-  string,
-  string,
-  string | null,
-  [string, string][],
-][] = [
+const productList: [string, string, string, string | null, [string, string][]][] = [
   [
     "Emina",
     "Jelly Stain",
@@ -320,18 +319,8 @@ const benchmarkList: [string, string, string, string][] = [
   ["Jelly Stain", "04 Cream Peach", "Glow Fixing Tint", "05 Coral"],
   ["Jelly Stain", "07 Cherry Lit", "Glaze Bouncing Tint", "05 Bubbly"],
   ["Glossy Stain", "01 Autumn Bell", "Blur-Glowy Tint", "207 Rhea"],
-  [
-    "Glossy Stain",
-    "04 Peach Sprinkles",
-    "Glaze Bouncing Tint",
-    "04 Peach Chou",
-  ],
-  [
-    "Glossy Stain",
-    "03 Rainy Hazelrose",
-    "Glaze Bouncing Tint",
-    "02 Rosy Mocha",
-  ],
+  ["Glossy Stain", "04 Peach Sprinkles", "Glaze Bouncing Tint", "04 Peach Chou"],
+  ["Glossy Stain", "03 Rainy Hazelrose", "Glaze Bouncing Tint", "02 Rosy Mocha"],
 ];
 
 /** Base INCI list per sub-category code. Illustrative, not a real formula. */
@@ -348,9 +337,7 @@ const baseIngredients: Record<string, string> = {
  * to be replaced by the lab's real composition.
  */
 function colorants(hex: string) {
-  const [r, g, b] = [1, 3, 5].map((at) =>
-    Number.parseInt(hex.slice(at, at + 2), 16),
-  );
+  const [r, g, b] = [1, 3, 5].map((at) => Number.parseInt(hex.slice(at, at + 2), 16));
   const weights: [name: string, ci: string, weight: number][] = [
     ["Red 7 Lake", "CI 15850", r - Math.max(g, b)],
     ["Red 28 Lake", "CI 45410", b - g],
@@ -373,14 +360,8 @@ function colorants(hex: string) {
 export async function seedCatalog(db: Database) {
   // Categories, sub-categories and one active config per category.
   for (const [sortOrder, [name, config, items]] of formats.entries()) {
-    await db
-      .insert(productFormats)
-      .values({ name, sortOrder })
-      .onConflictDoNothing();
-    const [format] = await db
-      .select()
-      .from(productFormats)
-      .where(eq(productFormats.name, name));
+    await db.insert(productFormats).values({ name, sortOrder }).onConflictDoNothing();
+    const [format] = await db.select().from(productFormats).where(eq(productFormats.name, name));
     await db
       .insert(productFormatItems)
       .values(
@@ -402,16 +383,18 @@ export async function seedCatalog(db: Database) {
         isActive: true,
         note: "dummy – replace with client cut-offs",
       })
-      .onConflictDoNothing();
+      // Re-running the seed refreshes the dummy cut-offs of version 1.
+      .onConflictDoUpdate({
+        target: [classificationConfigVersions.productFormatId, classificationConfigVersions.version],
+        set: { config: sql`excluded.config` },
+      });
   }
 
   await db
     .insert(brands)
     .values(brandList.map(([name, isOwn]) => ({ name, isOwn })))
     .onConflictDoNothing();
-  const brandIds = new Map(
-    (await db.select().from(brands)).map((row) => [row.name, row.id]),
-  );
+  const brandIds = new Map((await db.select().from(brands)).map((row) => [row.name, row.id]));
 
   // Sub-category code -> its id and the active config of its category.
   const itemRows = await db
@@ -423,13 +406,7 @@ export async function seedCatalog(db: Database) {
     .from(productFormatItems)
     .innerJoin(
       classificationConfigVersions,
-      and(
-        eq(
-          classificationConfigVersions.productFormatId,
-          productFormatItems.productFormatId,
-        ),
-        eq(classificationConfigVersions.isActive, true),
-      ),
+      and(eq(classificationConfigVersions.productFormatId, productFormatItems.productFormatId), eq(classificationConfigVersions.isActive, true)),
     );
   const itemsByCode = new Map(itemRows.map((row) => [row.code, row]));
 
@@ -437,8 +414,7 @@ export async function seedCatalog(db: Database) {
   for (const [brand, name, code, skuPrefix, shadeList] of productList) {
     const item = itemsByCode.get(code);
     const brandId = brandIds.get(brand);
-    if (!item || !brandId)
-      throw new Error(`Missing format ${code} or brand ${brand}`);
+    if (!item || !brandId) throw new Error(`Missing format ${code} or brand ${brand}`);
 
     await db
       .insert(products)
@@ -465,16 +441,13 @@ export async function seedCatalog(db: Database) {
             ingredientsInci: baseIngredients[code] ?? baseIngredients.TG,
             mayContain: mix.map((item) => item.ci).join(", "),
             // Own brands only: externals never have a composition.
-            composition: skuPrefix
-              ? mix.map(({ name, percentage }) => ({ name, percentage }))
-              : null,
+            composition: skuPrefix ? mix.map(({ name, percentage }) => ({ name, percentage })) : null,
             undertone: color.undertone as Shade["undertone"],
             season: color.season as Shade["season"],
             productId: product.id,
             name: shade,
             hex,
-            sku:
-              skuPrefix && `${skuPrefix}-${String(index + 1).padStart(2, "0")}`,
+            sku: skuPrefix && `${skuPrefix}-${String(index + 1).padStart(2, "0")}`,
           };
         }),
       )
@@ -484,30 +457,24 @@ export async function seedCatalog(db: Database) {
           ingredientsInci: sql`excluded.ingredients_inci`,
           mayContain: sql`excluded.may_contain`,
           composition: sql`excluded.composition`,
+          colorSub: sql`excluded.color_sub`,
+          valueClass: sql`excluded.value_class`,
         },
       });
 
-    const rows = await db
-      .select({ id: shades.id, name: shades.name })
-      .from(shades)
-      .where(eq(shades.productId, product.id));
+    const rows = await db.select({ id: shades.id, name: shades.name }).from(shades).where(eq(shades.productId, product.id));
     for (const row of rows) shadeIds.set(`${name}|${row.name}`, row.id);
   }
 
   await db
     .insert(shadeBenchmarks)
     .values(
-      benchmarkList.map(
-        ([product, shade, benchmarkProduct, benchmarkShade]) => ({
-          shadeId: shadeIds.get(`${product}|${shade}`) ?? "",
-          benchmarkShadeId:
-            shadeIds.get(`${benchmarkProduct}|${benchmarkShade}`) ?? "",
-        }),
-      ),
+      benchmarkList.map(([product, shade, benchmarkProduct, benchmarkShade]) => ({
+        shadeId: shadeIds.get(`${product}|${shade}`) ?? "",
+        benchmarkShadeId: shadeIds.get(`${benchmarkProduct}|${benchmarkShade}`) ?? "",
+      })),
     )
     .onConflictDoNothing();
 
-  console.log(
-    `ok: catalog (${formats.length} categories, ${productList.length} products, ${shadeIds.size} shades)`,
-  );
+  console.log(`ok: catalog (${formats.length} categories, ${productList.length} products, ${shadeIds.size} shades)`);
 }

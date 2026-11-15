@@ -212,24 +212,38 @@ function SkuList({ productFormatItemId, selected, onSelectedChange, activeId, on
         {items.map((shade) => (
           <li
             key={shade.id}
-            className="flex items-center gap-2 border-b border-l-2 border-l-transparent px-3 py-2 text-[11px] has-data-checked:border-l-primary has-data-checked:bg-accent"
+            className="flex items-center border-b border-l-2 border-l-transparent text-[11px] has-data-checked:border-l-primary has-data-checked:bg-accent"
           >
-            <ShadeSwatch hex={shade.hex} />
-            {/* Name opens the detail panel; only the checkbox selects. */}
-            <button type="button" className="min-w-0 flex-1 text-left" onClick={() => onOpenShade(shade)}>
-              <span className={cn("block truncate hover:underline", shade.id === activeId && "font-medium text-primary")}>{shade.name}</span>
-              <span className="block truncate text-[10px] text-muted-foreground">
-                {[
-                  shade.brand.name,
-                  shade.product.name,
-                  shade.season && capitalize(shade.season),
-                  shade.hueMunsell && (munsellHues[shade.hueMunsell] ?? shade.hueMunsell),
-                ]
-                  .filter(Boolean)
-                  .join(" • ")}
+            <label htmlFor={`sku-${shade.id}`} className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 py-2 pr-2 pl-3">
+              <ShadeSwatch hex={shade.hex} />
+              <span className="min-w-0 flex-1">
+                <button
+                  type="button"
+                  className={cn("block max-w-full truncate text-left hover:underline", shade.id === activeId && "font-medium text-primary")}
+                  onClick={() => onOpenShade(shade)}
+                >
+                  {shade.name}
+                </button>
+                <span className="block truncate text-[10px] text-muted-foreground">
+                  {[
+                    shade.brand.name,
+                    shade.product.name,
+                    shade.season && capitalize(shade.season),
+                    shade.hueMunsell && (munsellHues[shade.hueMunsell] ?? shade.hueMunsell),
+                  ]
+                    .filter(Boolean)
+                    .join(" • ")}
+                </span>
               </span>
-            </button>
-            <Checkbox aria-label={`Select ${shade.name}`} checked={selected.has(shade.id)} onCheckedChange={(checked) => toggle(shade, checked)} />
+            </label>
+
+            <Checkbox
+              id={`sku-${shade.id}`}
+              className="mr-3"
+              aria-label={`Select ${shade.name}`}
+              checked={selected.has(shade.id)}
+              onCheckedChange={(checked) => toggle(shade, checked)}
+            />
           </li>
         ))}
       </ul>

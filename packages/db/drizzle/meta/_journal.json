@@ -15,6 +15,13 @@
       "when": 1794330029370,
       "tag": "0001_oval_sersi",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794727773773,
+      "tag": "0002_typical_titanium_man",
+      "breakpoints": true
     }
   ]
 }

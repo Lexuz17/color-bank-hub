@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, ilike, or, count, getTableColumns, type SQL } from "drizzle-orm";
+import { and, asc, desc, eq, ilike, inArray, or, count, getTableColumns, type SQL } from "drizzle-orm";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import { db } from "#api/lib/db.js";
 import { brands, products, productFormatItems, shadeBenchmarks, shades } from "@color-bank-hub/db";
@@ -160,4 +160,31 @@ export async function updateShade(id: string, input: Partial<Omit<ShadeInput, "p
     const { composition, ...publicShade } = row;
     return { ...publicShade, ...(product.isOwn ? { composition } : {}) };
   });
+}
+
+export async function countInFormatItem(ids: string[], productFormatItemId: number) {
+  const [row] = await db
+    .select({ count: count() })
+    .from(shades)
+    .innerJoin(products, eq(products.id, shades.productId))
+    .where(and(inArray(shades.id, ids), eq(products.productFormatItemId, productFormatItemId)));
+  return row.count;
+}
+
+export type ShadeLabels = Pick<
+  typeof shades.$inferInsert,
+  "undertone" | "season" | "hueMunsell" | "colorFamily" | "colorSub" | "valueClass" | "chromaClass"
+>;
+
+export function listCategoryHexes(tx: Executor, productFormatId: number) {
+  return tx
+    .select({ id: shades.id, hex: shades.hex })
+    .from(shades)
+    .innerJoin(products, eq(products.id, shades.productId))
+    .innerJoin(productFormatItems, eq(productFormatItems.id, products.productFormatItemId))
+    .where(eq(productFormatItems.productFormatId, productFormatId));
+}
+
+export function updateLabels(tx: Executor, id: string, labels: ShadeLabels) {
+  return tx.update(shades).set(labels).where(eq(shades.id, id));
 }

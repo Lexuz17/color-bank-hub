@@ -1,0 +1,1 @@
+ALTER TYPE "public"."mapping_view" ADD VALUE 'hue_circle' BEFORE 'custom';

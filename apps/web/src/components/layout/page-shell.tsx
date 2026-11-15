@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { WorkspaceLayout } from "./workspace-layout";
 import { ProductFormatSidebar } from "@/components/product-format/product-format-sidebar";
 import type { AppSection } from "./app-header";
@@ -32,23 +32,18 @@ export function PageShell({
       onProfile={() => {
         void navigate({ to: "/user-management" });
       }}
-      sidebar={
-        format && onFormatChange ? (
-          <ProductFormatSidebar value={format} onValueChange={onFormatChange} />
-        ) : (
-          sidebar
-        )
-      }
+      sidebar={format && onFormatChange ? <ProductFormatSidebar value={format} onValueChange={onFormatChange} /> : sidebar}
       wideSidebar={wideSidebar}
       detailPanel={detailPanel}
-      footer={
-        <footer className="mx-5 flex flex-wrap justify-between gap-2 border-t py-3 text-[10px] text-muted-foreground">
-          <span>Color Bank by DariData</span>
-          <Link to="/showcase" className="text-primary hover:underline">
-            Component showcase
-          </Link>
-        </footer>
-      }
+      // Footer hidden on request. Restore this block (and import Link from @tanstack/react-router) to show it again.
+      // footer={
+      //   <footer className="mx-5 flex flex-wrap justify-between gap-2 border-t py-3 text-[10px] text-muted-foreground">
+      //     <span>Color Bank by DariData</span>
+      //     <Link to="/showcase" className="text-primary hover:underline">
+      //       Component showcase
+      //     </Link>
+      //   </footer>
+      // }
     >
       {children}
     </WorkspaceLayout>

@@ -1,51 +1,15 @@
 import { pgEnum } from "drizzle-orm/pg-core";
 
-export const userRole = pgEnum("user_role", [
-  "website_admin",
-  "rnd",
-  "pid",
-  "tsi",
-]);
-export const userStatus = pgEnum("user_status", [
-  "pending",
-  "active",
-  "disabled",
-]);
-export const approvalStatus = pgEnum("approval_status", [
-  "pending",
-  "approved",
-  "declined",
-]);
+export const userRole = pgEnum("user_role", ["website_admin", "rnd", "pid", "tsi"]);
+export const userStatus = pgEnum("user_status", ["pending", "active", "disabled"]);
+export const approvalStatus = pgEnum("approval_status", ["pending", "approved", "declined"]);
 
 export const undertone = pgEnum("undertone", ["warm", "neutral", "cool"]);
-export const season = pgEnum("season", [
-  "spring",
-  "summer",
-  "autumn",
-  "winter",
-  "neutral",
-]);
+export const season = pgEnum("season", ["spring", "summer", "autumn", "winter", "neutral"]);
 
-export const mappingView = pgEnum("mapping_view", [
-  "season",
-  "color_family",
-  "custom",
-]);
+export const mappingView = pgEnum("mapping_view", ["season", "color_family", "hue_circle", "custom"]);
 
-export const priorityLevel = pgEnum("priority_level", [
-  "low",
-  "medium",
-  "high",
-]);
-export const requestType = pgEnum("request_type", [
-  "benchmark_matching",
-  "gap_filling",
-]);
-export const requestStatus = pgEnum("request_status", [
-  "pending",
-  "approved",
-  "formulating",
-  "completed",
-  "declined",
-]);
+export const priorityLevel = pgEnum("priority_level", ["low", "medium", "high"]);
+export const requestType = pgEnum("request_type", ["benchmark_matching", "gap_filling"]);
+export const requestStatus = pgEnum("request_status", ["pending", "approved", "formulating", "completed", "declined"]);
 export const reportStatus = pgEnum("report_status", ["pending", "resolved"]);

@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as AuthenticatedClassificationConfigRouteImport } from './routes/_authenticated/classification-config'
 import { Route as AuthenticatedColorBankRouteImport } from './routes/_authenticated/color-bank'
 import { Route as AuthenticatedColorDatabaseRouteImport } from './routes/_authenticated/color-database'
 import { Route as AuthenticatedDataInputRouteImport } from './routes/_authenticated/data-input'
@@ -35,6 +36,12 @@ const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedClassificationConfigRoute =
+  AuthenticatedClassificationConfigRouteImport.update({
+    id: '/classification-config',
+    path: '/classification-config',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedColorBankRoute = AuthenticatedColorBankRouteImport.update({
   id: '/color-bank',
   path: '/color-bank',
@@ -82,6 +89,7 @@ const AuthenticatedUserManagementRoute =
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/login': typeof LoginRoute
+  '/classification-config': typeof AuthenticatedClassificationConfigRoute
   '/color-bank': typeof AuthenticatedColorBankRoute
   '/color-database': typeof AuthenticatedColorDatabaseRoute
   '/data-input': typeof AuthenticatedDataInputRoute
@@ -93,6 +101,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
+  '/classification-config': typeof AuthenticatedClassificationConfigRoute
   '/color-bank': typeof AuthenticatedColorBankRoute
   '/color-database': typeof AuthenticatedColorDatabaseRoute
   '/data-input': typeof AuthenticatedDataInputRoute
@@ -107,6 +116,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/login': typeof LoginRoute
+  '/_authenticated/classification-config': typeof AuthenticatedClassificationConfigRoute
   '/_authenticated/color-bank': typeof AuthenticatedColorBankRoute
   '/_authenticated/color-database': typeof AuthenticatedColorDatabaseRoute
   '/_authenticated/data-input': typeof AuthenticatedDataInputRoute
@@ -122,6 +132,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
+    | '/classification-config'
     | '/color-bank'
     | '/color-database'
     | '/data-input'
@@ -133,6 +144,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
+    | '/classification-config'
     | '/color-bank'
     | '/color-database'
     | '/data-input'
@@ -146,6 +158,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_authenticated'
     | '/login'
+    | '/_authenticated/classification-config'
     | '/_authenticated/color-bank'
     | '/_authenticated/color-database'
     | '/_authenticated/data-input'
@@ -183,6 +196,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/classification-config': {
+      id: '/_authenticated/classification-config'
+      path: '/classification-config'
+      fullPath: '/classification-config'
+      preLoaderRoute: typeof AuthenticatedClassificationConfigRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/color-bank': {
@@ -245,6 +265,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteChildren {
+  AuthenticatedClassificationConfigRoute: typeof AuthenticatedClassificationConfigRoute
   AuthenticatedColorBankRoute: typeof AuthenticatedColorBankRoute
   AuthenticatedColorDatabaseRoute: typeof AuthenticatedColorDatabaseRoute
   AuthenticatedDataInputRoute: typeof AuthenticatedDataInputRoute
@@ -257,6 +278,8 @@ interface AuthenticatedRouteChildren {
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedClassificationConfigRoute:
+    AuthenticatedClassificationConfigRoute,
   AuthenticatedColorBankRoute: AuthenticatedColorBankRoute,
   AuthenticatedColorDatabaseRoute: AuthenticatedColorDatabaseRoute,
   AuthenticatedDataInputRoute: AuthenticatedDataInputRoute,

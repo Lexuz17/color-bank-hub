@@ -1,5 +1,6 @@
 import { can, type Role } from "@color-bank-hub/contracts/rbac";
 import type { ShadeInput, ShadePatch, ShadeQuery } from "@color-bank-hub/contracts/shade";
+import type { Executor } from "#api/lib/db.js";
 import * as repository from "#api/repositories/shade-repository.js";
 import { getFileUrl, verifyUpload } from "#api/services/upload-service.js";
 
@@ -46,4 +47,31 @@ export const createShades = (rows: ShadeInput[]) => repository.createShades(rows
 export async function updateShade(id: string, input: ShadePatch, role: Role) {
   await verifyPhotos(input);
   return withPhotoUrls(visibleShade(await repository.updateShade(id, input), role));
+}
+
+/**
+ * Stores new classification labels for every shade of a category. The caller owns the transaction and passes the
+ * classifier, so this module never reads the classification config.
+ */
+export const countShadesInFormatItem = (ids: string[], productFormatItemId: number) => repository.countInFormatItem(ids, productFormatItemId);
+
+export async function updateShadeLabels(
+  tx: Executor,
+  productFormatId: number,
+  classify: (hex: string) => Record<keyof repository.ShadeLabels, string | null>,
+) {
+  // shortcut: one UPDATE per shade, batch it when a category holds thousands of shades.
+  for (const shade of await repository.listCategoryHexes(tx, productFormatId)) {
+    const { undertone, season, hueMunsell, colorFamily, colorSub, valueClass, chromaClass } = classify(shade.hex);
+    // The config service only accepts undertone and season labels that are enum values.
+    await repository.updateLabels(tx, shade.id, {
+      undertone,
+      season,
+      hueMunsell,
+      colorFamily,
+      colorSub,
+      valueClass,
+      chromaClass,
+    } as repository.ShadeLabels);
+  }
 }

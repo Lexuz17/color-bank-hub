@@ -20,7 +20,7 @@ export function MappingSteps({ active }: { active: number }) {
             <span
               className={cn(
                 "flex size-4 shrink-0 items-center justify-center rounded-full border text-[9px]",
-                done && "border-success-foreground text-success-foreground",
+                done && "border-success-foreground bg-success text-success-foreground",
                 index === active && "border-primary bg-primary text-primary-foreground",
               )}
             >

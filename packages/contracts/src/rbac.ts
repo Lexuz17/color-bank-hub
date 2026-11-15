@@ -9,9 +9,7 @@ export const roleLabels = {
 } as const satisfies Record<Role, string>;
 
 export function isRole(value: unknown): value is Role {
-  return (
-    typeof value === "string" && (roles as readonly string[]).includes(value)
-  );
+  return typeof value === "string" && (roles as readonly string[]).includes(value);
 }
 
 // The API enforces it with `requirePermission()` and the web reads it with
@@ -29,14 +27,14 @@ const permissionRoles = {
   // Approve, decline, formulate and complete prototype requests.
   "prototype:process": ["website_admin", "rnd"],
   "user:manage": ["website_admin"],
+
+  // Cut-offs per category; saving re-classifies the category's shades.
+  "classification:manage": ["website_admin"],
 } as const satisfies Record<string, readonly Role[]>;
 
 export type Permission = keyof typeof permissionRoles;
 
-export function can(
-  role: Role | null | undefined,
-  permission: Permission,
-): boolean {
+export function can(role: Role | null | undefined, permission: Permission): boolean {
   if (!role) return false;
   return (permissionRoles[permission] as readonly Role[]).includes(role);
 }

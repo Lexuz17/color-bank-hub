@@ -1,7 +1,9 @@
 import { Hono } from "hono";
 import type { AppEnv } from "#api/middleware/auth.js";
 import { brandRoutes } from "#api/routes/brand-routes.js";
+import { classificationConfigRoutes } from "#api/routes/classification-config-routes.js";
 import { dataInputRoutes } from "#api/routes/data-input-routes.js";
+import { mappingRoutes } from "#api/routes/mapping-routes.js";
 import { productFormatRoutes } from "#api/routes/product-format-routes.js";
 import { productRoutes } from "#api/routes/product-routes.js";
 import { prototypeRequestRoutes } from "#api/routes/prototype-request-routes.js";
@@ -15,7 +17,9 @@ export const routes = new Hono<AppEnv>()
   .route("/", productFormatRoutes)
   .route("/", productRoutes)
   .route("/", shadeRoutes)
+  .route("/", classificationConfigRoutes)
   .route("/", dataInputRoutes)
+  .route("/", mappingRoutes)
   .route("/", reportRoutes)
   .route("/", prototypeRequestRoutes)
   .route("/", uploadRoutes)

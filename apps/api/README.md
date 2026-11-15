@@ -46,8 +46,13 @@ All resource paths below begin with `/api`.
 | GET | `/shades/:id` | Shade, product, brand, and format details |
 | POST | `/shades` | Manual shade entry with computed color metrics |
 | PATCH | `/shades/:id` | Update supported shade fields; recompute metrics when HEX changes |
+| GET | `/classification-configs/active?productFormatItemId=` | Active color cut-offs (season, family, Munsell hue…) of the sub-category's category |
+| GET | `/classification-configs?productFormatId=` | Cut-off versions of a category, newest first |
+| POST | `/classification-configs` | Save cut-offs as a new active version and re-classify the category's shades; `{productFormatId, config, note?}` |
+| PATCH | `/classification-configs/:id/activate` | Roll back: make an older version active and re-classify |
 | POST | `/imports/preview` | Validate rows and references without writing |
 | POST | `/imports/commit` | Revalidate and insert all rows in one transaction |
+| POST | `/mappings` | Save a shade map (name, format, shades, view, axes, display toggles) with a copy of the active cut-offs |
 | GET, POST | `/reports` | List or submit reports |
 | GET, PATCH | `/reports/:id` | Read a report or update its status |
 | GET, POST | `/prototype-requests` | List or create Color Bank requests |
@@ -135,6 +140,7 @@ Who can do what is defined once in `packages/contracts/src/rbac.ts`; the API enf
 | `prototype:create` | `POST /prototype-requests` | website_admin, pid, tsi |
 | `prototype:process` | `PATCH /prototype-requests/:id/status`, `/formulation` | website_admin, rnd |
 | `user:manage` | Web user-management screen (no API yet) | website_admin |
+| `classification:manage` | `GET`, `POST /classification-configs`; `PATCH /classification-configs/:id/activate` | website_admin |
 
 To change access, edit the role list in `rbac.ts`. To add a capability, add a `<resource>:<action>` key there and reference it with `requirePermission()` and `useCan()`.
 
@@ -157,11 +163,11 @@ Unknown write fields are rejected. UUIDs, HEX values, URLs, pagination, percenta
 | `BAD_REQUEST` | 400 | `INVALID_JSON` |
 | `UNAUTHORIZED` | 401 | — |
 | `FORBIDDEN` | 403 | `ACCOUNT_INACTIVE`, `MISSING_PERMISSION` |
-| `NOT_FOUND` | 404 | `ROUTE_NOT_FOUND`, `SHADE_NOT_FOUND`, `REPORT_NOT_FOUND`, `REQUEST_NOT_FOUND` |
-| `CONFLICT` | 409 | `UNIQUE_VIOLATION`, `INVALID_TRANSITION`, `NOT_FORMULATING` |
+| `NOT_FOUND` | 404 | `ROUTE_NOT_FOUND`, `SHADE_NOT_FOUND`, `REPORT_NOT_FOUND`, `REQUEST_NOT_FOUND`, `CONFIG_NOT_FOUND`, `FORMAT_NOT_FOUND` |
+| `CONFLICT` | 409 | `UNIQUE_VIOLATION`, `INVALID_TRANSITION`, `NOT_FORMULATING`, `ALREADY_ACTIVE` |
 | `PAYLOAD_TOO_LARGE` | 413 | — |
 | `VALIDATION_ERROR` | 422 | — (see `issues`) |
-| `BUSINESS_RULE` | 422 | `INVALID_PRODUCT`, `EXTERNAL_COMPOSITION`, `BRAND_SHADE_MISMATCH`, `RESULT_REQUIRED`, `IMPORT_INVALID`, `INVALID_REFERENCE` |
+| `BUSINESS_RULE` | 422 | `INVALID_PRODUCT`, `EXTERNAL_COMPOSITION`, `BRAND_SHADE_MISMATCH`, `RESULT_REQUIRED`, `IMPORT_INVALID`, `INVALID_REFERENCE`, `INVALID_LABEL`, `CATCH_ALL_REQUIRED`, `UNKNOWN_FAMILY`, `SUB_OUTSIDE_FAMILY`, `MAPPING_FORMAT_MISMATCH` |
 | `INTERNAL` | 500 | — |
 
 Throw with `fail(code, message, reason?)` from `src/core/errors.ts`. Internal SQL and credentials are not sent to clients.

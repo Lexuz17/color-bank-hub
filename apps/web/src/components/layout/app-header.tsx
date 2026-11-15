@@ -1,18 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import {
-  can,
-  type Permission,
-  type Role,
-  roleLabels,
-} from "@color-bank-hub/contracts/rbac";
-import {
-  Menu,
-  ChevronDown,
-  Home,
-  LogOut,
-  Palette,
-  type LucideIcon,
-} from "lucide-react";
+import { can, type Permission, type Role, roleLabels } from "@color-bank-hub/contracts/rbac";
+import { Menu, ChevronDown, Home, LogOut, Palette, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -40,6 +28,7 @@ const navItems = [
     to: "/user-management",
     permission: "user:manage",
   },
+  { label: "Classification Rules", to: "/classification-config", permission: "classification:manage" },
 ] as const satisfies readonly {
   label: string;
   to: string;
@@ -78,9 +67,7 @@ export function AppHeader({
   onProfile: () => void;
 }) {
   const logout = useSignOut();
-  const items = navItems.filter(
-    (item) => !("permission" in item) || can(role, item.permission),
-  );
+  const items = navItems.filter((item) => !("permission" in item) || can(role, item.permission));
   const roleLabel = role ? roleLabels[role] : "No role";
   const initials = userName
     .split(" ")
@@ -90,21 +77,12 @@ export function AppHeader({
   return (
     <header className="flex min-h-14 shrink-0 items-center gap-4 border-b bg-card px-4">
       {onOpenSidebar && (
-        <Button
-          size="icon-sm"
-          variant="ghost"
-          className="lg:hidden"
-          aria-label="Open product formats"
-          onClick={onOpenSidebar}
-        >
+        <Button size="icon-sm" variant="ghost" className="lg:hidden" aria-label="Open product formats" onClick={onOpenSidebar}>
           <Menu />
         </Button>
       )}
       <BrandLogo />
-      <nav
-        aria-label="Main navigation"
-        className="hidden min-w-0 flex-1 items-stretch self-stretch overflow-x-auto lg:flex"
-      >
+      <nav aria-label="Main navigation" className="hidden min-w-0 flex-1 items-stretch self-stretch overflow-x-auto lg:flex">
         {items.map((item) => (
           <Link
             key={item.label}
@@ -139,10 +117,7 @@ export function AppHeader({
         <DropdownMenu>
           <DropdownMenuTrigger
             render={
-              <Button
-                variant="ghost"
-                className="h-9 gap-2.5 rounded-md px-2.5 py-1 hover:bg-muted/70 hover:text-foreground active:translate-y-0"
-              />
+              <Button variant="ghost" className="h-9 gap-2.5 rounded-md px-2.5 py-1 hover:bg-muted/70 hover:text-foreground active:translate-y-0" />
             }
           >
             <span className="hidden text-[11px] xl:inline">{userName}</span>
@@ -152,23 +127,15 @@ export function AppHeader({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" sideOffset={8} className="w-64">
             <DropdownMenuGroup>
-              <DropdownMenuLabel className="px-2 pt-2 pb-1 text-foreground">
-                {userName}
-              </DropdownMenuLabel>
-              <p className="px-2 pb-2 text-[11px] text-muted-foreground">
-                {roleLabel}
-              </p>
+              <DropdownMenuLabel className="px-2 pt-2 pb-1 text-foreground">{userName}</DropdownMenuLabel>
+              <p className="px-2 pb-2 text-[11px] text-muted-foreground">{roleLabel}</p>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={onProfile}>
               <Palette />
               Preview identity & permissions
             </DropdownMenuItem>
-            <DropdownMenuItem
-              variant="destructive"
-              disabled={logout.isPending}
-              onClick={() => logout.mutate()}
-            >
+            <DropdownMenuItem variant="destructive" disabled={logout.isPending} onClick={() => logout.mutate()}>
               <LogOut />
               {logout.isPending ? "Logging out…" : "Log out"}
             </DropdownMenuItem>

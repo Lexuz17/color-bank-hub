@@ -6,4 +6,4 @@ export const reportRoutes = new Hono<AppEnv>()
   .get("/reports", reports.listReports)
   .post("/reports", requirePermission("report:create"), reports.createReport)
   .get("/reports/:id", reports.findReport)
-  .patch("/reports/:id",requirePermission("report:resolve"),reports.updateReport);
+  .patch("/reports/:id", requirePermission("report:resolve"), reports.updateReport);
