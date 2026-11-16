@@ -12,7 +12,7 @@ export default defineConfig({
     trace: "on-first-retry",
     screenshot: "only-on-failure",
     viewport: { width: 1440, height: 900 },
-    headless: false,
+    headless: true,
   },
   projects: [
     {
@@ -23,7 +23,7 @@ export default defineConfig({
   webServer: {
     command: "pnpm dev",
     url: "http://localhost:5173",
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: true,
     timeout: 30000,
   },
 });

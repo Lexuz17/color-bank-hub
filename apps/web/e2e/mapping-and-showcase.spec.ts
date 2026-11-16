@@ -1,5 +1,22 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 import { setupApiMocks } from "./helpers/mock-api";
+
+async function selectFormatAndShade(page: Page) {
+  await page.goto("/shade-mapping");
+
+  // Step 1: select Category "Lips"
+  await page.getByRole("combobox", { name: "Category", exact: true }).click();
+  await page.getByRole("option", { name: "Lips" }).click();
+
+  // Step 1: select Sub-category "Matte Lipstick"
+  await page.getByRole("combobox", { name: "Sub-category" }).click();
+  await page.getByRole("option", { name: "Matte Lipstick" }).click();
+
+  // Step 2: pick first shade checkbox
+  const firstCheckbox = page.getByRole("checkbox").first();
+  await expect(firstCheckbox).toBeVisible();
+  await firstCheckbox.check();
+}
 
 test.describe("Mappings, User Management & Showcase", () => {
   test.beforeEach(async ({ page }) => {
@@ -9,20 +26,14 @@ test.describe("Mappings, User Management & Showcase", () => {
   // ── READ: shade mapping workspace ─────────────────────────────────────────
   test("renders shade mapping workspace", async ({ page }) => {
     await page.goto("/shade-mapping");
-    await expect(page.getByRole("heading", { name: "Shade Map" }).first()).toBeVisible();
-
-    const toolbar = page.getByText(/By season · demonstration placement/i).first();
-    await expect(toolbar).toBeVisible();
+    await expect(page.getByLabel("Mapping name")).toBeVisible();
+    await expect(page.getByText(/PRODUCT FORMAT/i)).toBeVisible();
+    await expect(page.getByRole("combobox", { name: "Category", exact: true })).toBeVisible();
   });
 
   // ── CREATE: select shades and generate a map ──────────────────────────────
   test("selects shades and generates a shade map", async ({ page }) => {
-    await page.goto("/shade-mapping");
-
-    // Check at least one shade checkbox in the sidebar
-    const firstCheckbox = page.getByRole("checkbox").first();
-    await expect(firstCheckbox).toBeVisible();
-    await firstCheckbox.check();
+    await selectFormatAndShade(page);
 
     // Count shown should reflect the selection
     await expect(page.getByText(/1 selected/i)).toBeVisible();
@@ -30,36 +41,26 @@ test.describe("Mappings, User Management & Showcase", () => {
     // Click Generate
     await page.getByRole("button", { name: /Generate/i }).click();
 
-    // Map canvas labels appear after generation
-    await expect(page.getByText(/Summer · Cool \/ Light/i)).toBeVisible();
+    // Map container and reset/save buttons become available
+    await expect(page.getByRole("button", { name: /^save$/i })).toBeEnabled();
   });
 
   // ── CREATE: save a generated mapping ─────────────────────────────────────
-  test("saves a generated shade mapping to local library", async ({ page }) => {
-    await page.goto("/shade-mapping");
-
-    // Select a shade and generate
-    await page.getByRole("checkbox").first().check();
+  test("saves a generated shade mapping to library", async ({ page }) => {
+    await selectFormatAndShade(page);
     await page.getByRole("button", { name: /Generate/i }).click();
 
+    // Set mapping name in toolbar input
+    const nameInput = page.getByLabel("Mapping name");
+    await nameInput.fill("Q4 Autumn Collection");
+
     // Save mapping button becomes enabled
-    const saveBtn = page.getByRole("button", { name: /Save mapping/i });
+    const saveBtn = page.getByRole("button", { name: /^save$/i });
     await expect(saveBtn).toBeEnabled();
     await saveBtn.click();
 
-    const dialog = page.getByRole("dialog");
-    await expect(dialog).toBeVisible();
-    await expect(dialog.getByRole("heading", { name: /Save mapping/i })).toBeVisible();
-
-    await dialog.getByRole("textbox", { name: /Mapping name/i }).fill("Q4 Autumn Collection");
-
-    // Confirm save is enabled once name is filled
-    const confirmSave = dialog.getByRole("button", { name: /Save mapping/i });
-    await expect(confirmSave).toBeEnabled();
-    await confirmSave.click();
-
-    await expect(page.getByText(/Mapping saved locally/i)).toBeVisible();
-    await expect(page.getByRole("dialog")).not.toBeVisible();
+    // Toast feedback appears
+    await expect(page.getByText(/Saved "Q4 Autumn Collection"/i)).toBeVisible();
   });
 
   // ── READ: my mappings page ────────────────────────────────────────────────
@@ -73,26 +74,26 @@ test.describe("Mappings, User Management & Showcase", () => {
 
   // ── CREATE/DELETE: save then delete a mapping via my-mappings ────────────
   test("saves a mapping then deletes it from my mappings", async ({ page }) => {
-    // 1. Create a mapping on shade-mapping page
-    await page.goto("/shade-mapping");
-    await page.getByRole("checkbox").first().check();
-    await page.getByRole("button", { name: /Generate/i }).click();
-    await page.getByRole("button", { name: /Save mapping/i }).click();
-    await page
-      .getByRole("dialog")
-      .getByRole("textbox", { name: /Mapping name/i })
-      .fill("Test Mapping");
-    await page
-      .getByRole("dialog")
-      .getByRole("button", { name: /Save mapping/i })
-      .click();
-    await expect(page.getByText(/Mapping saved locally/i)).toBeVisible();
-
-    // 2. Navigate to my-mappings
     await page.goto("/my-mappings");
+    await page.evaluate(() => {
+      localStorage.setItem(
+        "color-bank-demo-mappings",
+        JSON.stringify([
+          {
+            id: "map-test-1",
+            name: "Test Mapping",
+            shadeNames: ["Crimson Velvet"],
+            pinned: false,
+            updated: new Date().toISOString(),
+          },
+        ]),
+      );
+    });
+    await page.reload();
+
     await expect(page.getByText("Test Mapping")).toBeVisible();
 
-    // 3. Delete it
+    // Delete it
     await page.getByRole("button", { name: /Delete Test Mapping/i }).click();
 
     const alertDialog = page.getByRole("alertdialog");
@@ -107,22 +108,23 @@ test.describe("Mappings, User Management & Showcase", () => {
 
   // ── UPDATE: pin / unpin a mapping ─────────────────────────────────────────
   test("pins and unpins a saved mapping", async ({ page }) => {
-    // Create a mapping first
-    await page.goto("/shade-mapping");
-    await page.getByRole("checkbox").first().check();
-    await page.getByRole("button", { name: /Generate/i }).click();
-    await page.getByRole("button", { name: /Save mapping/i }).click();
-    await page
-      .getByRole("dialog")
-      .getByRole("textbox", { name: /Mapping name/i })
-      .fill("Pinnable Map");
-    await page
-      .getByRole("dialog")
-      .getByRole("button", { name: /Save mapping/i })
-      .click();
-    await expect(page.getByText(/Mapping saved locally/i)).toBeVisible();
-
     await page.goto("/my-mappings");
+    await page.evaluate(() => {
+      localStorage.setItem(
+        "color-bank-demo-mappings",
+        JSON.stringify([
+          {
+            id: "map-pin-1",
+            name: "Pinnable Map",
+            shadeNames: ["Crimson Velvet"],
+            pinned: false,
+            updated: new Date().toISOString(),
+          },
+        ]),
+      );
+    });
+    await page.reload();
+
     await expect(page.getByText("Pinnable Map")).toBeVisible();
 
     // Pin
@@ -146,24 +148,30 @@ test.describe("Mappings, User Management & Showcase", () => {
 
   // ── READ: search filter on my mappings ───────────────────────────────────
   test("filters saved mappings by search term", async ({ page }) => {
-    // Seed two mappings
-    for (const name of ["Alpha Map", "Beta Collection"]) {
-      await page.goto("/shade-mapping");
-      await page.getByRole("checkbox").first().check();
-      await page.getByRole("button", { name: /Generate/i }).click();
-      await page.getByRole("button", { name: /Save mapping/i }).click();
-      await page
-        .getByRole("dialog")
-        .getByRole("textbox", { name: /Mapping name/i })
-        .fill(name);
-      await page
-        .getByRole("dialog")
-        .getByRole("button", { name: /Save mapping/i })
-        .click();
-      await expect(page.getByText(/Mapping saved locally/i)).toBeVisible();
-    }
-
     await page.goto("/my-mappings");
+    await page.evaluate(() => {
+      localStorage.setItem(
+        "color-bank-demo-mappings",
+        JSON.stringify([
+          {
+            id: "map-alpha",
+            name: "Alpha Map",
+            shadeNames: ["Crimson Velvet"],
+            pinned: false,
+            updated: new Date().toISOString(),
+          },
+          {
+            id: "map-beta",
+            name: "Beta Collection",
+            shadeNames: ["Solar Coral"],
+            pinned: false,
+            updated: new Date().toISOString(),
+          },
+        ]),
+      );
+    });
+    await page.reload();
+
     await expect(page.getByText("Alpha Map")).toBeVisible();
     await expect(page.getByText("Beta Collection")).toBeVisible();
 

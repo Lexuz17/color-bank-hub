@@ -70,8 +70,9 @@ test.describe("Data Input Feature", () => {
 
   // ── CREATE: manual shade entry ─────────────────────────────────────────────
   test("submits a new shade via manual entry form", async ({ page }) => {
-    // Select product
-    await page.locator("select").first().selectOption({ value: "prod-1" });
+    // Select product via combobox
+    await page.getByRole("combobox", { name: "Product" }).click();
+    await page.getByRole("option", { name: /Velvet Satin Lipstick/i }).click();
 
     // Fill required name + SKU fields
     await page.locator('input[name="name"]').fill("Dusk Plum");
@@ -87,8 +88,9 @@ test.describe("Data Input Feature", () => {
   test("previews and imports shades via paste tab", async ({ page }) => {
     await page.getByRole("tab", { name: /Paste from Excel/i }).click();
 
-    // Select product
-    await page.locator("select").first().selectOption({ value: "prod-1" });
+    // Select product via combobox
+    await page.getByRole("combobox", { name: "Product" }).click();
+    await page.getByRole("option", { name: /Velvet Satin Lipstick/i }).click();
 
     // Paste TSV (with header row)
     await page.getByLabel(/Spreadsheet data/i).fill("SKU\tShade name\tHEX\nDP-02\tDusk Rose\t#c05080");
@@ -107,7 +109,8 @@ test.describe("Data Input Feature", () => {
     await page.getByRole("tab", { name: /Paste from Excel/i }).click();
 
     // Select product as fallback
-    await page.locator("select").first().selectOption({ value: "prod-1" });
+    await page.getByRole("combobox", { name: "Product" }).click();
+    await page.getByRole("option", { name: /Velvet Satin Lipstick/i }).click();
 
     // Paste full template row format
     const templateRow = [
@@ -119,12 +122,16 @@ test.describe("Data Input Feature", () => {
     await page.getByRole("button", { name: /Preview & validate/i }).click();
 
     await expect(page.getByText(/1 of 1 rows valid/i)).toBeVisible();
-    await expect(page.getByText("08 Ube Mochi")).toBeVisible();
-    await expect(page.getByText("EM-JS-08")).toBeVisible();
+    await expect(page.getByRole("cell", { name: "08 Ube Mochi" })).toBeVisible();
+    await expect(page.getByRole("cell", { name: "EM-JS-08" })).toBeVisible();
   });
 
   // ── CREATE: upload template .xlsx file ──────────────────────────────────────
   test("uploads and parses shade-import-template.xlsx file", async ({ page }) => {
+    // Select product first so unassigned template rows have a target product
+    await page.getByRole("combobox", { name: "Product" }).click();
+    await page.getByRole("option", { name: /Velvet Satin Lipstick/i }).click();
+
     await page.getByRole("tab", { name: /File Upload/i }).click();
 
     const fileInput = page.locator('input[type="file"]');

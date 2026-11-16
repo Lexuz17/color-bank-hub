@@ -33,7 +33,14 @@ test("health is public and unknown endpoints return structured errors", async ()
   assert.ok(body.error.requestId);
 });
 test("catalog validation rejects bad pagination and IDs before database access", async () => {
-  for (const path of ["/api/shades?page=0", "/api/shades?pageSize=501", "/api/shades?sort=unsafe", "/api/shades/not-a-uuid"]) {
+  for (const path of [
+    "/api/shades?page=0",
+    "/api/shades?pageSize=501",
+    "/api/shades?sort=unsafe",
+    "/api/shades/not-a-uuid",
+    "/api/shades?productFormatId=bad",
+    "/api/shades?productFormatItemId=-5",
+  ]) {
     const response = await request(path);
     assert.equal(response.status, 422, path);
     assert.equal((await response.json()).error.code, "VALIDATION_ERROR");

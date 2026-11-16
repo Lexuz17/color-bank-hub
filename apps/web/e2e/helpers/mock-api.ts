@@ -139,6 +139,41 @@ export const mockShades = [
       count: 3,
     },
   },
+  {
+    id: "shade-3",
+    productId: "prod-2",
+    sku: "SGF-03",
+    name: "Golden Honey",
+    hex: "#d4a373",
+    undertone: "warm" as const,
+    season: "autumn" as const,
+    colorFamily: "Beige",
+    valueClass: "Medium",
+    chromaClass: "Muted",
+    hslH: 30,
+    hslS: 55,
+    hslL: 64,
+    lipPhotoUrl: null,
+    swatchPhotoUrl: null,
+    ingredientsInci: "Aqua, Dimethicone, Iron Oxides",
+    mayContain: null,
+    composition: [{ name: "Iron Oxides", percentage: 4.0 }],
+    brand: { id: "brand-2", name: "Aura Cosmetics", isOwn: false },
+    product: {
+      id: "prod-2",
+      brandId: "brand-2",
+      productFormatItemId: 3,
+      name: "Skin Glow Foundation",
+      baseType: "emulsion",
+    },
+    formatItem: {
+      id: 3,
+      productFormatId: 2,
+      name: "Silk Foundation",
+      code: "FACE-FND",
+      count: 4,
+    },
+  },
 ];
 
 export const mockReports = [
@@ -334,9 +369,17 @@ export async function setupApiMocks(page: Page, { authenticated = true }: { auth
     if (pathname === "/shades") {
       if (method === "GET") {
         const search = url.searchParams.get("search")?.toLowerCase();
+        const productFormatId = url.searchParams.get("productFormatId");
+        const productFormatItemId = url.searchParams.get("productFormatItemId");
         let items = mockShades;
         if (search) {
           items = items.filter((s) => s.name.toLowerCase().includes(search) || s.hex.toLowerCase().includes(search));
+        }
+        if (productFormatId) {
+          items = items.filter((s) => s.formatItem?.productFormatId === Number(productFormatId));
+        }
+        if (productFormatItemId) {
+          items = items.filter((s) => s.formatItem?.id === Number(productFormatItemId));
         }
         return route.fulfill({
           status: 200,
@@ -527,6 +570,38 @@ export async function setupApiMocks(page: Page, { authenticated = true }: { auth
           status: 201,
           contentType: "application/json",
           body: JSON.stringify({ data: newReq }),
+        });
+      }
+    }
+
+    // POST /mappings, GET /mappings
+    if (pathname === "/mappings") {
+      if (method === "POST") {
+        const body = route.request().postDataJSON();
+        const newMapping = {
+          id: `map-${Date.now()}`,
+          name: body.name,
+          productFormatItemId: body.productFormatItemId,
+          shadeIds: body.shadeIds,
+          viewMode: body.viewMode,
+          axisX: body.axisX,
+          axisY: body.axisY,
+          showPhoto: body.showPhoto,
+          hideProductName: body.hideProductName,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        return route.fulfill({
+          status: 201,
+          contentType: "application/json",
+          body: JSON.stringify({ data: newMapping }),
+        });
+      }
+      if (method === "GET") {
+        return route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({ data: [] }),
         });
       }
     }

@@ -20,8 +20,17 @@ test("HEX input is normalized and unknown fields are rejected", () => {
   }
 });
 test("pagination, patch, composition, and report inputs reject invalid values", () => {
-  for (const query of [{ page: 0 }, { pageSize: 101 }, { sort: "password" }, { season: "invalid" }])
+  for (const query of [
+    { page: 0 },
+    { pageSize: 101 },
+    { sort: "password" },
+    { season: "invalid" },
+    { productFormatId: "not-a-number" },
+    { productFormatId: 0 },
+    { productFormatItemId: -1 },
+  ])
     assert.equal(shadeQuery.safeParse(query).success, false);
+  assert.equal(shadeQuery.safeParse({ productFormatId: 1, productFormatItemId: 2 }).success, true);
   assert.equal(shadePatch.safeParse({}).success, false);
   assert.equal(
     composition.safeParse([

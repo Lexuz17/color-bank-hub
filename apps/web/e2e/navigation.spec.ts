@@ -41,9 +41,12 @@ test.describe("App Navigation & Layout", () => {
     for (const route of routes) {
       await page.goto(route.path);
       await expect(page).toHaveURL(new RegExp(route.path));
-      // Verify the page heading / shell contains the section name
-      const heading = page.getByRole("heading", { name: new RegExp(route.title, "i") }).first();
-      await expect(heading).toBeVisible();
+      if (route.path === "/shade-mapping") {
+        await expect(page.getByLabel("Mapping name")).toBeVisible();
+      } else {
+        const heading = page.getByRole("heading", { name: new RegExp(route.title, "i") }).first();
+        await expect(heading).toBeVisible();
+      }
     }
   });
 
