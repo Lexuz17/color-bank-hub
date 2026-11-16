@@ -1,4 +1,4 @@
-# One domain for web and API. Caddy gets and renews the HTTPS certificate by itself.
+# One address for web and API. With SITE_DOMAIN set to a domain, Caddy gets the HTTPS certificate itself; with ":80" it serves plain HTTP behind another proxy.
 {$SITE_DOMAIN} {
 	encode gzip
 
