@@ -1,0 +1,66 @@
+# Staging / production on the VPS. Images come from GHCR (built by .github/workflows/images.yml), nothing is built here.
+# Local development uses the compose file in the repo root, not this one.
+# Run from this folder on the VPS: docker compose up -d
+name: color-bank-prod
+
+services:
+  web:
+    image: ghcr.io/lexuz17/color-bank-web:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      SITE_DOMAIN: ${SITE_DOMAIN:?Set SITE_DOMAIN in .env}
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - backend
+    logging: &logging
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  backend:
+    image: ghcr.io/lexuz17/color-bank-api:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    # No published port: only the web container (Caddy) reaches it.
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      HOST: 0.0.0.0
+      DATABASE_URL: postgresql://${POSTGRES_USER:-color_bank}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-color_bank_hub}
+    depends_on:
+      db:
+        condition: service_healthy
+    logging: *logging
+
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    # Reachable from the VPS itself only. Run migrations from your laptop through an SSH tunnel.
+    ports:
+      - "127.0.0.1:5432:5432"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-color_bank_hub}
+      POSTGRES_USER: ${POSTGRES_USER:-color_bank}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-color_bank} -d $${POSTGRES_DB:-color_bank_hub}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    logging: *logging
+
+volumes:
+  postgres_data:
+  caddy_data:
+  caddy_config:
