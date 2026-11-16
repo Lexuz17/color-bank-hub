@@ -1,19 +1,7 @@
-import type {
-  FieldAsyncValidateOrFn,
-  FieldValidateOrFn,
-  FieldValidators,
-} from "@tanstack/react-form";
+import type { FieldAsyncValidateOrFn, FieldValidateOrFn, FieldValidators } from "@tanstack/react-form";
 
-type StringValidator = FieldValidateOrFn<
-  Record<string, string>,
-  string,
-  string
->;
-type AsyncStringValidator = FieldAsyncValidateOrFn<
-  Record<string, string>,
-  string,
-  string
->;
+type StringValidator = FieldValidateOrFn<Record<string, string>, string, string>;
+type AsyncStringValidator = FieldAsyncValidateOrFn<Record<string, string>, string, string>;
 
 export type StringFieldValidators = FieldValidators<
   Record<string, string>,

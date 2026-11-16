@@ -10,6 +10,7 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "test": "playwright test",
+    "test:unit": "tsx --test test/**/*.test.ts",
     "test:ui": "playwright test --ui"
   },
   "dependencies": {

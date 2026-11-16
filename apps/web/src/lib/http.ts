@@ -6,13 +6,8 @@ const httpClient = axios.create({
   timeout: 15000,
 });
 
-export async function get<T>(
-  path: string,
-  params?: object,
-  signal?: AbortSignal,
-) {
-  return (await httpClient.get<ApiResponse<T>>(path, { params, signal })).data
-    .data;
+export async function get<T>(path: string, params?: object, signal?: AbortSignal) {
+  return (await httpClient.get<ApiResponse<T>>(path, { params, signal })).data.data;
 }
 
 export async function post<T>(path: string, body: unknown) {

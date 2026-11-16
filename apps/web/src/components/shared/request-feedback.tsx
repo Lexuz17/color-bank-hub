@@ -2,24 +2,13 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { apiError } from "@/lib/api-error";
 import type { ComponentProps } from "react";
-export function ApiError({
-  error,
-  retry,
-}: {
-  error: unknown;
-  retry?: () => void;
-}) {
+export function ApiError({ error, retry }: { error: unknown; retry?: () => void }) {
   return (
     <Alert variant="destructive" role="alert">
       <AlertTitle>Unable to complete the request</AlertTitle>
       <AlertDescription>{apiError(error)}</AlertDescription>
       {retry && (
-        <Button
-          variant="outline"
-          size="xs"
-          className="mt-2 w-fit"
-          onClick={retry}
-        >
+        <Button variant="outline" size="xs" className="mt-2 w-fit" onClick={retry}>
           Retry
         </Button>
       )}
@@ -46,20 +35,10 @@ export function ResultsPagination({
         <span>
           Page {page} of {Math.max(1, Math.ceil(total / pageSize))}
         </span>
-        <Button
-          variant="outline"
-          size="xs"
-          disabled={disabled || page <= 1}
-          onClick={() => onPageChange(page - 1)}
-        >
+        <Button variant="outline" size="xs" disabled={disabled || page <= 1} onClick={() => onPageChange(page - 1)}>
           Previous
         </Button>
-        <Button
-          variant="outline"
-          size="xs"
-          disabled={disabled || page * pageSize >= total}
-          onClick={() => onPageChange(page + 1)}
-        >
+        <Button variant="outline" size="xs" disabled={disabled || page * pageSize >= total} onClick={() => onPageChange(page + 1)}>
           Next
         </Button>
       </div>

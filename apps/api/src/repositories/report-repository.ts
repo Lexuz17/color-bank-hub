@@ -1,8 +1,5 @@
 import { asc, count, desc, eq } from "drizzle-orm";
-import type {
-  ReportInput,
-  ReportQuery,
-} from "@color-bank-hub/contracts/report";
+import type { ReportInput, ReportQuery } from "@color-bank-hub/contracts/report";
 import { auditLogs, reports, shades } from "@color-bank-hub/db";
 import { fail } from "#api/core/errors.js";
 import { db } from "#api/lib/db.js";
@@ -39,12 +36,7 @@ export async function createReport(input: ReportInput, reporterId: string) {
       where: eq(shades.id, input.shadeId),
       with: { product: true },
     });
-    if (!shade || shade.product.brandId !== input.brandId)
-      fail(
-        "BUSINESS_RULE",
-        "Shade does not belong to this brand",
-        "BRAND_SHADE_MISMATCH",
-      );
+    if (!shade || shade.product.brandId !== input.brandId) fail("BUSINESS_RULE", "Shade does not belong to this brand", "BRAND_SHADE_MISMATCH");
   }
   const [row] = await db
     .insert(reports)
@@ -52,17 +44,9 @@ export async function createReport(input: ReportInput, reporterId: string) {
     .returning();
   return row;
 }
-export async function updateReportStatus(
-  id: string,
-  status: "pending" | "resolved",
-  actorId: string,
-) {
+export async function updateReportStatus(id: string, status: "pending" | "resolved", actorId: string) {
   return db.transaction(async (tx) => {
-    const [current] = await tx
-      .select()
-      .from(reports)
-      .where(eq(reports.id, id))
-      .for("update");
+    const [current] = await tx.select().from(reports).where(eq(reports.id, id)).for("update");
     if (!current) fail("NOT_FOUND", "Report not found", "REPORT_NOT_FOUND");
     const [row] = await tx
       .update(reports)

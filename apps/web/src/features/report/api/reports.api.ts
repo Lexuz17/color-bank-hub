@@ -1,8 +1,4 @@
-import type {
-  Report,
-  ReportInput,
-  ReportStatus,
-} from "@color-bank-hub/contracts/report";
+import type { Report, ReportInput, ReportStatus } from "@color-bank-hub/contracts/report";
 import { patch, post } from "@/lib/http";
 
 export function createReport(body: ReportInput) {

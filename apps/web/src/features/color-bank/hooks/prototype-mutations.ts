@@ -1,15 +1,8 @@
-import type {
-  FormulationInput,
-  TransitionInput,
-} from "@color-bank-hub/contracts/prototype";
+import type { FormulationInput, TransitionInput } from "@color-bank-hub/contracts/prototype";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { apiError } from "@/lib/api-error";
-import {
-  createRequest,
-  saveFormulation,
-  transitionRequest,
-} from "../api/prototypes.api";
+import { createRequest, saveFormulation, transitionRequest } from "../api/prototypes.api";
 
 export function useCreateRequest() {
   const queryClient = useQueryClient();
@@ -26,13 +19,7 @@ export function useCreateRequest() {
 export function useTransitionRequest(id: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({
-      status,
-      reason,
-    }: {
-      status: TransitionInput["status"];
-      reason?: string;
-    }) => transitionRequest(id, status, reason),
+    mutationFn: ({ status, reason }: { status: TransitionInput["status"]; reason?: string }) => transitionRequest(id, status, reason),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["prototype-requests"] });
       toast.success("Request updated");

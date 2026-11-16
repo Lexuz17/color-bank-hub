@@ -1,14 +1,5 @@
 import { sql } from "drizzle-orm";
-import {
-  boolean,
-  integer,
-  jsonb,
-  pgTable,
-  timestamp,
-  uniqueIndex,
-  uuid,
-  varchar,
-} from "drizzle-orm/pg-core";
+import { boolean, integer, jsonb, pgTable, timestamp, uniqueIndex, uuid, varchar } from "drizzle-orm/pg-core";
 import { productFormats } from "./product-formats.js";
 import { users } from "./users.js";
 
@@ -28,25 +19,14 @@ export const classificationConfigVersions = pgTable(
     createdBy: uuid("created_by").references(() => users.id, {
       onDelete: "set null",
     }),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [
-    uniqueIndex("classification_config_versions_product_format_version_uq").on(
-      t.productFormatId,
-      t.version,
-    ),
+    uniqueIndex("classification_config_versions_product_format_version_uq").on(t.productFormatId, t.version),
     // only one active config per category
-    uniqueIndex(
-      "classification_config_versions_one_active_per_product_format_uq",
-    )
-      .on(t.productFormatId)
-      .where(sql`${t.isActive}`),
+    uniqueIndex("classification_config_versions_one_active_per_product_format_uq").on(t.productFormatId).where(sql`${t.isActive}`),
   ],
 );
 
-export type ClassificationConfigVersion =
-  typeof classificationConfigVersions.$inferSelect;
-export type NewClassificationConfigVersion =
-  typeof classificationConfigVersions.$inferInsert;
+export type ClassificationConfigVersion = typeof classificationConfigVersions.$inferSelect;
+export type NewClassificationConfigVersion = typeof classificationConfigVersions.$inferInsert;

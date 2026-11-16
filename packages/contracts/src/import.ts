@@ -2,9 +2,7 @@ import { z } from "zod";
 import type { ApiIssue } from "./common.js";
 import type { ShadeInput, StoredShade } from "./shade.js";
 
-export const importInput = z
-  .object({ rows: z.array(z.unknown()).min(1).max(500) })
-  .strict();
+export const importInput = z.object({ rows: z.array(z.unknown()).min(1).max(500) }).strict();
 
 interface ImportPreviewRow {
   row: number;

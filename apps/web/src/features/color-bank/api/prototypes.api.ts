@@ -1,11 +1,5 @@
 import type { Page } from "@color-bank-hub/contracts/common";
-import type {
-  FormulationInput,
-  PrototypeInput,
-  PrototypeParams,
-  PrototypeRequest,
-  TransitionInput,
-} from "@color-bank-hub/contracts/prototype";
+import type { FormulationInput, PrototypeInput, PrototypeParams, PrototypeRequest, TransitionInput } from "@color-bank-hub/contracts/prototype";
 import { get, patch, post } from "@/lib/http";
 
 export function getRequests(params: PrototypeParams, signal?: AbortSignal) {
@@ -20,11 +14,7 @@ export function createRequest(body: PrototypeInput) {
   return post<PrototypeRequest>("/prototype-requests", body);
 }
 
-export function transitionRequest(
-  id: string,
-  status: TransitionInput["status"],
-  declineReason?: string,
-) {
+export function transitionRequest(id: string, status: TransitionInput["status"], declineReason?: string) {
   return patch<PrototypeRequest>(`/prototype-requests/${id}/status`, {
     status,
     ...(declineReason ? { declineReason } : {}),

@@ -1,6 +1,7 @@
 import type { Shade } from "@color-bank-hub/contracts/shade";
+import { useSearch } from "@tanstack/react-router";
 import { Download, Eye, EyeOff, Info, Maximize, RotateCcw, Save, ZoomIn, ZoomOut } from "lucide-react";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { PageShell } from "@/components/layout/page-shell";
 import { ProductDetailPanel } from "@/components/shared/product-detail-panel";
@@ -53,6 +54,48 @@ export function ShadeMappingPage() {
   const [showScale, setShowScale] = useState(false);
   const [hideProductName, setHideProductName] = useState(false);
   const config = useActiveConfig(generated ? itemId : null);
+
+  const search = useSearch({ strict: false }) as { itemId?: number; shadeIds?: string };
+
+  useEffect(() => {
+    try {
+      const cached = sessionStorage.getItem("color_bank_preselected_shades");
+      if (cached) {
+        const parsed = JSON.parse(cached) as Shade[];
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const map = new Map<string, Shade>();
+          for (const s of parsed) {
+            map.set(s.id, s);
+          }
+          setSelected(map);
+          const initialItemId = search?.itemId ?? parsed[0]?.formatItem?.id ?? null;
+          if (initialItemId) setItemId(initialItemId);
+          if (parsed[0]?.formatItem?.productFormatId) {
+            setCategoryId(parsed[0].formatItem.productFormatId);
+          }
+          sessionStorage.removeItem("color_bank_preselected_shades");
+          return;
+        }
+      }
+    } catch {
+      // ignore
+    }
+
+    if (search?.itemId) {
+      setItemId(search.itemId);
+    }
+  }, [search?.itemId]);
+
+  useEffect(() => {
+    if (itemId && formats.data && !categoryId) {
+      for (const format of formats.data) {
+        if (format.items.some((item) => item.id === itemId)) {
+          setCategoryId(format.id);
+          break;
+        }
+      }
+    }
+  }, [itemId, formats.data, categoryId]);
 
   function changeSelected(next: Map<string, Shade>) {
     setSelected(next);

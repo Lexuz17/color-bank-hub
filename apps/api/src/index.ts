@@ -7,9 +7,7 @@ try {
   await db.$client`select 1`;
 } catch (error) {
   const host = new URL(env.databaseUrl).host;
-  console.error(
-    `Cannot connect to the database at ${host}: ${(error as Error).message || (error as { code?: string }).code}`,
-  );
+  console.error(`Cannot connect to the database at ${host}: ${(error as Error).message || (error as { code?: string }).code}`);
   console.error("Start it with `docker compose up -d db`, then retry.");
   process.exit(1);
 }

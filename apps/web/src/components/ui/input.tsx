@@ -2,11 +2,7 @@ import { Field } from "@tanstack/react-form";
 import { Input as InputPrimitive } from "@base-ui/react/input";
 import { cn } from "cn";
 import { formContext } from "@/components/ui/form-context";
-import {
-  type StringFieldApi,
-  type StringFieldValidators,
-  getFieldError,
-} from "@/lib/form-utils";
+import { type StringFieldApi, type StringFieldValidators, getFieldError } from "@/lib/form-utils";
 
 type InputProps = React.ComponentProps<"input"> & {
   field?: StringFieldApi;
@@ -17,19 +13,7 @@ type InputProps = React.ComponentProps<"input"> & {
   errorClassName?: string;
 };
 
-function Input({
-  className,
-  type,
-  field,
-  name,
-  validators,
-  label,
-  description,
-  containerClassName,
-  errorClassName,
-  id,
-  ...props
-}: InputProps) {
+function Input({ className, type, field, name, validators, label, description, containerClassName, errorClassName, id, ...props }: InputProps) {
   return (
     <formContext.Consumer>
       {(form) => {
@@ -60,9 +44,7 @@ function Input({
           return (
             <div className={containerClassName ?? "flex flex-col gap-1.5"}>
               {label ? <label htmlFor={fieldId}>{label}</label> : null}
-              {description ? (
-                <p className="text-sm text-muted-foreground">{description}</p>
-              ) : null}
+              {description ? <p className="text-sm text-muted-foreground">{description}</p> : null}
               <InputPrimitive
                 id={fieldId}
                 name={field.name}
@@ -77,11 +59,7 @@ function Input({
                 onChange={(event) => field.handleChange(event.target.value)}
                 {...props}
               />
-              {error ? (
-                <p className={cn("text-sm text-destructive", errorClassName)}>
-                  {error}
-                </p>
-              ) : null}
+              {error ? <p className={cn("text-sm text-destructive", errorClassName)}>{error}</p> : null}
             </div>
           );
         }

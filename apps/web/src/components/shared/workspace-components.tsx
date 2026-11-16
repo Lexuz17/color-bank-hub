@@ -1,41 +1,16 @@
-import {
-  useId,
-  useState,
-  useEffect,
-  type ReactNode,
-  type ComponentProps,
-} from "react";
-import {
-  Search,
-  X,
-  Upload,
-  Map as MapIcon,
-  Check,
-  LoaderCircle,
-} from "lucide-react";
+import { useId, useState, useEffect, type ReactNode, type ComponentProps } from "react";
+import { Search, X, Upload, Map as MapIcon, Check, LoaderCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-export function PageToolbar({
-  title,
-  description,
-  children,
-}: {
-  title: string;
-  description?: string;
-  children?: ReactNode;
-}) {
+export function PageToolbar({ title, description, children }: { title: string; description?: string; children?: ReactNode }) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 border-b bg-card px-5 py-3">
       <div>
         <h1 className="text-sm font-medium">{title}</h1>
-        {description && (
-          <p className="mt-1 text-[11px] text-muted-foreground">
-            {description}
-          </p>
-        )}
+        {description && <p className="mt-1 text-[11px] text-muted-foreground">{description}</p>}
       </div>
       <div className="flex flex-wrap items-center gap-2">{children}</div>
     </div>
@@ -54,10 +29,7 @@ export function SearchInput({
 }) {
   return (
     <div className={cn("relative", className)}>
-      <Search
-        aria-hidden="true"
-        className="pointer-events-none absolute top-2.5 left-2.5 size-3 text-muted-foreground"
-      />
+      <Search aria-hidden="true" className="pointer-events-none absolute top-2.5 left-2.5 size-3 text-muted-foreground" />
       <Input
         type="search"
         aria-label={placeholder}
@@ -79,23 +51,14 @@ export function SearchInput({
     </div>
   );
 }
-export function ShadeSwatch({
-  hex,
-  size = "sm",
-  className,
-  ...props
-}: ComponentProps<"span"> & { hex: string; size?: "sm" | "lg" }) {
+export function ShadeSwatch({ hex, size = "sm", className, ...props }: ComponentProps<"span"> & { hex: string; size?: "sm" | "lg" }) {
   const valid = /^#[0-9a-f]{6}$/i.test(hex);
   return (
     <span
       role="img"
       aria-label={valid ? `Shade ${hex}` : "Invalid shade"}
       title={hex}
-      className={cn(
-        "inline-block shrink-0 rounded-full border border-foreground/10",
-        size === "sm" ? "size-5" : "size-12",
-        className,
-      )}
+      className={cn("inline-block shrink-0 rounded-full border border-foreground/10", size === "sm" ? "size-5" : "size-12", className)}
       style={{ backgroundColor: valid ? hex : "transparent" }}
       {...props}
     />
@@ -136,23 +99,14 @@ export function EmptyState({
     <div className="flex min-h-40 flex-col items-center justify-center gap-2 p-6 text-center">
       <MapIcon className="mb-1 size-7 text-muted-foreground/50" />
       <p className="text-xs font-medium">{title}</p>
-      <p className="max-w-64 text-[11px] text-muted-foreground">
-        {description}
-      </p>
+      <p className="max-w-64 text-[11px] text-muted-foreground">{description}</p>
       {action}
     </div>
   );
 }
-export function LoadingState({
-  label = "Loading shades…",
-}: {
-  label?: string;
-}) {
+export function LoadingState({ label = "Loading shades…" }: { label?: string }) {
   return (
-    <div
-      role="status"
-      className="flex items-center gap-2 text-xs text-muted-foreground"
-    >
+    <div role="status" className="flex items-center gap-2 text-xs text-muted-foreground">
       <LoaderCircle className="size-4 animate-spin" />
       {label}
     </div>
@@ -183,11 +137,7 @@ export function WorkflowSteps({
           )}
         >
           <span className="flex size-4 items-center justify-center rounded-full border">
-            {completed || index < activeStep ? (
-              <Check className="size-2.5" />
-            ) : (
-              index + 1
-            )}
+            {completed || index < activeStep ? <Check className="size-2.5" /> : index + 1}
           </span>
           {step}
         </li>
@@ -195,13 +145,7 @@ export function WorkflowSteps({
     </ol>
   );
 }
-export function ImageUpload({
-  label,
-  onFileChange,
-}: {
-  label: string;
-  onFileChange?: (file: File | null) => void;
-}) {
+export function ImageUpload({ label, onFileChange }: { label: string; onFileChange?: (file: File | null) => void }) {
   const id = useId();
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState("");
@@ -221,11 +165,7 @@ export function ImageUpload({
         className="relative flex min-h-24 cursor-pointer flex-col items-center justify-center gap-1 overflow-hidden rounded-md border border-dashed bg-muted/40 p-3 text-center text-[10px] text-muted-foreground focus-within:ring-2 focus-within:ring-ring/30"
       >
         {preview ? (
-          <img
-            src={preview}
-            alt={label}
-            className="h-20 w-full object-contain"
-          />
+          <img src={preview} alt={label} className="h-20 w-full object-contain" />
         ) : (
           <>
             <Upload className="size-5" />
@@ -242,11 +182,7 @@ export function ImageUpload({
           aria-describedby={error ? `${id}-error` : undefined}
           onChange={(event) => {
             const next = event.target.files?.[0] ?? null;
-            if (
-              next &&
-              (!["image/png", "image/jpeg", "image/webp"].includes(next.type) ||
-                next.size > 5 * 1024 * 1024)
-            ) {
+            if (next && (!["image/png", "image/jpeg", "image/webp"].includes(next.type) || next.size > 5 * 1024 * 1024)) {
               setError("Choose a PNG, JPEG, or WebP under 5 MB.");
               event.target.value = "";
               return;
@@ -267,9 +203,7 @@ export function ImageUpload({
             setPreview("");
             setError("");
             onFileChange?.(null);
-            const input = document.getElementById(
-              id,
-            ) as HTMLInputElement | null;
+            const input = document.getElementById(id) as HTMLInputElement | null;
             if (input) input.value = "";
           }}
         >
@@ -277,11 +211,7 @@ export function ImageUpload({
         </Button>
       )}
       {error && (
-        <p
-          id={`${id}-error`}
-          role="alert"
-          className="mt-1 text-xs text-destructive"
-        >
+        <p id={`${id}-error`} role="alert" className="mt-1 text-xs text-destructive">
           {error}
         </p>
       )}

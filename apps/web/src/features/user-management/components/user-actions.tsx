@@ -12,13 +12,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useSession } from "@/features/auth/hooks/use-session";
 import { useUpdateUser } from "../hooks/user-mutations";
 
@@ -70,17 +64,9 @@ export function RoleSelect({ user }: Props) {
 
   return (
     <>
-      <Select
-        value={user.role}
-        disabled={useIsSelf(user) || update.isPending}
-        onValueChange={(value) => value && setNext(value as Role)}
-      >
+      <Select value={user.role} disabled={useIsSelf(user) || update.isPending} onValueChange={(value) => value && setNext(value as Role)}>
         <SelectTrigger size="sm" aria-label={`Role for ${user.name}`}>
-          <SelectValue>
-            {(value: Role | null) =>
-              value ? roleLabels[value] : "Select role"
-            }
-          </SelectValue>
+          <SelectValue>{(value: Role | null) => (value ? roleLabels[value] : "Select role")}</SelectValue>
         </SelectTrigger>
         <SelectContent>
           {roles.map((role) => (
@@ -94,9 +80,7 @@ export function RoleSelect({ user }: Props) {
         <ConfirmDialog
           title="Change role?"
           description={`${user.name} will get the ${roleLabels[next]} role. The change is logged.`}
-          onConfirm={() =>
-            update.mutate({ id: user.id, changes: { role: next } })
-          }
+          onConfirm={() => update.mutate({ id: user.id, changes: { role: next } })}
           onClose={() => setNext(null)}
         />
       )}

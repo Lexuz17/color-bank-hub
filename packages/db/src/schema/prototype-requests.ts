@@ -1,16 +1,4 @@
-import {
-  char,
-  index,
-  integer,
-  jsonb,
-  numeric,
-  pgTable,
-  text,
-  timestamp,
-  uniqueIndex,
-  uuid,
-  varchar,
-} from "drizzle-orm/pg-core";
+import { char, index, integer, jsonb, numeric, pgTable, text, timestamp, uniqueIndex, uuid, varchar } from "drizzle-orm/pg-core";
 import { brands } from "./brands.js";
 import { priorityLevel, requestStatus, requestType, season } from "./enums.js";
 import { productFormatItems } from "./product-formats.js";
@@ -69,9 +57,7 @@ export const prototypeRequests = pgTable(
     /** master shade created on completed */
     resultShadeId: uuid("result_shade_id").references(() => shades.id),
 
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true })
       .notNull()
       .defaultNow()
@@ -81,10 +67,7 @@ export const prototypeRequests = pgTable(
     index("prototype_requests_status_idx").on(t.status),
     index("prototype_requests_requester_idx").on(t.requesterId),
     index("prototype_requests_created_at_idx").on(t.createdAt),
-    uniqueIndex("prototype_requests_product_format_item_seq_uq").on(
-      t.productFormatItemId,
-      t.sequenceNo,
-    ),
+    uniqueIndex("prototype_requests_product_format_item_seq_uq").on(t.productFormatItemId, t.sequenceNo),
   ],
 );
 

@@ -16,5 +16,4 @@ const dateTimeFormat = new Intl.DateTimeFormat(locale, {
 export const formatDate = (iso: string) => dateFormat.format(new Date(iso));
 
 /** ISO timestamp from the API -> "27 Nov 2026, 14:05". */
-export const formatDateTime = (iso: string) =>
-  dateTimeFormat.format(new Date(iso));
+export const formatDateTime = (iso: string) => dateTimeFormat.format(new Date(iso));

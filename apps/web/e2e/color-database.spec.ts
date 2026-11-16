@@ -9,9 +9,7 @@ test.describe("Color Database Feature", () => {
 
   test("displays shade catalog and handles search filter", async ({ page }) => {
     // Check toolbar title
-    await expect(
-      page.getByRole("heading", { name: "Color Database" }).first(),
-    ).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Color Database" }).first()).toBeVisible();
 
     // Verify shade items are rendered
     await expect(page.getByText("Crimson Velvet")).toBeVisible();
@@ -23,29 +21,14 @@ test.describe("Color Database Feature", () => {
     await expect(page.getByText("Solar Coral")).toBeVisible();
   });
 
-  test("inspects a shade and opens product detail panel", async ({ page }) => {
-    // Click on Crimson Velvet inspect button
-    const shadeBtn = page
-      .getByRole("button", { name: /Crimson Velvet/i })
-      .first();
-    await shadeBtn.click();
+  test("renders shade attributes in table without detail panel", async ({ page }) => {
+    // Verify shade and related columns are directly visible in the table
+    await expect(page.getByText("Crimson Velvet")).toBeVisible();
+    await expect(page.getByText("Aura Beauty").first()).toBeVisible();
+    await expect(page.getByText("#aa6d78")).toBeVisible();
 
-    // Verify detail panel shows product and ingredients
-    await expect(
-      page.locator(":visible").filter({ hasText: "PRODUCT DETAIL" }).first(),
-    ).toBeVisible();
-    await expect(
-      page
-        .locator(":visible")
-        .filter({ hasText: "Velvet Satin Lipstick" })
-        .first(),
-    ).toBeVisible();
-    await expect(
-      page
-        .locator(":visible")
-        .filter({ hasText: /Dimethicone, Silica/ })
-        .first(),
-    ).toBeVisible();
+    // Detail panel header should not be present
+    await expect(page.locator(":visible").filter({ hasText: "PRODUCT DETAIL" })).toHaveCount(0);
   });
 
   test("filters shades by category in sidebar", async ({ page }) => {

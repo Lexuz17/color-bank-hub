@@ -1,12 +1,4 @@
-import {
-  boolean,
-  index,
-  pgTable,
-  text,
-  timestamp,
-  uuid,
-  varchar,
-} from "drizzle-orm/pg-core";
+import { boolean, index, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 import { approvalStatus, userRole, userStatus } from "./enums.js";
 
 export const users = pgTable("users", {
@@ -19,9 +11,7 @@ export const users = pgTable("users", {
   role: userRole("role"),
   status: userStatus("status").notNull().default("pending"),
   lastLoginAt: timestamp("last_login_at", { withTimezone: true }),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .notNull()
     .defaultNow()
@@ -41,9 +31,7 @@ export const roleRequests = pgTable(
       onDelete: "set null",
     }),
     decidedAt: timestamp("decided_at", { withTimezone: true }),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index("role_requests_user_status_idx").on(t.userId, t.status)],
 );

@@ -1,17 +1,6 @@
 import { z } from "zod";
 import type { Brand, FormatItem, Product } from "./catalog.js";
-import {
-  type CompositionItem,
-  type Season,
-  type Undertone,
-  composition,
-  hex,
-  name,
-  pagination,
-  season,
-  undertone,
-  uuid,
-} from "./common.js";
+import { type CompositionItem, type Season, type Undertone, composition, hex, name, pagination, season, undertone, uuid } from "./common.js";
 
 export const shadeInput = z
   .object({
@@ -31,25 +20,17 @@ export type ShadeInput = z.infer<typeof shadeInput>;
 export const shadePatch = shadeInput
   .omit({ productId: true })
   .partial()
-  .refine(
-    (value) => Object.keys(value).length > 0,
-    "Provide at least one field",
-  );
+  .refine((value) => Object.keys(value).length > 0, "Provide at least one field");
 export type ShadePatch = z.infer<typeof shadePatch>;
 
-export const shadeSort = z.enum([
-  "name",
-  "sku",
-  "createdAt",
-  "hue",
-  "lightness",
-]);
+export const shadeSort = z.enum(["name", "sku", "createdAt", "hue", "lightness"]);
 export type ShadeSort = z.infer<typeof shadeSort>;
 
 export const shadeQuery = pagination.extend({
   search: z.string().trim().max(255).optional(),
   brandId: uuid.optional(),
   productId: uuid.optional(),
+  productFormatId: z.coerce.number().int().positive().optional(),
   productFormatItemId: z.coerce.number().int().positive().optional(),
   undertone: undertone.optional(),
   season: season.optional(),

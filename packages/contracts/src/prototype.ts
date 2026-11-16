@@ -1,26 +1,9 @@
 import { z } from "zod";
-import {
-  type CompositionItem,
-  type Priority,
-  type Season,
-  composition,
-  hex,
-  name,
-  pagination,
-  priority,
-  season,
-  url,
-} from "./common.js";
+import { type CompositionItem, type Priority, type Season, composition, hex, name, pagination, priority, season, url } from "./common.js";
 
 export const prototypeType = z.enum(["benchmark_matching", "gap_filling"]);
 export type PrototypeType = z.infer<typeof prototypeType>;
-export const prototypeStatus = z.enum([
-  "pending",
-  "approved",
-  "formulating",
-  "completed",
-  "declined",
-]);
+export const prototypeStatus = z.enum(["pending", "approved", "formulating", "completed", "declined"]);
 export type PrototypeStatus = z.infer<typeof prototypeStatus>;
 
 export const prototypeInput = z
@@ -68,10 +51,7 @@ export const formulationInput = z
     resultNotes: z.string().max(20000).optional(),
   })
   .strict()
-  .refine(
-    (value) => Object.keys(value).length > 0,
-    "Provide at least one field",
-  );
+  .refine((value) => Object.keys(value).length > 0, "Provide at least one field");
 export type FormulationInput = z.infer<typeof formulationInput>;
 
 export interface PrototypeRequest {

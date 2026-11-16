@@ -14,11 +14,7 @@
 // Later: attachment_urls -> upload keys (purpose in contracts/upload.ts).
 
 import { uuid } from "@color-bank-hub/contracts/common";
-import {
-  reportInput,
-  reportPatch,
-  reportQuery,
-} from "@color-bank-hub/contracts/report";
+import { reportInput, reportPatch, reportQuery } from "@color-bank-hub/contracts/report";
 import type { Context } from "hono";
 import { parse } from "#api/core/errors.js";
 import type { AppEnv } from "#api/middleware/auth.js";

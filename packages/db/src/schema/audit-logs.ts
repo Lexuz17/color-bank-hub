@@ -1,20 +1,10 @@
-import {
-  bigint,
-  index,
-  jsonb,
-  pgTable,
-  timestamp,
-  uuid,
-  varchar,
-} from "drizzle-orm/pg-core";
+import { bigint, index, jsonb, pgTable, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 import { users } from "./users.js";
 
 export const auditLogs = pgTable(
   "audit_logs",
   {
-    id: bigint("id", { mode: "number" })
-      .primaryKey()
-      .generatedAlwaysAsIdentity(),
+    id: bigint("id", { mode: "number" }).primaryKey().generatedAlwaysAsIdentity(),
     actorId: uuid("actor_id").references(() => users.id, {
       onDelete: "set null",
     }),
@@ -24,14 +14,9 @@ export const auditLogs = pgTable(
     targetId: varchar("target_id").notNull(),
     before: jsonb("before"),
     after: jsonb("after"),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [
-    index("audit_logs_target_idx").on(t.targetType, t.targetId),
-    index("audit_logs_created_at_idx").on(t.createdAt),
-  ],
+  (t) => [index("audit_logs_target_idx").on(t.targetType, t.targetId), index("audit_logs_created_at_idx").on(t.createdAt)],
 );
 
 export type AuditLog = typeof auditLogs.$inferSelect;

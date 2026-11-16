@@ -10,12 +10,7 @@ const userWith = (role: Role) => ({
   role,
 });
 const app = createApp({ resolveUser: async () => userWith("website_admin") });
-async function request(
-  path: string,
-  method = "GET",
-  body?: unknown,
-  target = app,
-) {
+async function request(path: string, method = "GET", body?: unknown, target = app) {
   return target.request(path, {
     method,
     ...(body === undefined
@@ -27,12 +22,7 @@ async function request(
   });
 }
 test("health is public and unknown endpoints return structured errors", async () => {
-  const health = await request(
-    "/health",
-    "GET",
-    undefined,
-    createApp({ resolveUser: async () => null }),
-  );
+  const health = await request("/health", "GET", undefined, createApp({ resolveUser: async () => null }));
   assert.equal(health.status, 200);
   const missing = await request("/api/missing");
   assert.equal(missing.status, 404);
@@ -43,12 +33,7 @@ test("health is public and unknown endpoints return structured errors", async ()
   assert.ok(body.error.requestId);
 });
 test("catalog validation rejects bad pagination and IDs before database access", async () => {
-  for (const path of [
-    "/api/shades?page=0",
-    "/api/shades?pageSize=501",
-    "/api/shades?sort=unsafe",
-    "/api/shades/not-a-uuid",
-  ]) {
+  for (const path of ["/api/shades?page=0", "/api/shades?pageSize=501", "/api/shades?sort=unsafe", "/api/shades/not-a-uuid"]) {
     const response = await request(path);
     assert.equal(response.status, 422, path);
     assert.equal((await response.json()).error.code, "VALIDATION_ERROR");
@@ -87,12 +72,7 @@ test("status and formulation endpoints validate status, composition, and IDs", a
 });
 test("API routes require a signed-in user", async () => {
   const anonymous = createApp({ resolveUser: async () => null });
-  for (const path of [
-    "/api/me",
-    "/api/brands",
-    "/api/shades",
-    "/api/reports",
-  ]) {
+  for (const path of ["/api/me", "/api/brands", "/api/shades", "/api/reports"]) {
     const response = await request(path, "GET", undefined, anonymous);
     assert.equal(response.status, 401, path);
     assert.equal((await response.json()).error.code, "UNAUTHORIZED");

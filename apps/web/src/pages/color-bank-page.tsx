@@ -1,41 +1,18 @@
 import { useState } from "react";
 import { PageShell } from "@/components/layout/page-shell";
-import {
-  PageToolbar,
-  ShadeSwatch,
-  StatusBadge,
-  EmptyState,
-  LoadingState,
-} from "@/components/shared/workspace-components";
+import { PageToolbar, ShadeSwatch, StatusBadge, EmptyState, LoadingState } from "@/components/shared/workspace-components";
 import { CatalogSidebar } from "@/components/catalog/catalog-sidebar";
 import { PrototypeDetail } from "@/components/prototypes/prototype-detail";
-import {
-  ApiError,
-  FieldSelect,
-  ResultsPagination,
-} from "@/components/shared/request-feedback";
+import { ApiError, FieldSelect, ResultsPagination } from "@/components/shared/request-feedback";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { useProductFormats } from "@/api/product-formats/product-format-queries";
 import { useCreateRequest } from "@/features/color-bank/hooks/prototype-mutations";
-import {
-  useRequest,
-  useRequests,
-} from "@/features/color-bank/hooks/prototype-queries";
+import { useRequest, useRequests } from "@/features/color-bank/hooks/prototype-queries";
 import { useCan } from "@/features/auth/hooks/use-can";
-import type {
-  PrototypeInput,
-  PrototypeStatus,
-} from "@color-bank-hub/contracts/prototype";
+import type { PrototypeInput, PrototypeStatus } from "@color-bank-hub/contracts/prototype";
 const statusLabels = {
   pending: "Pending",
   approved: "Approved",
@@ -62,10 +39,7 @@ export function ColorBankPage() {
   const request = useRequest(activeId);
   const create = useCreateRequest();
   const detail = !activeId ? (
-    <EmptyState
-      title="Request detail"
-      description="Select or create a prototype request."
-    />
+    <EmptyState title="Request detail" description="Select or create a prototype request." />
   ) : request.isPending ? (
     <div className="p-4">
       <LoadingState label="Loading request…" />
@@ -78,10 +52,7 @@ export function ColorBankPage() {
     <PrototypeDetail
       key={`${request.data.id}:${request.data.status}`}
       request={request.data}
-      formatName={
-        items.find((item) => item.id === request.data.productFormatItemId)
-          ?.name ?? "Product format"
-      }
+      formatName={items.find((item) => item.id === request.data.productFormatItemId)?.name ?? "Product format"}
     />
   );
   return (
@@ -90,8 +61,8 @@ export function ColorBankPage() {
       sidebar={
         <CatalogSidebar
           value={format}
-          onChange={(value) => {
-            setFormat(value);
+          onChange={(selection) => {
+            setFormat(selection?.type === "subsegment" ? selection.id : null);
             setSelected(null);
             setPage(1);
           }}
@@ -130,16 +101,11 @@ export function ColorBankPage() {
       </PageToolbar>
       {formats.isError && (
         <div className="p-4">
-          <ApiError
-            error={formats.error}
-            retry={() => void formats.refetch()}
-          />
+          <ApiError error={formats.error} retry={() => void formats.refetch()} />
         </div>
       )}
       {formats.data && !items.length && (
-        <p className="p-4 text-xs text-muted-foreground">
-          Add a product format in Data Input before creating requests.
-        </p>
+        <p className="p-4 text-xs text-muted-foreground">Add a product format in Data Input before creating requests.</p>
       )}
       {requests.isPending ? (
         <div className="p-5">
@@ -147,18 +113,12 @@ export function ColorBankPage() {
         </div>
       ) : requests.isError ? (
         <div className="p-5">
-          <ApiError
-            error={requests.error}
-            retry={() => void requests.refetch()}
-          />
+          <ApiError error={requests.error} retry={() => void requests.refetch()} />
         </div>
       ) : (
         <>
           {!requests.data.items.length ? (
-            <EmptyState
-              title="No prototype requests"
-              description="Create a request or adjust the current filters."
-            />
+            <EmptyState title="No prototype requests" description="Create a request or adjust the current filters." />
           ) : (
             requests.data.items.map((row) => (
               <button
@@ -170,17 +130,12 @@ export function ColorBankPage() {
               >
                 {row.targetHex && <ShadeSwatch hex={row.targetHex} />}
                 <div className="min-w-0 flex-1">
-                  <strong className="font-medium">
-                    {row.autoName ?? `Request ${row.id.slice(0, 8)}`}
-                  </strong>
+                  <strong className="font-medium">{row.autoName ?? `Request ${row.id.slice(0, 8)}`}</strong>
                   <p className="mt-1 text-muted-foreground">
-                    {row.brandNameNew} · {row.productNameNew} ·{" "}
-                    {row.shadeNameNew}
+                    {row.brandNameNew} · {row.productNameNew} · {row.shadeNameNew}
                   </p>
                 </div>
-                <span className="text-[10px] text-muted-foreground">
-                  {row.priority} priority
-                </span>
+                <span className="text-[10px] text-muted-foreground">{row.priority} priority</span>
                 <StatusBadge status={statusLabels[row.status]} />
               </button>
             ))
@@ -209,9 +164,7 @@ export function ColorBankPage() {
         <DialogContent className="max-h-[90dvh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>New prototype request</DialogTitle>
-            <DialogDescription>
-              Submit a benchmark-matching or gap-filling request.
-            </DialogDescription>
+            <DialogDescription>Submit a benchmark-matching or gap-filling request.</DialogDescription>
           </DialogHeader>
           <form
             className="grid gap-4"
@@ -220,9 +173,7 @@ export function ColorBankPage() {
               const data = new FormData(event.currentTarget);
               const body: PrototypeInput = {
                 type: String(data.get("type")) as PrototypeInput["type"],
-                priority: String(
-                  data.get("priority"),
-                ) as PrototypeInput["priority"],
+                priority: String(data.get("priority")) as PrototypeInput["priority"],
                 brandNameNew: String(data.get("brand")).trim(),
                 productNameNew: String(data.get("product")).trim(),
                 shadeNameNew: String(data.get("shade")).trim(),
@@ -260,11 +211,7 @@ export function ColorBankPage() {
             </div>
             <label className="grid gap-2 text-xs">
               Product format
-              <FieldSelect
-                name="format"
-                defaultValue={format ?? items[0]?.id}
-                required
-              >
+              <FieldSelect name="format" defaultValue={format ?? items[0]?.id} required>
                 {items.map((item) => (
                   <option key={item.id} value={item.id}>
                     {item.name}
@@ -287,12 +234,7 @@ export function ColorBankPage() {
               </label>
               <label className="grid gap-2 text-xs">
                 Target HEX
-                <Input
-                  name="hex"
-                  defaultValue="#aa6d78"
-                  pattern="#[0-9a-fA-F]{6}"
-                  required
-                />
+                <Input name="hex" defaultValue="#aa6d78" pattern="#[0-9a-fA-F]{6}" required />
               </label>
             </div>
             <label className="grid gap-2 text-xs">
@@ -301,12 +243,7 @@ export function ColorBankPage() {
             </label>
             {create.isError && <ApiError error={create.error} />}
             <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                disabled={create.isPending}
-                onClick={() => setOpen(false)}
-              >
+              <Button type="button" variant="outline" disabled={create.isPending} onClick={() => setOpen(false)}>
                 Cancel
               </Button>
               <Button type="submit" disabled={create.isPending}>

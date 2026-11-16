@@ -1,10 +1,4 @@
-import {
-  DeleteObjectCommand,
-  GetObjectCommand,
-  HeadObjectCommand,
-  PutObjectCommand,
-  S3Client,
-} from "@aws-sdk/client-s3";
+import { DeleteObjectCommand, GetObjectCommand, HeadObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { env } from "#api/env.js";
 
@@ -49,13 +43,10 @@ export function presignDownload(key: string) {
 /** Object metadata, or null when the key does not exist. */
 export async function headObject(key: string) {
   try {
-    const head = await s3.send(
-      new HeadObjectCommand({ Bucket: bucket, Key: key }),
-    );
+    const head = await s3.send(new HeadObjectCommand({ Bucket: bucket, Key: key }));
     return { size: head.ContentLength ?? 0, contentType: head.ContentType };
   } catch (error) {
-    const status = (error as { $metadata?: { httpStatusCode?: number } })
-      .$metadata?.httpStatusCode;
+    const status = (error as { $metadata?: { httpStatusCode?: number } }).$metadata?.httpStatusCode;
     if (status === 404) return null;
     throw error;
   }

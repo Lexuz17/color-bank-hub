@@ -18,6 +18,7 @@ export async function listShades(query: ShadeQuery) {
   const filters: (SQL | undefined)[] = [
     query.brandId ? eq(brands.id, query.brandId) : undefined,
     query.productId ? eq(products.id, query.productId) : undefined,
+    query.productFormatId ? eq(productFormatItems.productFormatId, query.productFormatId) : undefined,
     query.productFormatItemId ? eq(products.productFormatItemId, query.productFormatItemId) : undefined,
     query.season ? eq(shades.season, query.season) : undefined,
     query.undertone ? eq(shades.undertone, query.undertone) : undefined,
@@ -53,6 +54,7 @@ export async function listShades(query: ShadeQuery) {
       .from(shades)
       .innerJoin(products, eq(products.id, shades.productId))
       .innerJoin(brands, eq(brands.id, products.brandId))
+      .innerJoin(productFormatItems, eq(productFormatItems.id, products.productFormatItemId))
       .where(where),
   ]);
   return {

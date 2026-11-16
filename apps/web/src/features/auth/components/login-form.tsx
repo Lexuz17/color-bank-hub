@@ -6,11 +6,7 @@ import { DevEmailLogin } from "./dev-email-login";
 export function LoginForm({ redirectTo }: { redirectTo: string }) {
   return (
     <div className="flex flex-col gap-4">
-      <Button
-        type="button"
-        className="w-full"
-        onClick={() => signInWithGoogle(redirectTo)}
-      >
+      <Button type="button" className="w-full" onClick={() => signInWithGoogle(redirectTo)}>
         Login with Google
       </Button>
       {import.meta.env.DEV && <DevEmailLogin redirectTo={redirectTo} />}

@@ -8,8 +8,7 @@ import { usersQueryOptions } from "./user-queries";
 export function useUpdateUser() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, changes }: { id: string; changes: UserPatch }) =>
-      updateUser(id, changes),
+    mutationFn: ({ id, changes }: { id: string; changes: UserPatch }) => updateUser(id, changes),
     onSuccess: () => {
       toast.success("User updated");
       return queryClient.invalidateQueries({

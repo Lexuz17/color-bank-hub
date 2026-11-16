@@ -146,8 +146,7 @@ export const mockReports = [
     id: "rep-00000001",
     brandId: "brand-1",
     shadeId: "shade-1",
-    description:
-      "Sample #44 displays noticeable yellow shift vs master swatch.",
+    description: "Sample #44 displays noticeable yellow shift vs master swatch.",
     priority: "high" as const,
     status: "pending" as const,
     createdAt: "2026-01-15T10:00:00Z",
@@ -192,10 +191,7 @@ export const mockRequests = [
   },
 ];
 
-export async function setupApiMocks(
-  page: Page,
-  { authenticated = true }: { authenticated?: boolean } = {},
-) {
+export async function setupApiMocks(page: Page, { authenticated = true }: { authenticated?: boolean } = {}) {
   await page.route("**/api/**", async (route: Route) => {
     const url = new URL(route.request().url());
     const method = route.request().method();
@@ -273,15 +269,13 @@ export async function setupApiMocks(
           id: Date.now(),
           name: body.name,
           count: body.items.length,
-          items: body.items.map(
-            (item: { name: string; code: string }, index: number) => ({
-              id: Date.now() + index,
-              productFormatId: Date.now(),
-              name: item.name,
-              code: item.code,
-              count: 0,
-            }),
-          ),
+          items: body.items.map((item: { name: string; code: string }, index: number) => ({
+            id: Date.now() + index,
+            productFormatId: Date.now(),
+            name: item.name,
+            code: item.code,
+            count: 0,
+          })),
         };
         return route.fulfill({
           status: 201,
@@ -342,11 +336,7 @@ export async function setupApiMocks(
         const search = url.searchParams.get("search")?.toLowerCase();
         let items = mockShades;
         if (search) {
-          items = items.filter(
-            (s) =>
-              s.name.toLowerCase().includes(search) ||
-              s.hex.toLowerCase().includes(search),
-          );
+          items = items.filter((s) => s.name.toLowerCase().includes(search) || s.hex.toLowerCase().includes(search));
         }
         return route.fulfill({
           status: 200,
@@ -479,11 +469,7 @@ export async function setupApiMocks(
     }
 
     // PATCH /prototype-requests/:id/status
-    if (
-      pathname.includes("/prototype-requests/") &&
-      pathname.endsWith("/status") &&
-      method === "PATCH"
-    ) {
+    if (pathname.includes("/prototype-requests/") && pathname.endsWith("/status") && method === "PATCH") {
       const body = route.request().postDataJSON();
       return route.fulfill({
         status: 200,
@@ -495,11 +481,7 @@ export async function setupApiMocks(
     }
 
     // PATCH /prototype-requests/:id/formulation
-    if (
-      pathname.includes("/prototype-requests/") &&
-      pathname.endsWith("/formulation") &&
-      method === "PATCH"
-    ) {
+    if (pathname.includes("/prototype-requests/") && pathname.endsWith("/formulation") && method === "PATCH") {
       const body = route.request().postDataJSON();
       return route.fulfill({
         status: 200,

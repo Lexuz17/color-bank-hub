@@ -54,25 +54,19 @@ export const brandsRelations = relations(brands, ({ many }) => ({
   products: many(products),
 }));
 
-export const productFormatsRelations = relations(
-  productFormats,
-  ({ many }) => ({
-    items: many(productFormatItems),
-    classificationConfigs: many(classificationConfigVersions),
-  }),
-);
+export const productFormatsRelations = relations(productFormats, ({ many }) => ({
+  items: many(productFormatItems),
+  classificationConfigs: many(classificationConfigVersions),
+}));
 
-export const productFormatItemsRelations = relations(
-  productFormatItems,
-  ({ one, many }) => ({
-    format: one(productFormats, {
-      fields: [productFormatItems.productFormatId],
-      references: [productFormats.id],
-    }),
-    products: many(products),
-    mappings: many(mappings),
+export const productFormatItemsRelations = relations(productFormatItems, ({ one, many }) => ({
+  format: one(productFormats, {
+    fields: [productFormatItems.productFormatId],
+    references: [productFormats.id],
   }),
-);
+  products: many(products),
+  mappings: many(mappings),
+}));
 
 export const productsRelations = relations(products, ({ one, many }) => ({
   brand: one(brands, { fields: [products.brandId], references: [brands.id] }),
@@ -84,19 +78,16 @@ export const productsRelations = relations(products, ({ one, many }) => ({
 }));
 
 // Classification & shades
-export const classificationConfigVersionsRelations = relations(
-  classificationConfigVersions,
-  ({ one }) => ({
-    format: one(productFormats, {
-      fields: [classificationConfigVersions.productFormatId],
-      references: [productFormats.id],
-    }),
-    creator: one(users, {
-      fields: [classificationConfigVersions.createdBy],
-      references: [users.id],
-    }),
+export const classificationConfigVersionsRelations = relations(classificationConfigVersions, ({ one }) => ({
+  format: one(productFormats, {
+    fields: [classificationConfigVersions.productFormatId],
+    references: [productFormats.id],
   }),
-);
+  creator: one(users, {
+    fields: [classificationConfigVersions.createdBy],
+    references: [users.id],
+  }),
+}));
 
 export const shadesRelations = relations(shades, ({ one, many }) => ({
   product: one(products, {
@@ -117,21 +108,18 @@ export const shadesRelations = relations(shades, ({ one, many }) => ({
   }),
 }));
 
-export const shadeBenchmarksRelations = relations(
-  shadeBenchmarks,
-  ({ one }) => ({
-    shade: one(shades, {
-      fields: [shadeBenchmarks.shadeId],
-      references: [shades.id],
-      relationName: "benchmark_shade",
-    }),
-    benchmark: one(shades, {
-      fields: [shadeBenchmarks.benchmarkShadeId],
-      references: [shades.id],
-      relationName: "benchmark_target",
-    }),
+export const shadeBenchmarksRelations = relations(shadeBenchmarks, ({ one }) => ({
+  shade: one(shades, {
+    fields: [shadeBenchmarks.shadeId],
+    references: [shades.id],
+    relationName: "benchmark_shade",
   }),
-);
+  benchmark: one(shades, {
+    fields: [shadeBenchmarks.benchmarkShadeId],
+    references: [shades.id],
+    relationName: "benchmark_target",
+  }),
+}));
 
 // Mappings
 export const mappingsRelations = relations(mappings, ({ one, many }) => ({
@@ -152,43 +140,40 @@ export const mappingPinsRelations = relations(mappingPins, ({ one }) => ({
 }));
 
 // Color Bank
-export const prototypeRequestsRelations = relations(
-  prototypeRequests,
-  ({ one }) => ({
-    requester: one(users, {
-      fields: [prototypeRequests.requesterId],
-      references: [users.id],
-      relationName: "request_requester",
-    }),
-    decider: one(users, {
-      fields: [prototypeRequests.decidedBy],
-      references: [users.id],
-      relationName: "request_decider",
-    }),
-    brand: one(brands, {
-      fields: [prototypeRequests.brandId],
-      references: [brands.id],
-    }),
-    product: one(products, {
-      fields: [prototypeRequests.productId],
-      references: [products.id],
-    }),
-    shade: one(shades, {
-      fields: [prototypeRequests.shadeId],
-      references: [shades.id],
-      relationName: "request_shade",
-    }),
-    resultShade: one(shades, {
-      fields: [prototypeRequests.resultShadeId],
-      references: [shades.id],
-      relationName: "request_result_shade",
-    }),
-    formatItem: one(productFormatItems, {
-      fields: [prototypeRequests.productFormatItemId],
-      references: [productFormatItems.id],
-    }),
+export const prototypeRequestsRelations = relations(prototypeRequests, ({ one }) => ({
+  requester: one(users, {
+    fields: [prototypeRequests.requesterId],
+    references: [users.id],
+    relationName: "request_requester",
   }),
-);
+  decider: one(users, {
+    fields: [prototypeRequests.decidedBy],
+    references: [users.id],
+    relationName: "request_decider",
+  }),
+  brand: one(brands, {
+    fields: [prototypeRequests.brandId],
+    references: [brands.id],
+  }),
+  product: one(products, {
+    fields: [prototypeRequests.productId],
+    references: [products.id],
+  }),
+  shade: one(shades, {
+    fields: [prototypeRequests.shadeId],
+    references: [shades.id],
+    relationName: "request_shade",
+  }),
+  resultShade: one(shades, {
+    fields: [prototypeRequests.resultShadeId],
+    references: [shades.id],
+    relationName: "request_result_shade",
+  }),
+  formatItem: one(productFormatItems, {
+    fields: [prototypeRequests.productFormatItemId],
+    references: [productFormatItems.id],
+  }),
+}));
 
 // Reports
 export const reportsRelations = relations(reports, ({ one }) => ({

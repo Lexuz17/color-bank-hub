@@ -1,12 +1,4 @@
-import {
-  index,
-  integer,
-  pgTable,
-  timestamp,
-  uniqueIndex,
-  uuid,
-  varchar,
-} from "drizzle-orm/pg-core";
+import { index, integer, pgTable, timestamp, uniqueIndex, uuid, varchar } from "drizzle-orm/pg-core";
 import { brands } from "./brands.js";
 import { productFormatItems } from "./product-formats.js";
 
@@ -21,18 +13,13 @@ export const products = pgTable(
       .notNull()
       .references(() => productFormatItems.id),
     name: varchar("name").notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true })
       .notNull()
       .defaultNow()
       .$onUpdate(() => new Date()),
   },
-  (t) => [
-    uniqueIndex("products_brand_name_uq").on(t.brandId, t.name),
-    index("products_product_format_item_idx").on(t.productFormatItemId),
-  ],
+  (t) => [uniqueIndex("products_brand_name_uq").on(t.brandId, t.name), index("products_product_format_item_idx").on(t.productFormatItemId)],
 );
 
 export type Product = typeof products.$inferSelect;

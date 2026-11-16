@@ -22,14 +22,9 @@ export const reports = pgTable(
       onDelete: "set null",
     }),
     resolvedAt: timestamp("resolved_at", { withTimezone: true }),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [
-    index("reports_status_idx").on(t.status),
-    index("reports_created_at_idx").on(t.createdAt),
-  ],
+  (t) => [index("reports_status_idx").on(t.status), index("reports_created_at_idx").on(t.createdAt)],
 );
 
 export type Report = typeof reports.$inferSelect;

@@ -2,13 +2,7 @@ import { useState, type ReactNode } from "react";
 import type { Role } from "@color-bank-hub/contracts/rbac";
 import { AppHeader } from "./app-header";
 import type { AppSection } from "./app-header";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 
 export function WorkspaceLayout({
   children,
@@ -34,10 +28,7 @@ export function WorkspaceLayout({
   const [mobileOpen, setMobileOpen] = useState(false);
   return (
     <div className="flex h-dvh min-h-0 flex-col overflow-hidden bg-background">
-      <a
-        href="#workspace-main"
-        className="sr-only z-50 bg-card p-3 focus:not-sr-only focus:absolute"
-      >
+      <a href="#workspace-main" className="sr-only z-50 bg-card p-3 focus:not-sr-only focus:absolute">
         Skip to content
       </a>
       <AppHeader
@@ -49,27 +40,18 @@ export function WorkspaceLayout({
       />
       <div className="flex min-h-0 flex-1">
         {sidebar && (
-          <aside
-            aria-label="Workspace sidebar"
-            className={`hidden shrink-0 flex-col border-r lg:flex ${wideSidebar ? "w-76" : "w-51"}`}
-          >
+          <aside aria-label="Workspace sidebar" className={`hidden shrink-0 flex-col border-r lg:flex ${wideSidebar ? "w-76" : "w-51"}`}>
             <div className="min-h-0 flex-1">{sidebar}</div>
           </aside>
         )}
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-          <main
-            id="workspace-main"
-            className="min-h-0 min-w-0 flex-1 overflow-y-auto"
-          >
+          <main id="workspace-main" className="min-h-0 min-w-0 flex-1 overflow-y-auto">
             {children}
           </main>
           {footer && <div className="shrink-0 bg-background">{footer}</div>}
         </div>
         {detailPanel && (
-          <aside
-            aria-label="Product detail"
-            className="hidden min-h-0 w-68 shrink-0 self-stretch overflow-y-auto border-l bg-card xl:block"
-          >
+          <aside aria-label="Product detail" className="hidden min-h-0 w-68 shrink-0 self-stretch overflow-y-auto border-l bg-card xl:block">
             {detailPanel}
           </aside>
         )}

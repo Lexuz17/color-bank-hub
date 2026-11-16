@@ -16,19 +16,12 @@ export const productFormatItems = pgTable(
       .notNull()
       .references(() => productFormats.id),
     name: varchar("name").notNull(),
-    code: varchar("code", { length: 4 })
-      .notNull()
-      .unique() /** SM SG B TG TM TW LM LV V BP BL EM ES */,
+    code: varchar("code", { length: 4 }).notNull().unique() /** SM SG B TG TM TW LM LV V BP BL EM ES */,
     /** Anhydrous / Emulsion / Semisolid / Oil-based / Powder; drives the cross-format warning */
     baseType: varchar("base_type"),
     sortOrder: integer("sort_order").notNull().default(0),
   },
-  (t) => [
-    uniqueIndex("product_format_items_product_format_name_uq").on(
-      t.productFormatId,
-      t.name,
-    ),
-  ],
+  (t) => [uniqueIndex("product_format_items_product_format_name_uq").on(t.productFormatId, t.name)],
 );
 
 export type ProductFormat = typeof productFormats.$inferSelect;

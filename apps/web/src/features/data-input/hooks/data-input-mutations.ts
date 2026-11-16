@@ -2,23 +2,13 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { apiError } from "@/lib/api-error";
-import {
-  commitImport,
-  createBrand,
-  createFormat,
-  createProduct,
-  createShade,
-  previewImport,
-} from "../api/data-input.api";
+import { commitImport, createBrand, createFormat, createProduct, createShade, previewImport } from "../api/data-input.api";
 
 // New shades change the shade lists and the per-format counts.
 function useRefreshShades() {
   const queryClient = useQueryClient();
   return () =>
-    Promise.all([
-      queryClient.invalidateQueries({ queryKey: ["shades"] }),
-      queryClient.invalidateQueries({ queryKey: ["product-formats"] }),
-    ]);
+    Promise.all([queryClient.invalidateQueries({ queryKey: ["shades"] }), queryClient.invalidateQueries({ queryKey: ["product-formats"] })]);
 }
 
 export function useCreateShade() {
@@ -57,13 +47,7 @@ export type CatalogRecordMode = "brand" | "product" | "format";
 export function useCreateCatalogRecord() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({
-      mode,
-      data,
-    }: {
-      mode: CatalogRecordMode;
-      data: FormData;
-    }) => {
+    mutationFn: async ({ mode, data }: { mode: CatalogRecordMode; data: FormData }) => {
       if (mode === "brand")
         return {
           mode: "brand" as const,
@@ -100,9 +84,7 @@ export function useCreateCatalogRecord() {
         queryClient.invalidateQueries({ queryKey: ["products"] }),
         queryClient.invalidateQueries({ queryKey: ["product-formats"] }),
       ]);
-      toast.success(
-        `${result.mode[0].toUpperCase() + result.mode.slice(1)} created`,
-      );
+      toast.success(`${result.mode[0].toUpperCase() + result.mode.slice(1)} created`);
     },
     onError: (error) => toast.error(apiError(error)),
   });

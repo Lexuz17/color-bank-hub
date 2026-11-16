@@ -1,21 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import {
-  ArrowRight,
-  Info,
-  Plus,
-  Download,
-  Palette,
-  Check,
-  AlertTriangle,
-} from "lucide-react";
+import { ArrowRight, Info, Plus, Download, Palette, Check, AlertTriangle } from "lucide-react";
 import { WorkspaceLayout } from "@/components/layout/workspace-layout";
-import {
-  can,
-  type Role,
-  roleLabels,
-  roles,
-} from "@color-bank-hub/contracts/rbac";
+import { can, type Role, roleLabels, roles } from "@color-bank-hub/contracts/rbac";
 import { ProductFormatSidebar } from "@/components/product-format/product-format-sidebar";
 import {
   PageToolbar,
@@ -33,12 +20,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
 import { DataTable } from "@/components/ui/data-table";
 import { ThemeToggle } from "@/components/theme-toggle";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   AlertDialog,
@@ -51,39 +33,13 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarGroup,
-  AvatarGroupCount,
-} from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarGroup, AvatarGroupCount } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -96,44 +52,23 @@ import {
 import { Form, FormSubmitButton } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverDescription,
-  PopoverHeader,
-  PopoverTitle,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverDescription, PopoverHeader, PopoverTitle, PopoverTrigger } from "@/components/ui/popover";
 import { Progress } from "@/components/ui/progress";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 export const Route = createFileRoute("/_authenticated/showcase")({
+  head: () => ({
+    meta: [{ title: "Showcase" }],
+  }),
   component: ShowcasePage,
 });
 
@@ -150,11 +85,7 @@ const paletteColumns: ColumnDef<(typeof tableRows)[number]>[] = [
       />
     ),
     cell: ({ row }) => (
-      <Checkbox
-        aria-label={`Select ${row.original.shade}`}
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-      />
+      <Checkbox aria-label={`Select ${row.original.shade}`} checked={row.getIsSelected()} onCheckedChange={(value) => row.toggleSelected(!!value)} />
     ),
     enableSorting: false,
   },
@@ -228,11 +159,7 @@ function ShowcasePage() {
                 size="sm"
                 variant="outline"
                 className="w-full"
-                onClick={() =>
-                  document
-                    .getElementById("shade-table")
-                    ?.scrollIntoView({ behavior: "smooth" })
-                }
+                onClick={() => document.getElementById("shade-table")?.scrollIntoView({ behavior: "smooth" })}
               >
                 <ArrowRight />
                 Browse shade table
@@ -241,46 +168,20 @@ function ShowcasePage() {
           }
         />
       }
-      detailPanel={
-        <ProductDetailPanel
-          shade={
-            can(role, "shade:viewComposition")
-              ? sampleProfile
-              : { ...sampleProfile, composition: undefined }
-          }
-        />
-      }
+      detailPanel={<ProductDetailPanel shade={can(role, "shade:viewComposition") ? sampleProfile : { ...sampleProfile, composition: undefined }} />}
     >
-      <PageToolbar
-        title={`Lip Tint › ${format}`}
-        description="Shared application layout · component preview"
-      >
-        <SearchInput
-          value={search}
-          onValueChange={setSearch}
-          className="w-64"
-        />
+      <PageToolbar title={`Lip Tint › ${format}`} description="Shared application layout · component preview">
+        <SearchInput value={search} onValueChange={setSearch} className="w-64" />
       </PageToolbar>
       <div id="showcase-top" className="mx-auto w-full max-w-6xl p-5 lg:p-6">
         <div className="mb-6 rounded-lg border bg-secondary/40 p-5">
-          <p className="mb-2 text-[10px] tracking-widest text-primary uppercase">
-            Color Bank · UI foundations
-          </p>
-          <h2 className="font-display text-3xl leading-tight">
-            A workspace for every shade.
-          </h2>
+          <p className="mb-2 text-[10px] tracking-widest text-primary uppercase">Color Bank · UI foundations</p>
+          <h2 className="font-display text-3xl leading-tight">A workspace for every shade.</h2>
           <p className="mt-2 max-w-lg text-xs leading-relaxed text-muted-foreground">
-            Reusable layouts, precise controls, and product components based on
-            the design brief. Explore the complete component library below.
+            Reusable layouts, precise controls, and product components based on the design brief. Explore the complete component library below.
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
-            <Button
-              onClick={() =>
-                document
-                  .getElementById("shade-table")
-                  ?.scrollIntoView({ behavior: "smooth" })
-              }
-            >
+            <Button onClick={() => document.getElementById("shade-table")?.scrollIntoView({ behavior: "smooth" })}>
               <Palette />
               Explore components
             </Button>
@@ -293,12 +194,9 @@ function ShowcasePage() {
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <Badge variant="secondary">Design System</Badge>
-            <h1 className="mt-3 text-xl font-medium tracking-tight">
-              Component showcase
-            </h1>
+            <h1 className="mt-3 text-xl font-medium tracking-tight">Component showcase</h1>
             <p className="mt-2 max-w-2xl text-xs text-muted-foreground">
-              Single reference page for UI primitives, overlays, forms,
-              navigation, feedback states, and data display.
+              Single reference page for UI primitives, overlays, forms, navigation, feedback states, and data display.
             </p>
           </div>
           <ThemeToggle />
@@ -310,49 +208,27 @@ function ShowcasePage() {
           <Card>
             <CardHeader>
               <CardTitle>Buttons, Badges, Breadcrumb</CardTitle>
-              <CardDescription>
-                Core actions and hierarchy patterns.
-              </CardDescription>
+              <CardDescription>Core actions and hierarchy patterns.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex flex-wrap gap-2">
-                <Button onClick={() => toast.success("Primary action example")}>
-                  Primary
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => toast.info("Outline action example")}
-                >
+                <Button onClick={() => toast.success("Primary action example")}>Primary</Button>
+                <Button variant="outline" onClick={() => toast.info("Outline action example")}>
                   Outline
                 </Button>
-                <Button
-                  variant="secondary"
-                  onClick={() => toast.info("Secondary action example")}
-                >
+                <Button variant="secondary" onClick={() => toast.info("Secondary action example")}>
                   Secondary
                 </Button>
-                <Button
-                  variant="ghost"
-                  onClick={() => toast.info("Ghost action example")}
-                >
+                <Button variant="ghost" onClick={() => toast.info("Ghost action example")}>
                   Ghost
                 </Button>
-                <Button
-                  variant="destructive"
-                  onClick={() => toast.error("Destructive feedback example")}
-                >
+                <Button variant="destructive" onClick={() => toast.error("Destructive feedback example")}>
                   Destructive
                 </Button>
-                <Button
-                  variant="destructive-outline"
-                  onClick={() => toast.warning("Destructive outline example")}
-                >
+                <Button variant="destructive-outline" onClick={() => toast.warning("Destructive outline example")}>
                   Destructive outline
                 </Button>
-                <Button
-                  variant="link"
-                  onClick={() => toast.info("Link button example")}
-                >
+                <Button variant="link" onClick={() => toast.info("Link button example")}>
                   Link
                 </Button>
                 <Button disabled>Disabled</Button>
@@ -366,9 +242,7 @@ function ShowcasePage() {
               <Breadcrumb>
                 <BreadcrumbList>
                   <BreadcrumbItem>
-                    <BreadcrumbLink href="#showcase-top">
-                      Workspace
-                    </BreadcrumbLink>
+                    <BreadcrumbLink href="#showcase-top">Workspace</BreadcrumbLink>
                   </BreadcrumbItem>
                   <BreadcrumbSeparator />
                   <BreadcrumbItem>
@@ -386,9 +260,7 @@ function ShowcasePage() {
           <Card id="identity">
             <CardHeader>
               <CardTitle>Avatars and Status</CardTitle>
-              <CardDescription>
-                Identity clusters and indicators.
-              </CardDescription>
+              <CardDescription>Identity clusters and indicators.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <AvatarGroup>
@@ -405,25 +277,12 @@ function ShowcasePage() {
               </AvatarGroup>
               <Alert>
                 <AlertTitle>Live system status</AlertTitle>
-                <AlertDescription>
-                  All components are rendered from shared design-system
-                  primitives.
-                </AlertDescription>
+                <AlertDescription>All components are rendered from shared design-system primitives.</AlertDescription>
               </Alert>
               <Progress value={progress} aria-label="Import progress" />
               <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground">
-                  {progress}% complete
-                </span>
-                <Button
-                  size="xs"
-                  variant="outline"
-                  onClick={() =>
-                    setProgress((previous) =>
-                      previous === 100 ? 0 : Math.min(100, previous + 16),
-                    )
-                  }
-                >
+                <span className="text-xs text-muted-foreground">{progress}% complete</span>
+                <Button size="xs" variant="outline" onClick={() => setProgress((previous) => (previous === 100 ? 0 : Math.min(100, previous + 16)))}>
                   Advance progress
                 </Button>
               </div>
@@ -436,9 +295,7 @@ function ShowcasePage() {
                 }}
               >
                 <SelectTrigger aria-label="Preview role" className="w-full">
-                  <SelectValue>
-                    {(value: Role) => roleLabels[value]}
-                  </SelectValue>
+                  <SelectValue>{(value: Role) => roleLabels[value]}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {roles.map((item) => (
@@ -449,8 +306,7 @@ function ShowcasePage() {
                 </SelectContent>
               </Select>
               <p className="text-[10px] text-muted-foreground">
-                Role preview changes navigation and composition visibility. It
-                does not grant access.
+                Role preview changes navigation and composition visibility. It does not grant access.
               </p>
             </CardContent>
           </Card>
@@ -458,9 +314,7 @@ function ShowcasePage() {
           <Card>
             <CardHeader>
               <CardTitle>Inputs and Choices</CardTitle>
-              <CardDescription>
-                Base inputs with checkboxes, radio groups, and switches.
-              </CardDescription>
+              <CardDescription>Base inputs with checkboxes, radio groups, and switches.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -469,11 +323,7 @@ function ShowcasePage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="plain-textarea">Plain Textarea</Label>
-                <Textarea
-                  id="plain-textarea"
-                  placeholder="Multiline notes"
-                  rows={3}
-                />
+                <Textarea id="plain-textarea" placeholder="Multiline notes" rows={3} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="plain-select">Plain Select</Label>
@@ -510,9 +360,7 @@ function ShowcasePage() {
           <Card>
             <CardHeader>
               <CardTitle>Validated shade request</CardTitle>
-              <CardDescription>
-                Try submitting a title with fewer than three characters.
-              </CardDescription>
+              <CardDescription>Try submitting a title with fewer than three characters.</CardDescription>
             </CardHeader>
             <CardContent>
               <Form id="form-example" form={form} className="grid gap-3">
@@ -521,18 +369,10 @@ function ShowcasePage() {
                   label="Title"
                   placeholder="Prototype title"
                   validators={{
-                    onChange: ({ value }: { value: string }) =>
-                      value.trim().length < 3
-                        ? "Minimum 3 characters."
-                        : undefined,
+                    onChange: ({ value }: { value: string }) => (value.trim().length < 3 ? "Minimum 3 characters." : undefined),
                   }}
                 />
-                <Textarea
-                  name="details"
-                  label="Details"
-                  placeholder="Describe the request"
-                  rows={3}
-                />
+                <Textarea name="details" label="Details" placeholder="Describe the request" rows={3} />
                 <Select
                   name="category"
                   label="Category"
@@ -554,52 +394,32 @@ function ShowcasePage() {
           <Card>
             <CardHeader>
               <CardTitle>Overlays</CardTitle>
-              <CardDescription>
-                Dialog, alert dialog, sheet, popover, tooltip, dropdown.
-              </CardDescription>
+              <CardDescription>Dialog, alert dialog, sheet, popover, tooltip, dropdown.</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-wrap gap-2">
               <Dialog>
-                <DialogTrigger render={<Button variant="outline" />}>
-                  Open Dialog
-                </DialogTrigger>
+                <DialogTrigger render={<Button variant="outline" />}>Open Dialog</DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
                     <DialogTitle>Dialog title</DialogTitle>
-                    <DialogDescription>
-                      Example dialog content with standard header/footer layout.
-                    </DialogDescription>
+                    <DialogDescription>Example dialog content with standard header/footer layout.</DialogDescription>
                   </DialogHeader>
                   <DialogFooter>
-                    <Button
-                      onClick={() => toast.info("Dialog action demonstrated")}
-                    >
-                      Show feedback
-                    </Button>
+                    <Button onClick={() => toast.info("Dialog action demonstrated")}>Show feedback</Button>
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
 
               <AlertDialog>
-                <AlertDialogTrigger render={<Button variant="destructive" />}>
-                  Delete
-                </AlertDialogTrigger>
+                <AlertDialogTrigger render={<Button variant="destructive" />}>Delete</AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
                     <AlertDialogTitle>Delete this entry?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This action cannot be undone.
-                    </AlertDialogDescription>
+                    <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={() =>
-                        toast.success(
-                          "Example deletion confirmed; no records were changed.",
-                        )
-                      }
-                    >
+                    <AlertDialogAction onClick={() => toast.success("Example deletion confirmed; no records were changed.")}>
                       Confirm
                     </AlertDialogAction>
                   </AlertDialogFooter>
@@ -607,58 +427,38 @@ function ShowcasePage() {
               </AlertDialog>
 
               <Sheet>
-                <SheetTrigger render={<Button variant="secondary" />}>
-                  Open Sheet
-                </SheetTrigger>
+                <SheetTrigger render={<Button variant="secondary" />}>Open Sheet</SheetTrigger>
                 <SheetContent>
                   <SheetHeader>
                     <SheetTitle>Sheet panel</SheetTitle>
-                    <SheetDescription>
-                      Side panel for settings or contextual tools.
-                    </SheetDescription>
+                    <SheetDescription>Side panel for settings or contextual tools.</SheetDescription>
                   </SheetHeader>
                 </SheetContent>
               </Sheet>
 
               <Popover>
-                <PopoverTrigger render={<Button variant="outline" />}>
-                  Open Popover
-                </PopoverTrigger>
+                <PopoverTrigger render={<Button variant="outline" />}>Open Popover</PopoverTrigger>
                 <PopoverContent>
                   <PopoverHeader>
                     <PopoverTitle>Quick info</PopoverTitle>
-                    <PopoverDescription>
-                      Popovers are ideal for compact detail views.
-                    </PopoverDescription>
+                    <PopoverDescription>Popovers are ideal for compact detail views.</PopoverDescription>
                   </PopoverHeader>
                 </PopoverContent>
               </Popover>
 
               <Tooltip>
-                <TooltipTrigger render={<Button variant="ghost" />}>
-                  Hover me
-                </TooltipTrigger>
+                <TooltipTrigger render={<Button variant="ghost" />}>Hover me</TooltipTrigger>
                 <TooltipContent>Tooltip content</TooltipContent>
               </Tooltip>
 
               <DropdownMenu>
-                <DropdownMenuTrigger render={<Button variant="outline" />}>
-                  Open Menu
-                </DropdownMenuTrigger>
+                <DropdownMenuTrigger render={<Button variant="outline" />}>Open Menu</DropdownMenuTrigger>
                 <DropdownMenuContent>
                   <DropdownMenuGroup>
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => setDialogOpen(true)}>
-                      Rename mapping
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() =>
-                        toast.info(
-                          "Duplicate action demonstrated; no mapping is stored in this showcase.",
-                        )
-                      }
-                    >
+                    <DropdownMenuItem onClick={() => setDialogOpen(true)}>Rename mapping</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => toast.info("Duplicate action demonstrated; no mapping is stored in this showcase.")}>
                       Duplicate example
                     </DropdownMenuItem>
                   </DropdownMenuGroup>
@@ -678,16 +478,10 @@ function ShowcasePage() {
                   <TabsTrigger value="overview">Overview</TabsTrigger>
                   <TabsTrigger value="usage">Usage</TabsTrigger>
                 </TabsList>
-                <TabsContent
-                  value="overview"
-                  className="pt-2 text-sm text-muted-foreground"
-                >
+                <TabsContent value="overview" className="pt-2 text-sm text-muted-foreground">
                   Overview content panel.
                 </TabsContent>
-                <TabsContent
-                  value="usage"
-                  className="pt-2 text-sm text-muted-foreground"
-                >
+                <TabsContent value="usage" className="pt-2 text-sm text-muted-foreground">
                   Usage content panel.
                 </TabsContent>
               </Tabs>
@@ -695,9 +489,7 @@ function ShowcasePage() {
               <Accordion defaultValue={["item-1"]}>
                 <AccordionItem value="item-1">
                   <AccordionTrigger>What is this page?</AccordionTrigger>
-                  <AccordionContent>
-                    A consolidated showcase of the installed component set.
-                  </AccordionContent>
+                  <AccordionContent>A consolidated showcase of the installed component set.</AccordionContent>
                 </AccordionItem>
               </Accordion>
 
@@ -713,18 +505,12 @@ function ShowcasePage() {
         <Card id="shade-table" className="mt-4 scroll-mt-4">
           <CardHeader>
             <CardTitle>Table</CardTitle>
-            <CardDescription>
-              TanStack Table with sorting, filtering, and pagination.
-            </CardDescription>
+            <CardDescription>TanStack Table with sorting, filtering, and pagination.</CardDescription>
           </CardHeader>
           <CardContent>
             <DataTable
               columns={paletteColumns}
-              data={tableRows.filter((row) =>
-                `${row.brand} ${row.product} ${row.shade}`
-                  .toLowerCase()
-                  .includes(search.toLowerCase()),
-              )}
+              data={tableRows.filter((row) => `${row.brand} ${row.product} ${row.shade}`.toLowerCase().includes(search.toLowerCase()))}
               searchColumn="shade"
               searchPlaceholder="Search shade names…"
               pageSize={5}
@@ -735,29 +521,15 @@ function ShowcasePage() {
           <Card>
             <CardHeader>
               <CardTitle>Semantic badges & shade swatches</CardTitle>
-              <CardDescription>
-                Undertones, seasons, and request statuses.
-              </CardDescription>
+              <CardDescription>Undertones, seasons, and request statuses.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex flex-wrap gap-2">
-                {(
-                  [
-                    "Warm",
-                    "Neutral",
-                    "Cool",
-                    "Spring",
-                    "Summer",
-                    "Autumn",
-                    "Winter",
-                    "Pending",
-                    "Approved",
-                    "Formulating",
-                    "Closed",
-                  ] as const
-                ).map((status) => (
-                  <StatusBadge key={status} status={status} />
-                ))}
+                {(["Warm", "Neutral", "Cool", "Spring", "Summer", "Autumn", "Winter", "Pending", "Approved", "Formulating", "Closed"] as const).map(
+                  (status) => (
+                    <StatusBadge key={status} status={status} />
+                  ),
+                )}
               </div>
               <div className="flex flex-wrap gap-2">
                 {tableRows.map((row) => (
@@ -769,27 +541,16 @@ function ShowcasePage() {
           <Card id="workflow">
             <CardHeader>
               <CardTitle>Workflow & selection</CardTitle>
-              <CardDescription>
-                Compact stages for requests and mapping.
-              </CardDescription>
+              <CardDescription>Compact stages for requests and mapping.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <WorkflowSteps activeStep={workflow} />
-              <WorkflowSteps
-                steps={["Format", "Select SKUs", "Generate"]}
-                activeStep={Math.min(workflow, 2)}
-              />
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => setWorkflow((workflow + 1) % 4)}
-              >
+              <WorkflowSteps steps={["Format", "Select SKUs", "Generate"]} activeStep={Math.min(workflow, 2)} />
+              <Button size="sm" variant="outline" onClick={() => setWorkflow((workflow + 1) % 4)}>
                 Next stage
               </Button>
               <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border bg-accent p-3">
-                <p className="text-xs text-secondary-foreground">
-                  5 shades selected from {format}
-                </p>
+                <p className="text-xs text-secondary-foreground">5 shades selected from {format}</p>
                 <Button size="xs" onClick={() => setDialogOpen(true)}>
                   Map selected
                 </Button>
@@ -807,11 +568,7 @@ function ShowcasePage() {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() =>
-                        document
-                          .getElementById("shade-table")
-                          ?.scrollIntoView({ behavior: "smooth" })
-                      }
+                      onClick={() => document.getElementById("shade-table")?.scrollIntoView({ behavior: "smooth" })}
                     >
                       Select shades
                     </Button>
@@ -830,9 +587,7 @@ function ShowcasePage() {
           <Card>
             <CardHeader>
               <CardTitle>Image uploads & notices</CardTitle>
-              <CardDescription>
-                Local image preview with file type and size validation.
-              </CardDescription>
+              <CardDescription>Local image preview with file type and size validation.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
@@ -842,21 +597,15 @@ function ShowcasePage() {
               <Alert variant="warning">
                 <AlertTriangle />
                 <AlertTitle>Verification required</AlertTitle>
-                <AlertDescription>
-                  Sensitive permissions require administrator verification.
-                </AlertDescription>
+                <AlertDescription>Sensitive permissions require administrator verification.</AlertDescription>
               </Alert>
               <Alert variant="success">
                 <Check />
-                <AlertDescription>
-                  All shade values have been validated.
-                </AlertDescription>
+                <AlertDescription>All shade values have been validated.</AlertDescription>
               </Alert>
               <Alert variant="info">
                 <Info />
-                <AlertDescription>
-                  This showcase uses demonstration data.
-                </AlertDescription>
+                <AlertDescription>This showcase uses demonstration data.</AlertDescription>
               </Alert>
             </CardContent>
           </Card>
@@ -867,13 +616,7 @@ function ShowcasePage() {
               <CardTitle>Contextual product panel</CardTitle>
             </CardHeader>
             <CardContent>
-              <ProductDetailPanel
-                shade={
-                  can(role, "shade:viewComposition")
-                    ? sampleProfile
-                    : { ...sampleProfile, composition: undefined }
-                }
-              />
+              <ProductDetailPanel shade={can(role, "shade:viewComposition") ? sampleProfile : { ...sampleProfile, composition: undefined }} />
             </CardContent>
           </Card>
         </section>
@@ -886,17 +629,11 @@ function ShowcasePage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Save mapping</DialogTitle>
-            <DialogDescription>
-              Example form interaction. This stores no product mapping.
-            </DialogDescription>
+            <DialogDescription>Example form interaction. This stores no product mapping.</DialogDescription>
           </DialogHeader>
           <label className="flex flex-col gap-2 py-1 text-xs">
             <span>Mapping name</span>
-            <Input
-              value={mappingName}
-              onChange={(event) => setMappingName(event.target.value)}
-              placeholder="Emina Glossy Stain — Full Range"
-            />
+            <Input value={mappingName} onChange={(event) => setMappingName(event.target.value)} placeholder="Emina Glossy Stain — Full Range" />
           </label>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
@@ -925,17 +662,14 @@ function ShowcasePage() {
           <Alert variant="info">
             <Info />
             <AlertDescription>
-              This is a local component preview. Change the preview role under
-              Avatars and Status to inspect permission-aware components.
+              This is a local component preview. Change the preview role under Avatars and Status to inspect permission-aware components.
             </AlertDescription>
           </Alert>
           <DialogFooter>
             <Button
               onClick={() => {
                 setProfileOpen(false);
-                document
-                  .getElementById("identity")
-                  ?.scrollIntoView({ behavior: "smooth" });
+                document.getElementById("identity")?.scrollIntoView({ behavior: "smooth" });
               }}
             >
               View role controls

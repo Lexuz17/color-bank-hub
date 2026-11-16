@@ -17,17 +17,9 @@ test("PostgreSQL API integration: catalog, imports, reports and prototype lifecy
 }, async () => {
   const { createApp } = await import("../src/app.js");
   const { db } = await import("../src/lib/db.js");
-  const {
-    brands,
-    products,
-    productFormats,
-    productFormatItems,
-    shades,
-    reports,
-    prototypeRequests,
-    auditLogs,
-    users,
-  } = await import("@color-bank-hub/db");
+  const { brands, products, productFormats, productFormatItems, shades, reports, prototypeRequests, auditLogs, users } = await import(
+    "@color-bank-hub/db"
+  );
   const { eq, inArray } = await import("drizzle-orm");
   const prefix = `API_TEST_${randomUUID().slice(0, 8)}`;
   const ids = {
@@ -58,12 +50,7 @@ test("PostgreSQL API integration: catalog, imports, reports and prototype lifecy
       role: "website_admin",
     }),
   });
-  async function call(
-    path: string,
-    method = "GET",
-    body?: unknown,
-    status = 200,
-  ) {
+  async function call(path: string, method = "GET", body?: unknown, status = 200) {
     const response = await app.request(path, {
       method,
       ...(body
@@ -74,11 +61,7 @@ test("PostgreSQL API integration: catalog, imports, reports and prototype lifecy
         : {}),
     });
     const result = await response.json();
-    assert.equal(
-      response.status,
-      status,
-      `${method} ${path}: ${JSON.stringify(result)}`,
-    );
+    assert.equal(response.status, status, `${method} ${path}: ${JSON.stringify(result)}`);
     return result;
   }
   try {
@@ -100,18 +83,9 @@ test("PostgreSQL API integration: catalog, imports, reports and prototype lifecy
     ).data;
     productFormatId = format.id;
     itemId = format.items[0].id;
-    const own = (
-      await call(
-        "/api/brands",
-        "POST",
-        { name: `${prefix} OWN`, isOwn: true },
-        201,
-      )
-    ).data;
+    const own = (await call("/api/brands", "POST", { name: `${prefix} OWN`, isOwn: true }, 201)).data;
     ids.brands.push(own.id);
-    const external = (
-      await call("/api/brands", "POST", { name: `${prefix} EXTERNAL` }, 201)
-    ).data;
+    const external = (await call("/api/brands", "POST", { name: `${prefix} EXTERNAL` }, 201)).data;
     ids.brands.push(external.id);
     const product = (
       await call(
@@ -152,27 +126,11 @@ test("PostgreSQL API integration: catalog, imports, reports and prototype lifecy
     assert.equal(shade.hex, "#aa6d78");
     assert.equal(shade.r, 170);
     assert.equal(shade.season, null);
-    assert.equal(
-      (await call(`/api/shades?search=${prefix}&pageSize=1`)).data.pagination
-        .total,
-      1,
-    );
-    assert.equal(
-      (
-        await call(
-          `/api/shades?brandId=${own.id}&productFormatItemId=${itemId}`,
-        )
-      ).data.items.length,
-      1,
-    );
+    assert.equal((await call(`/api/shades?search=${prefix}&pageSize=1`)).data.pagination.total, 1);
+    assert.equal((await call(`/api/shades?brandId=${own.id}&productFormatItemId=${itemId}`)).data.items.length, 1);
     assert.ok((await call(`/api/shades/${shade.id}`)).data.composition);
     await call("/api/shades", "POST", shadeInput, 409);
-    await call(
-      "/api/shades",
-      "POST",
-      { ...shadeInput, productId: externalProduct.id, sku: `${prefix}-ext` },
-      422,
-    );
+    await call("/api/shades", "POST", { ...shadeInput, productId: externalProduct.id, sku: `${prefix}-ext` }, 422);
     const externalShade = (
       await call(
         "/api/shades",
@@ -187,13 +145,8 @@ test("PostgreSQL API integration: catalog, imports, reports and prototype lifecy
       )
     ).data;
     ids.shades.push(externalShade.id);
-    assert.equal(
-      "composition" in (await call(`/api/shades/${externalShade.id}`)).data,
-      false,
-    );
-    const changed = (
-      await call(`/api/shades/${shade.id}`, "PATCH", { hex: "#ff0000" })
-    ).data;
+    assert.equal("composition" in (await call(`/api/shades/${externalShade.id}`)).data, false);
+    const changed = (await call(`/api/shades/${shade.id}`, "PATCH", { hex: "#ff0000" })).data;
     assert.equal(changed.hslH, 0);
     assert.equal(changed.hslS, 100);
     assert.equal(changed.season, null);
@@ -203,15 +156,9 @@ test("PostgreSQL API integration: catalog, imports, reports and prototype lifecy
       name: "Imported",
       hex: "#cc6677",
     };
-    const preview = (
-      await call("/api/imports/preview", "POST", { rows: [importRow] })
-    ).data;
+    const preview = (await call("/api/imports/preview", "POST", { rows: [importRow] })).data;
     assert.equal(preview.valid, true);
-    assert.equal(
-      (await db.select().from(shades).where(eq(shades.sku, importRow.sku)))
-        .length,
-      0,
-    );
+    assert.equal((await db.select().from(shades).where(eq(shades.sku, importRow.sku))).length, 0);
     assert.equal(
       (
         await call("/api/imports/preview", "POST", {
@@ -224,28 +171,16 @@ test("PostgreSQL API integration: catalog, imports, reports and prototype lifecy
       "/api/imports/commit",
       "POST",
       {
-        rows: [
-          importRow,
-          { ...importRow, sku: `${prefix}-bad`, hex: "invalid" },
-        ],
+        rows: [importRow, { ...importRow, sku: `${prefix}-bad`, hex: "invalid" }],
       },
       422,
     );
-    assert.equal(
-      (await db.select().from(shades).where(eq(shades.sku, importRow.sku)))
-        .length,
-      0,
-    );
-    const imported = (
-      await call("/api/imports/commit", "POST", { rows: [importRow] }, 201)
-    ).data;
+    assert.equal((await db.select().from(shades).where(eq(shades.sku, importRow.sku))).length, 0);
+    const imported = (await call("/api/imports/commit", "POST", { rows: [importRow] }, 201)).data;
     ids.shades.push(imported.items[0].id);
     assert.equal(imported.imported, 1);
     const formats = (await call("/api/product-formats")).data;
-    assert.equal(
-      formats.find((item: { id: number }) => item.id === productFormatId).count,
-      3,
-    );
+    assert.equal(formats.find((item: { id: number }) => item.id === productFormatId).count, 3);
     const report = (
       await call(
         "/api/reports",
@@ -260,16 +195,8 @@ test("PostgreSQL API integration: catalog, imports, reports and prototype lifecy
     ).data;
     ids.reports.push(report.id);
     assert.ok(report.reporterId);
-    assert.equal(
-      (await call(`/api/reports/${report.id}`, "PATCH", { status: "resolved" }))
-        .data.status,
-      "resolved",
-    );
-    assert.equal(
-      (await call(`/api/reports/${report.id}`, "PATCH", { status: "pending" }))
-        .data.resolvedAt,
-      null,
-    );
+    assert.equal((await call(`/api/reports/${report.id}`, "PATCH", { status: "resolved" })).data.status, "resolved");
+    assert.equal((await call(`/api/reports/${report.id}`, "PATCH", { status: "pending" })).data.resolvedAt, null);
     const prototypeBody = {
       type: "gap_filling",
       productFormatItemId: itemId,
@@ -278,23 +205,11 @@ test("PostgreSQL API integration: catalog, imports, reports and prototype lifecy
       shadeNameNew: "Test rose",
       targetHex: "#aa6d78",
     };
-    const request = (
-      await call("/api/prototype-requests", "POST", prototypeBody, 201)
-    ).data;
+    const request = (await call("/api/prototype-requests", "POST", prototypeBody, 201)).data;
     ids.requests.push(request.id);
     assert.ok(request.requesterId);
-    await call(
-      `/api/prototype-requests/${request.id}/status`,
-      "PATCH",
-      { status: "completed" },
-      409,
-    );
-    await call(
-      `/api/prototype-requests/${request.id}/formulation`,
-      "PATCH",
-      { resultNotes: "Too early" },
-      409,
-    );
+    await call(`/api/prototype-requests/${request.id}/status`, "PATCH", { status: "completed" }, 409);
+    await call(`/api/prototype-requests/${request.id}/formulation`, "PATCH", { resultNotes: "Too early" }, 409);
     const approved = (
       await call(`/api/prototype-requests/${request.id}/status`, "PATCH", {
         status: "approved",
@@ -302,21 +217,11 @@ test("PostgreSQL API integration: catalog, imports, reports and prototype lifecy
     ).data;
     assert.ok(approved.autoName);
     assert.ok(approved.sequenceNo);
-    await call(
-      `/api/prototype-requests/${request.id}/status`,
-      "PATCH",
-      { status: "approved" },
-      409,
-    );
+    await call(`/api/prototype-requests/${request.id}/status`, "PATCH", { status: "approved" }, 409);
     await call(`/api/prototype-requests/${request.id}/status`, "PATCH", {
       status: "formulating",
     });
-    await call(
-      `/api/prototype-requests/${request.id}/status`,
-      "PATCH",
-      { status: "completed" },
-      422,
-    );
+    await call(`/api/prototype-requests/${request.id}/status`, "PATCH", { status: "completed" }, 422);
     await call(`/api/prototype-requests/${request.id}/formulation`, "PATCH", {
       resultPhotoUrl: "https://example.com/test-result.png",
       resultNotes: "Test result",
@@ -330,9 +235,7 @@ test("PostgreSQL API integration: catalog, imports, reports and prototype lifecy
       ).data.status,
       "completed",
     );
-    const decline = (
-      await call("/api/prototype-requests", "POST", prototypeBody, 201)
-    ).data;
+    const decline = (await call("/api/prototype-requests", "POST", prototypeBody, 201)).data;
     ids.requests.push(decline.id);
     assert.equal(
       (
@@ -343,44 +246,21 @@ test("PostgreSQL API integration: catalog, imports, reports and prototype lifecy
       ).data.status,
       "declined",
     );
-    await call(
-      `/api/prototype-requests/${decline.id}/status`,
-      "PATCH",
-      { status: "approved" },
-      409,
-    );
-    assert.equal(
-      (await call(`/api/prototype-requests?productFormatItemId=${itemId}`)).data
-        .pagination.total,
-      2,
-    );
+    await call(`/api/prototype-requests/${decline.id}/status`, "PATCH", { status: "approved" }, 409);
+    assert.equal((await call(`/api/prototype-requests?productFormatItemId=${itemId}`)).data.pagination.total, 2);
     await call(`/api/shades/${randomUUID()}`, "GET", undefined, 404);
   } finally {
     // Cleanup only fixture IDs and the test-owned format. Never truncate shared tables.
     await db.transaction(async (tx) => {
       const targets = [...ids.reports, ...ids.requests];
-      if (targets.length)
-        await tx.delete(auditLogs).where(inArray(auditLogs.targetId, targets));
-      if (ids.reports.length)
-        await tx.delete(reports).where(inArray(reports.id, ids.reports));
-      if (ids.requests.length)
-        await tx
-          .delete(prototypeRequests)
-          .where(inArray(prototypeRequests.id, ids.requests));
-      if (ids.shades.length)
-        await tx.delete(shades).where(inArray(shades.id, ids.shades));
-      if (ids.products.length)
-        await tx.delete(products).where(inArray(products.id, ids.products));
-      if (ids.brands.length)
-        await tx.delete(brands).where(inArray(brands.id, ids.brands));
-      if (itemId)
-        await tx
-          .delete(productFormatItems)
-          .where(eq(productFormatItems.id, itemId));
-      if (productFormatId)
-        await tx
-          .delete(productFormats)
-          .where(eq(productFormats.id, productFormatId));
+      if (targets.length) await tx.delete(auditLogs).where(inArray(auditLogs.targetId, targets));
+      if (ids.reports.length) await tx.delete(reports).where(inArray(reports.id, ids.reports));
+      if (ids.requests.length) await tx.delete(prototypeRequests).where(inArray(prototypeRequests.id, ids.requests));
+      if (ids.shades.length) await tx.delete(shades).where(inArray(shades.id, ids.shades));
+      if (ids.products.length) await tx.delete(products).where(inArray(products.id, ids.products));
+      if (ids.brands.length) await tx.delete(brands).where(inArray(brands.id, ids.brands));
+      if (itemId) await tx.delete(productFormatItems).where(eq(productFormatItems.id, itemId));
+      if (productFormatId) await tx.delete(productFormats).where(eq(productFormats.id, productFormatId));
     });
     await db.delete(auditLogs).where(eq(auditLogs.actorId, actor.id));
     await db.delete(users).where(eq(users.id, actor.id));

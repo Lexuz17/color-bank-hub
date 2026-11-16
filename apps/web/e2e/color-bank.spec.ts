@@ -8,27 +8,19 @@ test.describe("Color Bank Prototype Feature", () => {
   });
 
   // ── READ: list ─────────────────────────────────────────────────────────────
-  test("displays prototype requests list with status badges", async ({
-    page,
-  }) => {
-    await expect(
-      page.getByRole("heading", { name: "Color Bank" }).first(),
-    ).toBeVisible();
+  test("displays prototype requests list with status badges", async ({ page }) => {
+    await expect(page.getByRole("heading", { name: "Color Bank" }).first()).toBeVisible();
 
     await expect(page.getByText("Autumn Rose Formulation")).toBeVisible();
     await expect(page.getByText(/Color Lab Studio/i).first()).toBeVisible();
   });
 
   // ── READ: detail panel ────────────────────────────────────────────────────
-  test("inspects prototype request and views workflow panel", async ({
-    page,
-  }) => {
+  test("inspects prototype request and views workflow panel", async ({ page }) => {
     const requestRow = page.getByText("Autumn Rose Formulation").first();
     await requestRow.click();
 
-    await expect(
-      page.locator(":visible").filter({ hasText: "Approve request" }).first(),
-    ).toBeVisible();
+    await expect(page.locator(":visible").filter({ hasText: "Approve request" }).first()).toBeVisible();
     await expect(
       page
         .locator(":visible")
@@ -53,20 +45,12 @@ test.describe("Color Bank Prototype Feature", () => {
 
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible();
-    await expect(
-      dialog.getByRole("heading", { name: /New prototype request/i }),
-    ).toBeVisible();
+    await expect(dialog.getByRole("heading", { name: /New prototype request/i })).toBeVisible();
 
     // Fill required text fields
-    await dialog
-      .getByRole("textbox", { name: /Target brand/i })
-      .fill("Indie Lab");
-    await dialog
-      .getByRole("textbox", { name: /Target product/i })
-      .fill("Velvet Tint");
-    await dialog
-      .getByRole("textbox", { name: /Target shade/i })
-      .fill("Berry Bliss");
+    await dialog.getByRole("textbox", { name: /Target brand/i }).fill("Indie Lab");
+    await dialog.getByRole("textbox", { name: /Target product/i }).fill("Velvet Tint");
+    await dialog.getByRole("textbox", { name: /Target shade/i }).fill("Berry Bliss");
 
     // HEX already has a default — leave as-is
     await dialog.getByRole("button", { name: /Submit request/i }).click();
@@ -88,9 +72,7 @@ test.describe("Color Bank Prototype Feature", () => {
     // Confirm dialog appears
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible();
-    await expect(
-      dialog.getByRole("heading", { name: /Approve request/i }),
-    ).toBeVisible();
+    await expect(dialog.getByRole("heading", { name: /Approve request/i })).toBeVisible();
 
     await dialog.getByRole("button", { name: /Confirm/i }).click();
 
@@ -98,9 +80,7 @@ test.describe("Color Bank Prototype Feature", () => {
   });
 
   // ── UPDATE: decline a request ─────────────────────────────────────────────
-  test("declines a pending prototype request with a reason", async ({
-    page,
-  }) => {
+  test("declines a pending prototype request with a reason", async ({ page }) => {
     await page.getByText("Autumn Rose Formulation").first().click();
 
     const declineBtn = page
@@ -111,17 +91,13 @@ test.describe("Color Bank Prototype Feature", () => {
 
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible();
-    await expect(
-      dialog.getByRole("heading", { name: /Decline request/i }),
-    ).toBeVisible();
+    await expect(dialog.getByRole("heading", { name: /Decline request/i })).toBeVisible();
 
     // Reason is required — confirm stays disabled until filled
     const confirmBtn = dialog.getByRole("button", { name: /Confirm/i });
     await expect(confirmBtn).toBeDisabled();
 
-    await dialog
-      .getByRole("textbox")
-      .fill("Does not meet minimum delta-E spec.");
+    await dialog.getByRole("textbox").fill("Does not meet minimum delta-E spec.");
     await expect(confirmBtn).toBeEnabled();
     await confirmBtn.click();
 

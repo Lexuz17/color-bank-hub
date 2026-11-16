@@ -9,14 +9,15 @@ function safeRedirect(value: unknown): string {
 }
 
 export const Route = createFileRoute("/login")({
+  head: () => ({
+    meta: [{ title: "Login" }],
+  }),
   validateSearch: (search: Record<string, unknown>) => ({
     redirect: safeRedirect(search.redirect),
   }),
 
   beforeLoad: async ({ context, search }) => {
-    const session = await context.queryClient
-      .query(sessionQueryOptions)
-      .catch(() => null);
+    const session = await context.queryClient.query(sessionQueryOptions).catch(() => null);
 
     if (session) {
       throw redirect({ to: search.redirect });

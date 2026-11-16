@@ -7,8 +7,7 @@ import { updateShade } from "../api/shades.api";
 export function useUpdateShade() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: ShadePatch }) =>
-      updateShade(id, data),
+    mutationFn: ({ id, data }: { id: string; data: ShadePatch }) => updateShade(id, data),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["shades"] });
       toast.success("Shade updated");

@@ -1,8 +1,4 @@
-import {
-  type ApiIssue,
-  type ErrorCode,
-  errorStatus,
-} from "@color-bank-hub/contracts/common";
+import { type ApiIssue, type ErrorCode, errorStatus } from "@color-bank-hub/contracts/common";
 import type { z } from "zod";
 
 export class AppError extends Error {
@@ -23,10 +19,7 @@ export function fail(code: ErrorCode, message: string, reason?: string): never {
   throw new AppError(code, message, reason);
 }
 
-export function parse<T extends z.ZodType>(
-  schema: T,
-  value: unknown,
-): z.output<T> {
+export function parse<T extends z.ZodType>(schema: T, value: unknown): z.output<T> {
   const result = schema.safeParse(value);
   if (!result.success)
     throw new AppError(

@@ -38,8 +38,7 @@ export function rgbToHsl({ r, g, b }: Rgb) {
   const min = Math.min(red, green, blue);
   const lightness = (max + min) / 2;
   const delta = max - min;
-  const saturation =
-    delta === 0 ? 0 : delta / (1 - Math.abs(2 * lightness - 1));
+  const saturation = delta === 0 ? 0 : delta / (1 - Math.abs(2 * lightness - 1));
   return {
     h: hueOf(red, green, blue),
     s: saturation * 100,
@@ -71,8 +70,7 @@ export function rgbToLab({ r, g, b }: Rgb) {
   const y = lr * 0.2126729 + lg * 0.7151522 + lb * 0.072175;
   const z = (lr * 0.0193339 + lg * 0.119192 + lb * 0.9503041) / 1.08883;
 
-  const f = (value: number) =>
-    value > 216 / 24389 ? Math.cbrt(value) : ((24389 / 27) * value + 16) / 116;
+  const f = (value: number) => (value > 216 / 24389 ? Math.cbrt(value) : ((24389 / 27) * value + 16) / 116);
   return {
     l: 116 * f(y) - 16,
     a: 500 * (f(x) - f(y)),

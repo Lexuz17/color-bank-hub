@@ -21,22 +21,14 @@ export const uploadRules = {
     maxBytes: 5 * MB,
     permission: "prototype:process",
   },
-} satisfies Record<
-  string,
-  { types: string[]; maxBytes: number; permission: Permission }
->;
+} satisfies Record<string, { types: string[]; maxBytes: number; permission: Permission }>;
 
 export type UploadPurpose = keyof typeof uploadRules;
 
-export function checkUpload(
-  purpose: UploadPurpose,
-  file: { contentType: string; size: number },
-) {
+export function checkUpload(purpose: UploadPurpose, file: { contentType: string; size: number }) {
   const rule = uploadRules[purpose];
-  if (!rule.types.includes(file.contentType))
-    return `File type must be one of: ${rule.types.join(", ")}`;
-  if (file.size > rule.maxBytes)
-    return `File must be ${rule.maxBytes / MB} MB or smaller`;
+  if (!rule.types.includes(file.contentType)) return `File type must be one of: ${rule.types.join(", ")}`;
+  if (file.size > rule.maxBytes) return `File must be ${rule.maxBytes / MB} MB or smaller`;
   return null;
 }
 

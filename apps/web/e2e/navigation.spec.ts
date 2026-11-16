@@ -6,9 +6,7 @@ test.describe("App Navigation & Layout", () => {
     await setupApiMocks(page);
   });
 
-  test("renders shell, loads home page and toggles dark mode", async ({
-    page,
-  }) => {
+  test("renders shell, loads home page and toggles dark mode", async ({ page }) => {
     await page.goto("/");
     await expect(page).toHaveTitle(/web|color/i);
 
@@ -17,11 +15,7 @@ test.describe("App Navigation & Layout", () => {
     await expect(header).toBeVisible();
 
     // Verify theme toggle button functions
-    const themeToggle = page
-      .locator(
-        'button[aria-label*="theme" i], button:has(.lucide-sun), button:has(.lucide-moon)',
-      )
-      .first();
+    const themeToggle = page.locator('button[aria-label*="theme" i], button:has(.lucide-sun), button:has(.lucide-moon)').first();
     if (await themeToggle.isVisible()) {
       await themeToggle.click();
       // Theme changes html attribute class or data-theme
@@ -30,9 +24,7 @@ test.describe("App Navigation & Layout", () => {
     }
   });
 
-  test("navigates across all workspace views via header/sidebar links", async ({
-    page,
-  }) => {
+  test("navigates across all workspace views via header/sidebar links", async ({ page }) => {
     await page.goto("/");
 
     const routes = [
@@ -50,23 +42,17 @@ test.describe("App Navigation & Layout", () => {
       await page.goto(route.path);
       await expect(page).toHaveURL(new RegExp(route.path));
       // Verify the page heading / shell contains the section name
-      const heading = page
-        .getByRole("heading", { name: new RegExp(route.title, "i") })
-        .first();
+      const heading = page.getByRole("heading", { name: new RegExp(route.title, "i") }).first();
       await expect(heading).toBeVisible();
     }
   });
 
-  test("redirects signed-out users to login before opening a workspace view", async ({
-    page,
-  }) => {
+  test("redirects signed-out users to login before opening a workspace view", async ({ page }) => {
     await setupApiMocks(page, { authenticated: false });
 
     await page.goto("/color-bank");
 
     await expect(page).toHaveURL(/\/login\?redirect=%2Fcolor-bank/);
-    await expect(
-      page.getByRole("button", { name: "Login with Google" }),
-    ).toBeVisible();
+    await expect(page.getByRole("button", { name: "Login with Google" })).toBeVisible();
   });
 });

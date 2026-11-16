@@ -42,9 +42,7 @@ export const auth = betterAuth({
     user: {
       create: {
         before: async (user) => {
-          if (
-            !user.email.toLowerCase().endsWith(`@${env.allowedEmailDomain}`)
-          ) {
+          if (!user.email.toLowerCase().endsWith(`@${env.allowedEmailDomain}`)) {
             throw new APIError("FORBIDDEN", {
               message: "Email domain not allowed",
             });

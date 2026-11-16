@@ -1,17 +1,4 @@
-import {
-  char,
-  index,
-  jsonb,
-  numeric,
-  pgTable,
-  primaryKey,
-  smallint,
-  text,
-  timestamp,
-  uniqueIndex,
-  uuid,
-  varchar,
-} from "drizzle-orm/pg-core";
+import { char, index, jsonb, numeric, pgTable, primaryKey, smallint, text, timestamp, uniqueIndex, uuid, varchar } from "drizzle-orm/pg-core";
 import { season, undertone } from "./enums.js";
 import { products } from "./products.js";
 import { users } from "./users.js";
@@ -67,9 +54,7 @@ export const shades = pgTable(
     createdBy: uuid("created_by").references(() => users.id, {
       onDelete: "set null",
     }),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true })
       .notNull()
       .defaultNow()
@@ -99,14 +84,9 @@ export const shadeBenchmarks = pgTable(
     benchmarkShadeId: uuid("benchmark_shade_id")
       .notNull()
       .references(() => shades.id, { onDelete: "cascade" }),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [
-    primaryKey({ columns: [t.shadeId, t.benchmarkShadeId] }),
-    index("shade_benchmarks_benchmark_idx").on(t.benchmarkShadeId),
-  ],
+  (t) => [primaryKey({ columns: [t.shadeId, t.benchmarkShadeId] }), index("shade_benchmarks_benchmark_idx").on(t.benchmarkShadeId)],
 );
 
 export type Shade = typeof shades.$inferSelect;

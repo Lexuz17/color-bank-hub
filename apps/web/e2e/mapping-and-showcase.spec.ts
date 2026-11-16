@@ -9,13 +9,9 @@ test.describe("Mappings, User Management & Showcase", () => {
   // ── READ: shade mapping workspace ─────────────────────────────────────────
   test("renders shade mapping workspace", async ({ page }) => {
     await page.goto("/shade-mapping");
-    await expect(
-      page.getByRole("heading", { name: "Shade Map" }).first(),
-    ).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Shade Map" }).first()).toBeVisible();
 
-    const toolbar = page
-      .getByText(/By season · demonstration placement/i)
-      .first();
+    const toolbar = page.getByText(/By season · demonstration placement/i).first();
     await expect(toolbar).toBeVisible();
   });
 
@@ -53,13 +49,9 @@ test.describe("Mappings, User Management & Showcase", () => {
 
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible();
-    await expect(
-      dialog.getByRole("heading", { name: /Save mapping/i }),
-    ).toBeVisible();
+    await expect(dialog.getByRole("heading", { name: /Save mapping/i })).toBeVisible();
 
-    await dialog
-      .getByRole("textbox", { name: /Mapping name/i })
-      .fill("Q4 Autumn Collection");
+    await dialog.getByRole("textbox", { name: /Mapping name/i }).fill("Q4 Autumn Collection");
 
     // Confirm save is enabled once name is filled
     const confirmSave = dialog.getByRole("button", { name: /Save mapping/i });
@@ -73,9 +65,7 @@ test.describe("Mappings, User Management & Showcase", () => {
   // ── READ: my mappings page ────────────────────────────────────────────────
   test("renders my mappings page with empty state", async ({ page }) => {
     await page.goto("/my-mappings");
-    await expect(
-      page.getByRole("heading", { name: "My Mappings" }).first(),
-    ).toBeVisible();
+    await expect(page.getByRole("heading", { name: "My Mappings" }).first()).toBeVisible();
 
     // Empty state is expected (sessionStorage has no saved mappings in test)
     await expect(page.getByText(/No saved mappings/i)).toBeVisible();
@@ -107,9 +97,7 @@ test.describe("Mappings, User Management & Showcase", () => {
 
     const alertDialog = page.getByRole("alertdialog");
     await expect(alertDialog).toBeVisible();
-    await expect(
-      alertDialog.getByRole("heading", { name: /Delete mapping/i }),
-    ).toBeVisible();
+    await expect(alertDialog.getByRole("heading", { name: /Delete mapping/i })).toBeVisible();
 
     await alertDialog.getByRole("button", { name: /Delete/i }).click();
 
@@ -188,18 +176,12 @@ test.describe("Mappings, User Management & Showcase", () => {
   // ── READ: user management ─────────────────────────────────────────────────
   test("renders user management page with role controls", async ({ page }) => {
     await page.goto("/user-management");
-    await expect(
-      page.getByRole("heading", { name: "User Management" }).first(),
-    ).toBeVisible();
+    await expect(page.getByRole("heading", { name: "User Management" }).first()).toBeVisible();
   });
 
   // ── READ: showcase ────────────────────────────────────────────────────────
-  test("renders component showcase page with interactive controls", async ({
-    page,
-  }) => {
+  test("renders component showcase page with interactive controls", async ({ page }) => {
     await page.goto("/showcase");
-    await expect(
-      page.getByText(/Shared application layout|Design system tokens/i).first(),
-    ).toBeVisible();
+    await expect(page.getByText(/Shared application layout|Design system tokens/i).first()).toBeVisible();
   });
 });

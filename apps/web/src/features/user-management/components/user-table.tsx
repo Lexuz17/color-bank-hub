@@ -42,17 +42,12 @@ const columns: ColumnDef<UserAccount>[] = [
   {
     accessorKey: "status",
     header: "Status",
-    cell: ({ row }) => (
-      <StatusBadge status={statusLabels[row.original.status]} />
-    ),
+    cell: ({ row }) => <StatusBadge status={statusLabels[row.original.status]} />,
   },
   {
     accessorKey: "lastLoginAt",
     header: "Last login",
-    cell: ({ row }) =>
-      row.original.lastLoginAt
-        ? formatDateTime(row.original.lastLoginAt)
-        : "Never",
+    cell: ({ row }) => (row.original.lastLoginAt ? formatDateTime(row.original.lastLoginAt) : "Never"),
   },
   {
     id: "action",
@@ -62,12 +57,5 @@ const columns: ColumnDef<UserAccount>[] = [
 ];
 
 export function UserTable({ users }: { users: UserAccount[] }) {
-  return (
-    <DataTable
-      columns={columns}
-      data={users}
-      searchColumn="name"
-      searchPlaceholder="Search users…"
-    />
-  );
+  return <DataTable columns={columns} data={users} searchColumn="name" searchPlaceholder="Search users…" />;
 }

@@ -1,11 +1,7 @@
 import { Field } from "@tanstack/react-form";
 import { cn } from "cn";
 import { formContext } from "@/components/ui/form-context";
-import {
-  type StringFieldApi,
-  type StringFieldValidators,
-  getFieldError,
-} from "@/lib/form-utils";
+import { type StringFieldApi, type StringFieldValidators, getFieldError } from "@/lib/form-utils";
 
 type TextareaProps = React.ComponentProps<"textarea"> & {
   field?: StringFieldApi;
@@ -16,18 +12,7 @@ type TextareaProps = React.ComponentProps<"textarea"> & {
   errorClassName?: string;
 };
 
-function Textarea({
-  className,
-  field,
-  name,
-  validators,
-  label,
-  description,
-  containerClassName,
-  errorClassName,
-  id,
-  ...props
-}: TextareaProps) {
+function Textarea({ className, field, name, validators, label, description, containerClassName, errorClassName, id, ...props }: TextareaProps) {
   return (
     <formContext.Consumer>
       {(form) => {
@@ -57,9 +42,7 @@ function Textarea({
           return (
             <div className={containerClassName ?? "flex flex-col gap-1.5"}>
               {label ? <label htmlFor={fieldId}>{label}</label> : null}
-              {description ? (
-                <p className="text-sm text-muted-foreground">{description}</p>
-              ) : null}
+              {description ? <p className="text-sm text-muted-foreground">{description}</p> : null}
               <textarea
                 id={fieldId}
                 name={field.name}
@@ -73,11 +56,7 @@ function Textarea({
                 onChange={(event) => field.handleChange(event.target.value)}
                 {...props}
               />
-              {error ? (
-                <p className={cn("text-sm text-destructive", errorClassName)}>
-                  {error}
-                </p>
-              ) : null}
+              {error ? <p className={cn("text-sm text-destructive", errorClassName)}>{error}</p> : null}
             </div>
           );
         }

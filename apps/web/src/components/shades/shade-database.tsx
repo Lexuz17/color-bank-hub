@@ -5,35 +5,13 @@ import { useShades } from "@/api/shades/shade-queries";
 import { useUpdateShade } from "@/features/color-database/hooks/shade-mutations";
 import type { Season } from "@color-bank-hub/contracts/common";
 import type { Shade, ShadeSort } from "@color-bank-hub/contracts/shade";
-import {
-  SearchInput,
-  ShadeSwatch,
-  StatusBadge,
-  LoadingState,
-} from "@/components/shared/workspace-components";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { SearchInput, ShadeSwatch, StatusBadge, LoadingState } from "@/components/shared/workspace-components";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import {
-  ApiError,
-  FieldSelect,
-  ResultsPagination,
-} from "@/components/shared/request-feedback";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { ApiError, FieldSelect, ResultsPagination } from "@/components/shared/request-feedback";
 const seasonLabels = {
   spring: "Spring",
   summer: "Summer",
@@ -43,13 +21,21 @@ const seasonLabels = {
 } as const;
 const toneLabels = { warm: "Warm", neutral: "Neutral", cool: "Cool" } as const;
 export function ShadeDatabase({
+  productFormatId = null,
   productFormatItemId = null,
   onInspect,
   editable = false,
+  selected,
+  onToggleSelect,
+  onSelectAll,
 }: {
+  productFormatId?: number | null;
   productFormatItemId?: number | null;
   onInspect?: (id: string) => void;
   editable?: boolean;
+  selected?: Map<string, Shade>;
+  onToggleSelect?: (shade: Shade, checked: boolean) => void;
+  onSelectAll?: (shades: Shade[], checked: boolean) => void;
 }) {
   const [search, setSearch] = useState("");
   const [brandId, setBrandId] = useState("");
@@ -63,6 +49,7 @@ export function ShadeDatabase({
     pageSize: 25,
     search: search || undefined,
     brandId: brandId || undefined,
+    productFormatId: productFormatId ?? undefined,
     productFormatItemId: productFormatItemId ?? undefined,
     season: season ? (season as Season) : undefined,
     sort,
@@ -123,9 +110,7 @@ export function ShadeDatabase({
           </span>
         )}
       </div>
-      {brands.isError && (
-        <ApiError error={brands.error} retry={() => void brands.refetch()} />
-      )}{" "}
+      {brands.isError && <ApiError error={brands.error} retry={() => void brands.refetch()} />}{" "}
       {rows.isPending ? (
         <LoadingState />
       ) : rows.isError ? (
@@ -136,40 +121,25 @@ export function ShadeDatabase({
             <Table>
               <TableHeader>
                 <TableRow>
+                  {onToggleSelect && (
+                    <TableHead className="w-10 px-3 text-center">
+                      <Checkbox
+                        checked={rows.data.items.length > 0 && rows.data.items.every((shade) => selected?.has(shade.id))}
+                        onCheckedChange={(checked) => onSelectAll?.(rows.data.items, !!checked)}
+                        aria-label="Select all shades on this page"
+                      />
+                    </TableHead>
+                  )}
                   <TableHead>Brand</TableHead>
                   <TableHead>Product name</TableHead>
-                  <TableHead
-                    aria-sort={
-                      sort === "name"
-                        ? direction === "asc"
-                          ? "ascending"
-                          : "descending"
-                        : "none"
-                    }
-                  >
-                    <button
-                      type="button"
-                      className="flex items-center gap-1"
-                      onClick={() => sortBy("name")}
-                    >
+                  <TableHead aria-sort={sort === "name" ? (direction === "asc" ? "ascending" : "descending") : "none"}>
+                    <button type="button" className="flex items-center gap-1" onClick={() => sortBy("name")}>
                       Shade name
                       <ArrowUpDown className="size-3" />
                     </button>
                   </TableHead>
-                  <TableHead
-                    aria-sort={
-                      sort === "sku"
-                        ? direction === "asc"
-                          ? "ascending"
-                          : "descending"
-                        : "none"
-                    }
-                  >
-                    <button
-                      type="button"
-                      className="flex items-center gap-1"
-                      onClick={() => sortBy("sku")}
-                    >
+                  <TableHead aria-sort={sort === "sku" ? (direction === "asc" ? "ascending" : "descending") : "none"}>
+                    <button type="button" className="flex items-center gap-1" onClick={() => sortBy("sku")}>
                       SKU
                       <ArrowUpDown className="size-3" />
                     </button>
@@ -181,72 +151,76 @@ export function ShadeDatabase({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {rows.data.items.map((shade) => (
-                  <TableRow key={shade.id}>
-                    <TableCell>{shade.brand.name}</TableCell>
-                    <TableCell>{shade.product.name}</TableCell>
-                    <TableCell>
-                      {onInspect ? (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-auto px-0"
-                          onClick={() => onInspect(shade.id)}
-                        >
-                          <ShadeSwatch hex={shade.hex} />
-                          {shade.name}
-                        </Button>
-                      ) : (
-                        <span className="flex items-center gap-2">
-                          <ShadeSwatch hex={shade.hex} />
-                          {shade.name}
-                        </span>
+                {rows.data.items.map((shade) => {
+                  const isSelected = selected?.has(shade.id) ?? false;
+                  return (
+                    <TableRow
+                      key={shade.id}
+                      aria-selected={isSelected}
+                      className={isSelected ? "bg-[#faf0ee] hover:bg-[#f6e6e2] dark:bg-rose-950/20" : undefined}
+                    >
+                      {onToggleSelect && (
+                        <TableCell className="w-10 px-3 text-center">
+                          <Checkbox
+                            checked={isSelected}
+                            onCheckedChange={(checked) => onToggleSelect(shade, !!checked)}
+                            aria-label={`Select ${shade.name}`}
+                          />
+                        </TableCell>
                       )}
-                    </TableCell>
-                    <TableCell>{shade.sku}</TableCell>
-                    <TableCell>
-                      {shade.undertone ? (
-                        <StatusBadge status={toneLabels[shade.undertone]} />
-                      ) : (
-                        <span className="text-muted-foreground">
-                          Unclassified
-                        </span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {shade.season ? (
-                        <StatusBadge status={seasonLabels[shade.season]} />
-                      ) : (
-                        <span className="text-muted-foreground">
-                          Unclassified
-                        </span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <code>{shade.hex}</code>
-                    </TableCell>
-                    {editable && (
+                      <TableCell>{shade.brand.name}</TableCell>
+                      <TableCell>{shade.product.name}</TableCell>
                       <TableCell>
-                        <Button
-                          size="xs"
-                          variant="outline"
-                          onClick={() => {
-                            save.reset();
-                            setEditing(shade);
-                          }}
-                        >
-                          Edit
-                        </Button>
+                        {onInspect ? (
+                          <Button variant="ghost" size="sm" className="h-auto px-0" onClick={() => onInspect(shade.id)}>
+                            <ShadeSwatch hex={shade.hex} />
+                            {shade.name}
+                          </Button>
+                        ) : (
+                          <span className="flex items-center gap-2">
+                            <ShadeSwatch hex={shade.hex} />
+                            {shade.name}
+                          </span>
+                        )}
                       </TableCell>
-                    )}
-                  </TableRow>
-                ))}
+                      <TableCell>{shade.sku}</TableCell>
+                      <TableCell>
+                        {shade.undertone ? (
+                          <StatusBadge status={toneLabels[shade.undertone]} />
+                        ) : (
+                          <span className="text-muted-foreground">Unclassified</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {shade.season ? (
+                          <StatusBadge status={seasonLabels[shade.season]} />
+                        ) : (
+                          <span className="text-muted-foreground">Unclassified</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <code>{shade.hex}</code>
+                      </TableCell>
+                      {editable && (
+                        <TableCell>
+                          <Button
+                            size="xs"
+                            variant="outline"
+                            onClick={() => {
+                              save.reset();
+                              setEditing(shade);
+                            }}
+                          >
+                            Edit
+                          </Button>
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  );
+                })}
                 {rows.data.items.length === 0 && (
                   <TableRow>
-                    <TableCell
-                      colSpan={editable ? 8 : 7}
-                      className="h-32 text-center text-muted-foreground"
-                    >
+                    <TableCell colSpan={(editable ? 8 : 7) + (onToggleSelect ? 1 : 0)} className="h-32 text-center text-muted-foreground">
                       No shades match these filters.
                     </TableCell>
                   </TableRow>
@@ -254,13 +228,7 @@ export function ShadeDatabase({
               </TableBody>
             </Table>
           </div>
-          <ResultsPagination
-            page={page}
-            total={rows.data.pagination.total}
-            pageSize={25}
-            onPageChange={setPage}
-            disabled={rows.isFetching}
-          />
+          <ResultsPagination page={page} total={rows.data.pagination.total} pageSize={25} onPageChange={setPage} disabled={rows.isFetching} />
         </>
       )}
       <Dialog
@@ -272,9 +240,7 @@ export function ShadeDatabase({
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Edit shade</DialogTitle>
-            <DialogDescription>
-              Save changes to the color database.
-            </DialogDescription>
+            <DialogDescription>Save changes to the color database.</DialogDescription>
           </DialogHeader>
           {editing && (
             <form
@@ -298,38 +264,19 @@ export function ShadeDatabase({
             >
               <label className="grid gap-2 text-xs">
                 Shade name
-                <Input
-                  name="name"
-                  defaultValue={editing.name}
-                  required
-                  maxLength={255}
-                />
+                <Input name="name" defaultValue={editing.name} required maxLength={255} />
               </label>
               <label className="grid gap-2 text-xs">
                 SKU
-                <Input
-                  name="sku"
-                  defaultValue={editing.sku ?? ""}
-                  maxLength={255}
-                />
+                <Input name="sku" defaultValue={editing.sku ?? ""} maxLength={255} />
               </label>
               <label className="grid gap-2 text-xs">
                 HEX code
-                <Input
-                  name="hex"
-                  defaultValue={editing.hex}
-                  required
-                  pattern="#[0-9a-fA-F]{6}"
-                />
+                <Input name="hex" defaultValue={editing.hex} required pattern="#[0-9a-fA-F]{6}" />
               </label>
               {save.isError && <ApiError error={save.error} />}
               <DialogFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={save.isPending}
-                  onClick={() => setEditing(null)}
-                >
+                <Button type="button" variant="outline" disabled={save.isPending} onClick={() => setEditing(null)}>
                   Cancel
                 </Button>
                 <Button type="submit" disabled={save.isPending}>

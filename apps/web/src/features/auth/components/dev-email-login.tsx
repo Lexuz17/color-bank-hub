@@ -1,18 +1,7 @@
 import { useForm } from "@tanstack/react-form";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Field,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { useSignInWithEmail } from "../hooks/auth-mutations";
 
@@ -30,9 +19,7 @@ export function DevEmailLogin({ redirectTo }: { redirectTo: string }) {
     <Card>
       <CardHeader>
         <CardTitle>Development login</CardTitle>
-        <CardDescription>
-          Available only in development. Use an account created by db:seed.
-        </CardDescription>
+        <CardDescription>Available only in development. Use an account created by db:seed.</CardDescription>
       </CardHeader>
       <CardContent>
         <form
@@ -78,11 +65,7 @@ export function DevEmailLogin({ redirectTo }: { redirectTo: string }) {
               )}
             </form.Field>
 
-            {signIn.isError && (
-              <FieldError>
-                Development login failed. Make sure you have run db:seed.
-              </FieldError>
-            )}
+            {signIn.isError && <FieldError>Development login failed. Make sure you have run db:seed.</FieldError>}
 
             <Button type="submit" disabled={signIn.isPending}>
               {signIn.isPending ? "Signing in..." : "Development login"}

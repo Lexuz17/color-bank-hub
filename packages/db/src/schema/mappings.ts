@@ -1,15 +1,4 @@
-import {
-  boolean,
-  jsonb,
-  index,
-  integer,
-  pgTable,
-  primaryKey,
-  text,
-  timestamp,
-  uuid,
-  varchar,
-} from "drizzle-orm/pg-core";
+import { boolean, jsonb, index, integer, pgTable, primaryKey, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 import { mappingView } from "./enums.js";
 import { productFormatItems } from "./product-formats.js";
 import { users } from "./users.js";
@@ -39,18 +28,13 @@ export const mappings = pgTable(
     /** true = Default (category's active config, read live), false = classificationConfig above */
     useActiveConfig: boolean("use_active_config").notNull().default(true),
     thumbnailUrl: text("thumbnail_url"),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true })
       .notNull()
       .defaultNow()
       .$onUpdate(() => new Date()),
   },
-  (t) => [
-    index("mappings_owner_idx").on(t.ownerId),
-    index("mappings_product_format_item_idx").on(t.productFormatItemId),
-  ],
+  (t) => [index("mappings_owner_idx").on(t.ownerId), index("mappings_product_format_item_idx").on(t.productFormatItemId)],
 );
 
 export const mappingPins = pgTable(
@@ -62,9 +46,7 @@ export const mappingPins = pgTable(
     mappingId: uuid("mapping_id")
       .notNull()
       .references(() => mappings.id, { onDelete: "cascade" }),
-    pinnedAt: timestamp("pinned_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
+    pinnedAt: timestamp("pinned_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [primaryKey({ columns: [t.userId, t.mappingId] })],
 );

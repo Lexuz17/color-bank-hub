@@ -5,11 +5,7 @@ import { composition } from "@color-bank-hub/contracts/common";
 import { can } from "@color-bank-hub/contracts/rbac";
 import { transitionInput } from "@color-bank-hub/contracts/prototype";
 import { reportInput } from "@color-bank-hub/contracts/report";
-import {
-  shadeInput,
-  shadePatch,
-  shadeQuery,
-} from "@color-bank-hub/contracts/shade";
+import { shadeInput, shadePatch, shadeQuery } from "@color-bank-hub/contracts/shade";
 const shade = {
   productId: "818565f8-bc7f-4c65-bd17-331c2e1d3986",
   sku: "TEST-001",
@@ -18,21 +14,13 @@ const shade = {
 };
 test("HEX input is normalized and unknown fields are rejected", () => {
   assert.equal(shadeInput.parse(shade).hex, "#aa6d78");
-  assert.equal(
-    shadeInput.safeParse({ ...shade, createdBy: shade.productId }).success,
-    false,
-  );
+  assert.equal(shadeInput.safeParse({ ...shade, createdBy: shade.productId }).success, false);
   for (const hex of ["red", "#abc", "#gg0000", ""]) {
     assert.equal(shadeInput.safeParse({ ...shade, hex }).success, false);
   }
 });
 test("pagination, patch, composition, and report inputs reject invalid values", () => {
-  for (const query of [
-    { page: 0 },
-    { pageSize: 101 },
-    { sort: "password" },
-    { season: "invalid" },
-  ])
+  for (const query of [{ page: 0 }, { pageSize: 101 }, { sort: "password" }, { season: "invalid" }])
     assert.equal(shadeQuery.safeParse(query).success, false);
   assert.equal(shadePatch.safeParse({}).success, false);
   assert.equal(
@@ -45,10 +33,7 @@ test("pagination, patch, composition, and report inputs reject invalid values", 
   assert.equal(reportInput.safeParse({ description: "short" }).success, false);
 });
 test("declining a request requires a reason", () => {
-  assert.equal(
-    transitionInput.safeParse({ status: "declined" }).success,
-    false,
-  );
+  assert.equal(transitionInput.safeParse({ status: "declined" }).success, false);
   assert.equal(
     transitionInput.safeParse({
       status: "declined",

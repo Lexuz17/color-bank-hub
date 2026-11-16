@@ -19,8 +19,7 @@ export function useCreateReport() {
 export function useUpdateReport() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, status }: { id: string; status: ReportStatus }) =>
-      updateReport(id, status),
+    mutationFn: ({ id, status }: { id: string; status: ReportStatus }) => updateReport(id, status),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["reports"] });
       toast.success("Report status updated");

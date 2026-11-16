@@ -1,15 +1,9 @@
 import { useContext, type ComponentProps, type ReactNode } from "react";
-import {
-  createFormHook,
-  type AnyFormApi,
-  useStore,
-} from "@tanstack/react-form";
+import { createFormHook, type AnyFormApi, useStore } from "@tanstack/react-form";
 import { Button } from "@/components/ui/button";
 import { fieldContext, formContext } from "@/components/ui/form-context";
 
-type FormHookComponents = Parameters<
-  typeof createFormHook
->[0]["fieldComponents"];
+type FormHookComponents = Parameters<typeof createFormHook>[0]["fieldComponents"];
 
 export function createAppForm<
   TFieldComponents extends FormHookComponents = Record<string, never>,
@@ -54,11 +48,7 @@ interface FormSubmitButtonProps extends ComponentProps<typeof Button> {
   submittingText?: string;
 }
 
-function FormSubmitButton({
-  children,
-  submittingText = "Submitting...",
-  ...props
-}: FormSubmitButtonProps) {
+function FormSubmitButton({ children, submittingText = "Submitting...", ...props }: FormSubmitButtonProps) {
   const form = useContext(formContext);
   if (!form) return null;
 
@@ -69,12 +59,7 @@ function FormSubmitButton({
   );
 }
 
-function SubmitButton({
-  formApi,
-  submittingText,
-  children,
-  ...props
-}: FormSubmitButtonProps & { formApi: AnyFormApi }) {
+function SubmitButton({ formApi, submittingText, children, ...props }: FormSubmitButtonProps & { formApi: AnyFormApi }) {
   const canSubmit = useStore(formApi.store, (state) => state.canSubmit);
   const isSubmitting = useStore(formApi.store, (state) => state.isSubmitting);
 

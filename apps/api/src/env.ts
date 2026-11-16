@@ -4,9 +4,7 @@ import { z } from "zod";
 const isDevelopment = process.env.NODE_ENV === "development";
 
 // Google OAuth is optional in development and required everywhere else.
-const googleCredential = isDevelopment
-  ? z.string().optional()
-  : z.string().min(1);
+const googleCredential = isDevelopment ? z.string().optional() : z.string().min(1);
 
 const schema = z
   .object({
@@ -26,8 +24,7 @@ const schema = z
     S3_SECRET_ACCESS_KEY: z.string().min(1),
   })
   .refine((value) => !value.GOOGLE_CLIENT_ID === !value.GOOGLE_CLIENT_SECRET, {
-    message:
-      "GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET must be configured together",
+    message: "GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET must be configured together",
   });
 
 const result = schema.safeParse(process.env);

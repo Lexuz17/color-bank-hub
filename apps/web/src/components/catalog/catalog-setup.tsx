@@ -1,44 +1,25 @@
 import { useState } from "react";
 import { useCatalog } from "@/features/data-input/hooks/catalog-queries";
-import {
-  type CatalogRecordMode,
-  useCreateCatalogRecord,
-} from "@/features/data-input/hooks/data-input-mutations";
+import { type CatalogRecordMode, useCreateCatalogRecord } from "@/features/data-input/hooks/data-input-mutations";
 import { ApiError, FieldSelect } from "@/components/shared/request-feedback";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 type Mode = CatalogRecordMode;
-export function CatalogSetup({
-  onProductCreated,
-}: {
-  onProductCreated: (id: string) => void;
-}) {
+export function CatalogSetup({ onProductCreated }: { onProductCreated: (id: string) => void }) {
   const [mode, setMode] = useState<Mode | null>(null);
   const catalog = useCatalog();
   const create = useCreateCatalogRecord();
   return (
     <>
       <div className="flex flex-wrap items-center gap-2">
-        <span className="mr-1 text-[11px] text-muted-foreground">
-          Catalog setup
-        </span>
+        <span className="mr-1 text-[11px] text-muted-foreground">Catalog setup</span>
         {(["format", "brand", "product"] as const).map((kind) => (
           <Button
             key={kind}
             size="xs"
             variant="outline"
-            disabled={
-              kind === "product" &&
-              (!catalog.brands.data?.length || !catalog.items.length)
-            }
+            disabled={kind === "product" && (!catalog.brands.data?.length || !catalog.items.length)}
             onClick={() => {
               create.reset();
               setMode(kind);
@@ -75,8 +56,7 @@ export function CatalogSetup({
                   { mode, data: new FormData(event.currentTarget) },
                   {
                     onSuccess: (result) => {
-                      if (result.mode === "product")
-                        onProductCreated(result.record.id);
+                      if (result.mode === "product") onProductCreated(result.record.id);
                       setMode(null);
                     },
                   },
@@ -86,12 +66,7 @@ export function CatalogSetup({
               {mode === "format" && (
                 <label className="grid gap-2 text-xs">
                   Parent format name
-                  <Input
-                    name="parent"
-                    required
-                    placeholder="Lip Tint"
-                    maxLength={255}
-                  />
+                  <Input name="parent" required placeholder="Lip Tint" maxLength={255} />
                 </label>
               )}
               {mode === "product" && (
@@ -111,11 +86,7 @@ export function CatalogSetup({
                   </label>
                   <label className="grid gap-2 text-xs">
                     Product format
-                    <FieldSelect
-                      name="productFormatItemId"
-                      required
-                      defaultValue=""
-                    >
+                    <FieldSelect name="productFormatItemId" required defaultValue="">
                       <option value="" disabled>
                         Select a format
                       </option>
@@ -135,33 +106,18 @@ export function CatalogSetup({
               {mode === "format" && (
                 <label className="grid gap-2 text-xs">
                   Unique format code
-                  <Input
-                    name="code"
-                    required
-                    maxLength={4}
-                    pattern="[A-Za-z0-9]{1,4}"
-                    placeholder="TG"
-                  />
+                  <Input name="code" required maxLength={4} pattern="[A-Za-z0-9]{1,4}" placeholder="TG" />
                 </label>
               )}
               {mode === "brand" && (
                 <label className="flex items-center gap-2 text-xs">
-                  <input
-                    name="isOwn"
-                    type="checkbox"
-                    className="accent-primary"
-                  />
+                  <input name="isOwn" type="checkbox" className="accent-primary" />
                   Own brand (allows color composition)
                 </label>
               )}
               {create.isError && <ApiError error={create.error} />}
               <DialogFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={create.isPending}
-                  onClick={() => setMode(null)}
-                >
+                <Button type="button" variant="outline" disabled={create.isPending} onClick={() => setMode(null)}>
                   Cancel
                 </Button>
                 <Button type="submit" disabled={create.isPending}>

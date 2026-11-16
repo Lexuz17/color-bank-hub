@@ -28,14 +28,7 @@ export async function seedDevUsers(db: Database) {
     if (!user) throw new Error(`Failed to create user ${email}`);
 
     // Replace an existing credential account with the development password.
-    await db
-      .delete(accounts)
-      .where(
-        and(
-          eq(accounts.userId, user.id),
-          eq(accounts.providerId, "credential"),
-        ),
-      );
+    await db.delete(accounts).where(and(eq(accounts.userId, user.id), eq(accounts.providerId, "credential")));
     await db.insert(accounts).values({
       userId: user.id,
       accountId: user.id,

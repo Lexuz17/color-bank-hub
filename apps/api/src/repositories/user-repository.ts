@@ -19,25 +19,13 @@ export function listUsers() {
 }
 
 export async function findUser(id: string) {
-  const [user] = await db
-    .select({ role: users.role, status: users.status })
-    .from(users)
-    .where(eq(users.id, id));
+  const [user] = await db.select({ role: users.role, status: users.status }).from(users).where(eq(users.id, id));
   return user;
 }
 
-export function updateUser(
-  id: string,
-  before: Pick<User, "role" | "status">,
-  changes: UserPatch,
-  actorId: string,
-) {
+export function updateUser(id: string, before: Pick<User, "role" | "status">, changes: UserPatch, actorId: string) {
   return db.transaction(async (tx) => {
-    const [row] = await tx
-      .update(users)
-      .set(changes)
-      .where(eq(users.id, id))
-      .returning(accountColumns);
+    const [row] = await tx.update(users).set(changes).where(eq(users.id, id)).returning(accountColumns);
     await tx.insert(auditLogs).values({
       actorId,
       action: "user.updated",
@@ -51,8 +39,5 @@ export function updateUser(
 }
 
 export async function updateLastLogin(userId: string) {
-  await db
-    .update(users)
-    .set({ lastLoginAt: new Date() })
-    .where(eq(users.id, userId));
+  await db.update(users).set({ lastLoginAt: new Date() }).where(eq(users.id, userId));
 }

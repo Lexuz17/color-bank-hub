@@ -6,29 +6,14 @@ export const hex = z
   .string()
   .regex(/^#[\da-fA-F]{6}$/, "Use a six-digit HEX code")
   .transform((value) => value.toLowerCase());
-export const url = z
-  .url()
-  .refine(
-    (value) => ["https:", "http:"].includes(new URL(value).protocol),
-    "Use an HTTP or HTTPS URL",
-  );
+export const url = z.url().refine((value) => ["https:", "http:"].includes(new URL(value).protocol), "Use an HTTP or HTTPS URL");
 export const composition = z
   .array(z.object({ name, percentage: z.number().min(0).max(100) }).strict())
   .max(100)
-  .refine(
-    (items) =>
-      items.reduce((total, item) => total + item.percentage, 0) <= 100.000001,
-    "Composition cannot exceed 100%",
-  );
+  .refine((items) => items.reduce((total, item) => total + item.percentage, 0) <= 100.000001, "Composition cannot exceed 100%");
 export type CompositionItem = z.infer<typeof composition>[number];
 
-export const season = z.enum([
-  "spring",
-  "summer",
-  "autumn",
-  "winter",
-  "neutral",
-]);
+export const season = z.enum(["spring", "summer", "autumn", "winter", "neutral"]);
 export type Season = z.infer<typeof season>;
 export const undertone = z.enum(["warm", "neutral", "cool"]);
 export type Undertone = z.infer<typeof undertone>;

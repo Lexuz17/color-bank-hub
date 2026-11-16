@@ -1,17 +1,20 @@
 import { useState } from "react";
+import { Download } from "lucide-react";
 import { toast } from "sonner";
+import { cn } from "cn";
 import { PageShell } from "@/components/layout/page-shell";
 import { PageToolbar, ShadeSwatch, LoadingState } from "@/components/shared/workspace-components";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { ApiError } from "@/components/shared/request-feedback";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CatalogSetup } from "@/components/catalog/catalog-setup";
 import { ShadeDatabase } from "@/components/shades/shade-database";
 import { useCatalog } from "@/features/data-input/hooks/catalog-queries";
 import { useCommitImport, useCreateShade, usePreviewImport } from "@/features/data-input/hooks/data-input-mutations";
+import { parseDelimitedText, parseTemplateRows, parseXlsxBuffer } from "@/features/data-input/utils/template-parser";
 import { colorMetrics } from "@color-bank-hub/contracts/color";
 import type { ShadeInput } from "@color-bank-hub/contracts/shade";
 export function DataInputPage() {
@@ -179,11 +182,21 @@ export function DataInputPage() {
           </TabsContent>
           <TabsContent value="paste">
             <div className="mt-4 w-full space-y-4 rounded-md border bg-card p-5">
-              <h2 className="text-sm font-medium">Paste from Excel</h2>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <h2 className="text-sm font-medium">Paste from Excel</h2>
+                <a
+                  href="/templates/shade-import-template.xlsx"
+                  download
+                  className={cn(buttonVariants({ variant: "outline", size: "sm" }), "gap-1.5")}
+                >
+                  <Download className="size-3.5" />
+                  Download template (.xlsx)
+                </a>
+              </div>
               {productSelect}
               <p className="text-xs text-muted-foreground">
-                Paste three tab-separated columns: SKU, shade name, HEX. All rows belong to the selected product. An optional header row is supported.
-                Maximum 500 rows.
+                Paste tab-separated columns copied from the template or 3 columns (SKU, shade name, HEX). If rows specify a known product name, it
+                will be automatically linked; otherwise, shades are assigned to the selected product above.
               </p>
               <Textarea
                 aria-label="Spreadsheet data"
@@ -194,7 +207,9 @@ export function DataInputPage() {
                   setPaste(event.target.value);
                   clearPreview();
                 }}
-                placeholder={"SKU\tShade name\tHEX\nEMINA-08\t08 Ube Mochi\t#aa6d78"}
+                placeholder={
+                  "Origin\tBrand\tProduct Name\tSub-Category Code\tShade Name\tSKU\tHEX Code\nOwn\tEmina\tJelly Stain\tTG\t08 Ube Mochi\tEM-JS-08\t#aa6d78"
+                }
               />
               {parseError && (
                 <p role="alert" className="text-xs text-destructive">
@@ -203,26 +218,35 @@ export function DataInputPage() {
               )}
               <div className="flex flex-wrap gap-2">
                 <Button
-                  disabled={!productId || !paste.trim() || busy}
+                  disabled={!paste.trim() || busy}
                   onClick={() => {
                     clearPreview();
-                    const lines = paste.split(/\r?\n/).filter((line) => line.trim());
-                    let cells = lines.map((line) => line.split("\t").map((value) => value.trim()));
-                    if (cells[0]?.[0].toLowerCase() === "sku") cells = cells.slice(1);
-                    if (!cells.length || cells.length > 500 || cells.some((row) => row.length !== 3)) {
-                      setParseError("Enter 1–500 rows with exactly three columns: SKU, shade name, HEX.");
+                    const rawRows = parseDelimitedText(paste);
+                    const parsed = parseTemplateRows(rawRows, catalog.products.data ?? [], productId);
+
+                    if (parsed.error) {
+                      setParseError(parsed.error);
                       return;
                     }
-                    const rows = cells.map(([sku, name, hex]) => ({
-                      productId,
-                      sku,
-                      name,
-                      hex,
-                    }));
+                    if (!parsed.rows.length) {
+                      setParseError("No valid rows found in pasted data.");
+                      return;
+                    }
+                    if (parsed.rows.length > 500) {
+                      setParseError("Enter 1–500 rows max.");
+                      return;
+                    }
+                    if (parsed.unassignedProductsCount > 0 && !productId) {
+                      setParseError("Select a target product above for shades that do not specify an existing product.");
+                      return;
+                    }
+
+                    const rows = parsed.rows;
                     if (new Blob([JSON.stringify({ rows })]).size > 2 * 1024 * 1024) {
                       setParseError("Import request exceeds the 2 MB limit.");
                       return;
                     }
+                    setParseError("");
                     preview.mutate(rows, {
                       onSuccess: () => setSnapshot(rows),
                     });
@@ -269,7 +293,12 @@ export function DataInputPage() {
                             <td className="border-b p-2">{row.row}</td>
                             <td className="border-b p-2">{snapshot[row.row - 1]?.sku ?? "—"}</td>
                             <td className="border-b p-2">{snapshot[row.row - 1]?.name ?? "—"}</td>
-                            <td className="border-b p-2">{snapshot[row.row - 1]?.hex ?? "—"}</td>
+                            <td className="border-b p-2">
+                              <span className="flex items-center gap-1.5">
+                                <span className="size-3 rounded-full border shrink-0" style={{ backgroundColor: snapshot[row.row - 1]?.hex }} />
+                                {snapshot[row.row - 1]?.hex ?? "—"}
+                              </span>
+                            </td>
                             <td className={`border-b p-2 ${row.valid ? "text-success-foreground" : "text-destructive"}`}>
                               {row.valid ? "Valid" : row.errors.map((error) => `${error.path ? `${error.path}: ` : ""}${error.message}`).join("; ")}
                             </td>
@@ -284,36 +313,82 @@ export function DataInputPage() {
           </TabsContent>
           <TabsContent value="upload">
             <div className="mt-4 flex min-h-64 w-full flex-col items-center justify-center gap-4 rounded-md border border-dashed bg-card p-8 text-center">
-              <h2 className="text-sm font-medium">Upload tab-separated data</h2>
+              <h2 className="text-sm font-medium">Upload import template (.xlsx, .tsv, .csv)</h2>
               <p className="max-w-lg text-xs text-muted-foreground">
-                Choose a .tsv file with SKU, shade name, and HEX columns. It will open in the import preview. XLSX parsing is not configured.
+                Upload your filled shade import Excel template (.xlsx), or a TSV/CSV file. The file will be parsed and loaded into the import preview.
               </p>
+              <a href="/templates/shade-import-template.xlsx" download className={cn(buttonVariants({ variant: "outline", size: "sm" }), "gap-1.5")}>
+                <Download className="size-3.5" />
+                Download template (.xlsx)
+              </a>
               <Input
                 className="max-w-md"
-                aria-label="Upload TSV file"
+                aria-label="Upload shade import file"
                 type="file"
-                accept=".tsv,text/tab-separated-values"
+                accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,.tsv,text/tab-separated-values,.csv,text/csv"
                 onChange={async (event) => {
                   const input = event.currentTarget;
                   const file = input.files?.[0];
                   if (!file) return;
-                  if (!file.name.toLowerCase().endsWith(".tsv")) {
-                    toast.error("Choose a .tsv file");
+
+                  const lowerName = file.name.toLowerCase();
+                  const isXlsx = lowerName.endsWith(".xlsx");
+                  const isTsv = lowerName.endsWith(".tsv") || lowerName.endsWith(".txt");
+                  const isCsv = lowerName.endsWith(".csv");
+
+                  if (!isXlsx && !isTsv && !isCsv) {
+                    toast.error("Choose an .xlsx, .tsv, or .csv file");
                     input.value = "";
                     return;
                   }
-                  if (file.size > 2 * 1024 * 1024) {
-                    toast.error("Choose a file under 2 MB");
+                  if (file.size > 5 * 1024 * 1024) {
+                    toast.error("Choose a file under 5 MB");
                     input.value = "";
                     return;
                   }
+
                   try {
-                    setPaste(await file.text());
+                    let matrix: string[][];
+                    if (isXlsx) {
+                      const buffer = await file.arrayBuffer();
+                      matrix = await parseXlsxBuffer(buffer);
+                    } else {
+                      const text = await file.text();
+                      matrix = parseDelimitedText(text);
+                    }
+
+                    if (!matrix.length) {
+                      toast.error("No data rows found in file");
+                      return;
+                    }
+
+                    // Convert to text for preview in paste tab
+                    const tsvText = matrix.map((r) => r.join("\t")).join("\n");
+                    setPaste(tsvText);
+
+                    const parsed = parseTemplateRows(matrix, catalog.products.data ?? [], productId);
+                    if (parsed.error) {
+                      toast.error(parsed.error);
+                      return;
+                    }
+
                     clearPreview();
                     setTab("paste");
-                    toast.info("File loaded. Select its product and validate before importing.");
+
+                    if (parsed.unassignedProductsCount > 0 && !productId) {
+                      setParseError("Some shades do not match an existing product in the catalog. Please select a target product above.");
+                      toast.info("Select a product above for unassigned shades, then validate.");
+                    } else if (parsed.rows.length > 500) {
+                      setParseError("Maximum 500 rows allowed per import.");
+                    } else {
+                      setParseError("");
+                      preview.mutate(parsed.rows, {
+                        onSuccess: () => setSnapshot(parsed.rows),
+                      });
+                      toast.success(`Loaded ${parsed.rows.length} shade(s) from ${file.name}`);
+                    }
                   } catch {
-                    toast.error("Unable to read file");
+                    toast.error("Unable to parse file. Make sure it is a valid Excel or text file.");
                   } finally {
                     input.value = "";
                   }
