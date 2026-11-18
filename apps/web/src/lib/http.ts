@@ -17,3 +17,11 @@ export async function post<T>(path: string, body: unknown) {
 export async function patch<T>(path: string, body: unknown) {
   return (await httpClient.patch<ApiResponse<T>>(path, body)).data.data;
 }
+
+export async function put<T>(path: string, body: unknown) {
+  return (await httpClient.put<ApiResponse<T>>(path, body)).data.data;
+}
+
+export async function del<T>(path: string) {
+  return (await httpClient.delete<ApiResponse<T>>(path)).data.data;
+}

@@ -79,7 +79,8 @@ export interface ShadeRef {
 export interface Shade extends StoredShade {
   product: Product;
   brand: Brand;
-  formatItem: FormatItem;
+  /** Shade endpoints do not send the shade count of the sub-category. */
+  formatItem: Omit<FormatItem, "count">;
   /** Detail only (GET /shades/:id). External shades this one is benchmarked to. */
   benchmarkedTo?: ShadeRef[];
   /** Detail only. Own shades that use this one as their benchmark. */

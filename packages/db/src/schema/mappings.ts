@@ -3,6 +3,19 @@ import { mappingView } from "./enums.js";
 import { productFormatItems } from "./product-formats.js";
 import { users } from "./users.js";
 
+export const mappingFolders = pgTable(
+  "mapping_folders",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ownerId: uuid("owner_id")
+      .notNull()
+      .references(() => users.id),
+    name: varchar("name").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("mapping_folders_owner_idx").on(t.ownerId)],
+);
+
 export const mappings = pgTable(
   "mappings",
   {
@@ -11,6 +24,9 @@ export const mappings = pgTable(
       .notNull()
       .references(() => users.id),
     name: varchar("name").notNull(),
+    notes: text("notes"),
+    /** null = not in a folder; deleting the folder moves the map back out */
+    folderId: uuid("folder_id").references(() => mappingFolders.id, { onDelete: "set null" }),
     /** locked sub-category */
     productFormatItemId: integer("product_format_item_id")
       .notNull()
@@ -51,6 +67,7 @@ export const mappingPins = pgTable(
   (t) => [primaryKey({ columns: [t.userId, t.mappingId] })],
 );
 
+export type MappingFolder = typeof mappingFolders.$inferSelect;
 export type Mapping = typeof mappings.$inferSelect;
 export type NewMapping = typeof mappings.$inferInsert;
 export type MappingPin = typeof mappingPins.$inferSelect;

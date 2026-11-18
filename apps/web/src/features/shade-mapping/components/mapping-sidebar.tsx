@@ -10,9 +10,9 @@ import { useShades } from "@/api/shades/shade-queries";
 import { SearchInput, ShadeSwatch } from "@/components/shared/workspace-components";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { MappingSteps } from "./mapping-steps";
+import { SearchSelect } from "./search-select";
 
 const ALL = "all";
 const noFilters = {
@@ -55,38 +55,20 @@ export function MappingSidebar(props: Props) {
       <section className="space-y-2 border-b p-3">
         <h2 className="text-[11px] font-medium text-muted-foreground">PRODUCT FORMAT</h2>
         <div className="grid grid-cols-2 gap-2">
-          <Select
+          <SearchSelect
             value={categoryId === null ? null : String(categoryId)}
+            placeholder="Category"
             disabled={locked}
-            onValueChange={(value) => value && props.onCategoryChange(Number(value))}
-          >
-            <SelectTrigger size="sm" aria-label="Category" className="w-full min-w-0">
-              <SelectValue>{() => category?.name ?? "- Category -"}</SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              {formats.map((format) => (
-                <SelectItem key={format.id} value={String(format.id)}>
-                  {format.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select
+            options={formats.map((format) => [String(format.id), format.name])}
+            onChange={(value) => props.onCategoryChange(Number(value))}
+          />
+          <SearchSelect
             value={itemId === null ? null : String(itemId)}
+            placeholder="Sub-category"
             disabled={locked || !category}
-            onValueChange={(value) => value && props.onItemChange(Number(value))}
-          >
-            <SelectTrigger size="sm" aria-label="Sub-category" className="w-full min-w-0">
-              <SelectValue>{() => item?.name ?? "- Sub-category -"}</SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              {category?.items.map((entry) => (
-                <SelectItem key={entry.id} value={String(entry.id)}>
-                  {entry.name} ({entry.count})
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            options={(category?.items ?? []).map((entry) => [String(entry.id), `${entry.name} (${entry.count})`])}
+            onChange={(value) => props.onItemChange(Number(value))}
+          />
         </div>
         <p className="flex gap-1.5 rounded border border-primary/30 bg-accent p-2 text-[10px] text-primary">
           <Lock className="mt-0.5 size-3 shrink-0" />
@@ -264,25 +246,19 @@ function FilterSelect({
   options: [value: string, label: string][];
   disabled: boolean;
 }) {
-  const current = options.find(([option]) => option === value)?.[1] ?? "All";
   return (
     <div className="flex min-w-0 items-center gap-2 text-[11px] text-muted-foreground">
       <span aria-hidden="true" className="w-12 shrink-0">
         {label}
       </span>
-      <Select value={value} disabled={disabled} onValueChange={(next) => next && onChange(next)}>
-        <SelectTrigger size="sm" aria-label={label} className="min-w-0 flex-1 text-foreground">
-          <SelectValue>{() => (disabled ? `- ${label.toLowerCase()} -` : current)}</SelectValue>
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value={ALL}>All</SelectItem>
-          {options.map(([option, text]) => (
-            <SelectItem key={option} value={option}>
-              {text}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <SearchSelect
+        value={value}
+        placeholder="All"
+        disabled={disabled}
+        className="flex-1 text-foreground"
+        options={[[ALL, "All"], ...options]}
+        onChange={onChange}
+      />
     </div>
   );
 }

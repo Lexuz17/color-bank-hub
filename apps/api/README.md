@@ -52,7 +52,15 @@ All resource paths below begin with `/api`.
 | PATCH | `/classification-configs/:id/activate` | Roll back: make an older version active and re-classify |
 | POST | `/imports/preview` | Validate rows and references without writing |
 | POST | `/imports/commit` | Revalidate and insert all rows in one transaction |
-| POST | `/mappings` | Save a shade map (name, format, shades, view, axes, display toggles) with a copy of the active cut-offs |
+| GET | `/mappings` | My Mappings library: automatic maps of own brands + the user's saved maps, filters, search, paging, sidebar counts |
+| GET | `/mappings/:id` | A saved map (owner only) with its shades |
+| POST | `/mappings` | Save a shade map (name, notes, format, shades, view, axes, display toggles) with a copy of the active cut-offs |
+| PATCH | `/mappings/:id` | Replace the content of a saved map (owner only) |
+| DELETE | `/mappings/:id` | Delete a saved map (owner only) |
+| PUT | `/mappings/:id/folder` | Move a saved map into a folder, or out with `folderId: null` |
+| POST | `/mapping-folders` | Create a folder (name unique per owner) |
+| PATCH | `/mapping-folders/:id` | Rename a folder |
+| DELETE | `/mapping-folders/:id` | Delete a folder; its maps move out of it |
 | GET, POST | `/reports` | List or submit reports |
 | GET, PATCH | `/reports/:id` | Read a report or update its status |
 | GET, POST | `/prototype-requests` | List or create Color Bank requests |
@@ -163,8 +171,8 @@ Unknown write fields are rejected. UUIDs, HEX values, URLs, pagination, percenta
 | `BAD_REQUEST` | 400 | `INVALID_JSON` |
 | `UNAUTHORIZED` | 401 | — |
 | `FORBIDDEN` | 403 | `ACCOUNT_INACTIVE`, `MISSING_PERMISSION` |
-| `NOT_FOUND` | 404 | `ROUTE_NOT_FOUND`, `SHADE_NOT_FOUND`, `REPORT_NOT_FOUND`, `REQUEST_NOT_FOUND`, `CONFIG_NOT_FOUND`, `FORMAT_NOT_FOUND` |
-| `CONFLICT` | 409 | `UNIQUE_VIOLATION`, `INVALID_TRANSITION`, `NOT_FORMULATING`, `ALREADY_ACTIVE` |
+| `NOT_FOUND` | 404 | `ROUTE_NOT_FOUND`, `SHADE_NOT_FOUND`, `REPORT_NOT_FOUND`, `REQUEST_NOT_FOUND`, `CONFIG_NOT_FOUND`, `FORMAT_NOT_FOUND`, `MAPPING_NOT_FOUND`, `FOLDER_NOT_FOUND` |
+| `CONFLICT` | 409 | `UNIQUE_VIOLATION`, `INVALID_TRANSITION`, `NOT_FORMULATING`, `ALREADY_ACTIVE`, `MAPPING_NAME_TAKEN`, `FOLDER_NAME_TAKEN` |
 | `PAYLOAD_TOO_LARGE` | 413 | — |
 | `VALIDATION_ERROR` | 422 | — (see `issues`) |
 | `BUSINESS_RULE` | 422 | `INVALID_PRODUCT`, `EXTERNAL_COMPOSITION`, `BRAND_SHADE_MISMATCH`, `RESULT_REQUIRED`, `IMPORT_INVALID`, `INVALID_REFERENCE`, `INVALID_LABEL`, `CATCH_ALL_REQUIRED`, `UNKNOWN_FAMILY`, `SUB_OUTSIDE_FAMILY`, `MAPPING_FORMAT_MISMATCH` |

@@ -41,7 +41,7 @@ export function ConfigPreview({ items, view, draft, active, dirty }: Props) {
         </div>
         <Select value={itemId === null ? null : String(itemId)} onValueChange={(value) => value && setItemId(Number(value))}>
           <SelectTrigger size="sm" className="w-44" aria-label="Sub-category to preview">
-            <SelectValue>{() => items.find((item) => item.id === itemId)?.name ?? "- Sub-category -"}</SelectValue>
+            <SelectValue>{() => items.find((item) => item.id === itemId)?.name ?? "Sub-category"}</SelectValue>
           </SelectTrigger>
           <SelectContent>
             {items.map((item) => (

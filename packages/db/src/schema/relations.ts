@@ -2,7 +2,7 @@ import { relations } from "drizzle-orm";
 import { auditLogs } from "./audit-logs.js";
 import { brands } from "./brands.js";
 import { classificationConfigVersions } from "./classification.js";
-import { mappingPins, mappings } from "./mappings.js";
+import { mappingFolders, mappingPins, mappings } from "./mappings.js";
 import { productFormatItems, productFormats } from "./product-formats.js";
 import { products } from "./products.js";
 import { prototypeRequests } from "./prototype-requests.js";
@@ -128,7 +128,13 @@ export const mappingsRelations = relations(mappings, ({ one, many }) => ({
     fields: [mappings.productFormatItemId],
     references: [productFormatItems.id],
   }),
+  folder: one(mappingFolders, { fields: [mappings.folderId], references: [mappingFolders.id] }),
   pins: many(mappingPins),
+}));
+
+export const mappingFoldersRelations = relations(mappingFolders, ({ one, many }) => ({
+  owner: one(users, { fields: [mappingFolders.ownerId], references: [users.id] }),
+  mappings: many(mappings),
 }));
 
 export const mappingPinsRelations = relations(mappingPins, ({ one }) => ({

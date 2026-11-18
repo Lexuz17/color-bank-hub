@@ -10,12 +10,14 @@ import { EmptyState, LoadingState } from "@/components/shared/workspace-componen
 import { Button } from "@/components/ui/button";
 import { useActiveConfig } from "@/api/classification-configs/classification-config-queries";
 import { useProductFormats } from "@/api/product-formats/product-format-queries";
-import { useShade } from "@/api/shades/shade-queries";
+import { useShade, useShades } from "@/api/shades/shade-queries";
 import type { AxisKey } from "@/components/shared/map-axes";
 import { MapToolbar } from "./map-toolbar";
 import { MappingSidebar } from "./mapping-sidebar";
+import { SaveMappingDialog } from "./save-mapping-dialog";
 import { type MapView, ShadeMap, type ShadeMapHandle } from "@/components/shared/shade-map";
-import { useCreateMapping } from "../hooks/mapping-mutations";
+import { useCreateMapping, useUpdateMapping } from "../hooks/mapping-mutations";
+import { useMapping } from "../hooks/mapping-queries";
 
 // Display labels for the stored lowercase enums.
 const labels = {
@@ -34,28 +36,40 @@ export function ShadeMappingPage() {
   const formats = useProductFormats();
   const [categoryId, setCategoryId] = useState<number | null>(null);
   const [itemId, setItemId] = useState<number | null>(null);
-  const [selected, setSelected] = useState(new Map<string, Shade>());
+  const [selectedShades, setSelectedShades] = useState(new Map<string, Shade>());
   const [generated, setGenerated] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
-  const detail = useShade(activeId);
-  const active = detail.data;
+  const shadeDetail = useShade(activeId);
+  const activeShade = shadeDetail.data;
 
   const [zoom, setZoom] = useState(1);
-  const stage = useRef<HTMLDivElement>(null);
-  const map = useRef<ShadeMapHandle>(null);
-  const create = useCreateMapping();
+  const stageRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<ShadeMapHandle>(null);
+  const createMapping = useCreateMapping();
+  const updateMapping = useUpdateMapping();
   const wheelZoom = useCallback((factor: number) => setZoom((current) => Math.min(maxZoom, Math.max(1, current * factor))), []);
 
-  const [name, setName] = useState("Shade Map");
-  const [view, setView] = useState<MapView>("season");
+  const [mapName, setMapName] = useState("Shade Map");
+  const [notes, setNotes] = useState("");
+  const [saveOpen, setSaveOpen] = useState(false);
+  // The saved map being edited. Without it, Save creates a new map.
+  const [mappingId, setMappingId] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<MapView>("season");
   const [axisX, setAxisX] = useState<AxisKey>("lchC");
   const [axisY, setAxisY] = useState<AxisKey>("hslL");
   const [showPhoto, setShowPhoto] = useState(false);
   const [showScale, setShowScale] = useState(false);
   const [hideProductName, setHideProductName] = useState(false);
-  const config = useActiveConfig(generated ? itemId : null);
+  const activeConfig = useActiveConfig(generated ? itemId : null);
 
-  const search = useSearch({ strict: false }) as { itemId?: number; shadeIds?: string };
+  const routeSearch = useSearch({ strict: false }) as { itemId?: number; brandId?: string; mappingId?: string };
+  const savedMapping = useMapping(routeSearch.mappingId ?? null);
+  // Opened from an automatic map of My Mappings: every shade of that brand + sub-category.
+  // shortcut: first 100 shades (API page limit), page through them when one brand + sub-category passes 100.
+  const brandShades = useShades(
+    { brandId: routeSearch.brandId, productFormatItemId: routeSearch.itemId, pageSize: 100 },
+    !!routeSearch.brandId && !!routeSearch.itemId,
+  );
 
   useEffect(() => {
     try {
@@ -63,12 +77,12 @@ export function ShadeMappingPage() {
       if (cached) {
         const parsed = JSON.parse(cached) as Shade[];
         if (Array.isArray(parsed) && parsed.length > 0) {
-          const map = new Map<string, Shade>();
-          for (const s of parsed) {
-            map.set(s.id, s);
+          const preselected = new Map<string, Shade>();
+          for (const shade of parsed) {
+            preselected.set(shade.id, shade);
           }
-          setSelected(map);
-          const initialItemId = search?.itemId ?? parsed[0]?.formatItem?.id ?? null;
+          setSelectedShades(preselected);
+          const initialItemId = routeSearch?.itemId ?? parsed[0]?.formatItem?.id ?? null;
           if (initialItemId) setItemId(initialItemId);
           if (parsed[0]?.formatItem?.productFormatId) {
             setCategoryId(parsed[0].formatItem.productFormatId);
@@ -81,10 +95,36 @@ export function ShadeMappingPage() {
       // ignore
     }
 
-    if (search?.itemId) {
-      setItemId(search.itemId);
+    if (routeSearch?.itemId) {
+      setItemId(routeSearch.itemId);
     }
-  }, [search?.itemId]);
+  }, [routeSearch?.itemId]);
+
+  useEffect(() => {
+    const mapping = savedMapping.data;
+    if (!mapping) return;
+    setMappingId(mapping.id);
+    setItemId(mapping.productFormatItemId);
+    setSelectedShades(new Map(mapping.shades.map((shade) => [shade.id, shade])));
+    setMapName(mapping.name);
+    setNotes(mapping.notes ?? "");
+    setViewMode(mapping.viewMode);
+    if (mapping.axisX && mapping.axisY) {
+      setAxisX(mapping.axisX as AxisKey);
+      setAxisY(mapping.axisY as AxisKey);
+    }
+    setShowPhoto(mapping.showPhoto);
+    setHideProductName(mapping.hideProductName);
+    setGenerated(true);
+  }, [savedMapping.data]);
+
+  useEffect(() => {
+    const first = brandShades.data?.items[0];
+    if (!brandShades.data || !first) return;
+    setSelectedShades(new Map(brandShades.data.items.map((shade) => [shade.id, shade])));
+    setMapName(`${first.brand.name} — ${first.formatItem.name}`);
+    setGenerated(true);
+  }, [brandShades.data]);
 
   useEffect(() => {
     if (itemId && formats.data && !categoryId) {
@@ -97,21 +137,41 @@ export function ShadeMappingPage() {
     }
   }, [itemId, formats.data, categoryId]);
 
-  function changeSelected(next: Map<string, Shade>) {
-    setSelected(next);
+  function changeSelectedShades(next: Map<string, Shade>) {
+    setSelectedShades(next);
     setGenerated(false);
   }
 
-  function save() {
+  function saveMapping(name: string, notes: string) {
     if (!itemId) return;
-    create.mutate({ name, productFormatItemId: itemId, shadeIds: [...selected.keys()], viewMode: view, axisX, axisY, showPhoto, hideProductName });
+    setMapName(name);
+    setNotes(notes);
+    const input = {
+      name,
+      notes,
+      productFormatItemId: itemId,
+      shadeIds: [...selectedShades.keys()],
+      viewMode,
+      axisX,
+      axisY,
+      showPhoto,
+      hideProductName,
+    };
+    if (mappingId) updateMapping.mutate({ id: mappingId, input }, { onSuccess: () => setSaveOpen(false) });
+    else
+      createMapping.mutate(input, {
+        onSuccess: (mapping) => {
+          setMappingId(mapping.id);
+          setSaveOpen(false);
+        },
+      });
   }
 
-  function download() {
+  function downloadMap() {
     try {
       const link = document.createElement("a");
-      link.href = map.current?.png() ?? "";
-      link.download = `${name || "Shade Map"}.png`;
+      link.href = mapRef.current?.png() ?? "";
+      link.download = `${mapName || "Shade Map"}.png`;
       link.click();
     } catch {
       // A canvas that drew an image from another server cannot be exported.
@@ -119,12 +179,14 @@ export function ShadeMappingPage() {
     }
   }
 
-  function reset() {
+  function resetMap() {
     setZoom(1);
     setCategoryId(null);
     setItemId(null);
-    changeSelected(new Map());
+    changeSelectedShades(new Map());
     setActiveId(null);
+    setMappingId(null);
+    setNotes("");
   }
 
   return (
@@ -132,31 +194,31 @@ export function ShadeMappingPage() {
       section="Shade Mapping"
       wideSidebar
       detailPanel={
-        detail.isFetching ? (
+        shadeDetail.isFetching ? (
           <LoadingState label="Loading shade profile…" />
-        ) : detail.isError ? (
+        ) : shadeDetail.isError ? (
           <div className="p-3">
-            <ApiError error={detail.error} retry={() => void detail.refetch()} />
+            <ApiError error={shadeDetail.error} retry={() => void shadeDetail.refetch()} />
           </div>
-        ) : active ? (
+        ) : activeShade ? (
           <ProductDetailPanel
-            key={active.id}
+            key={activeShade.id}
             shade={{
-              brand: active.brand.name,
-              product: active.product.name,
-              shade: active.name,
-              hex: active.hex,
-              undertone: active.undertone ? labels[active.undertone] : null,
-              season: active.season ? labels[active.season] : null,
-              format: active.formatItem.name,
+              brand: activeShade.brand.name,
+              product: activeShade.product.name,
+              shade: activeShade.name,
+              hex: activeShade.hex,
+              undertone: activeShade.undertone ? labels[activeShade.undertone] : null,
+              season: activeShade.season ? labels[activeShade.season] : null,
+              format: activeShade.formatItem.name,
               tags: [],
-              benchmarkedTo: active.benchmarkedTo?.map((ref) => `${ref.brand} ${ref.product} ${ref.name}`),
-              benchmarkFor: active.benchmarkFor?.map((ref) => `${ref.brand} ${ref.product} ${ref.name}`),
-              ingredients: active.ingredientsInci ?? undefined,
-              mayContain: active.mayContain ?? undefined,
-              composition: active.composition ?? undefined,
-              lipPhotoUrl: active.lipPhotoUrl ?? undefined,
-              swatchPhotoUrl: active.swatchPhotoUrl ?? undefined,
+              benchmarkedTo: activeShade.benchmarkedTo?.map((ref) => `${ref.brand} ${ref.product} ${ref.name}`),
+              benchmarkFor: activeShade.benchmarkFor?.map((ref) => `${ref.brand} ${ref.product} ${ref.name}`),
+              ingredients: activeShade.ingredientsInci ?? undefined,
+              mayContain: activeShade.mayContain ?? undefined,
+              composition: activeShade.composition ?? undefined,
+              lipPhotoUrl: activeShade.lipPhotoUrl ?? undefined,
+              swatchPhotoUrl: activeShade.swatchPhotoUrl ?? undefined,
             }}
           />
         ) : (
@@ -184,8 +246,8 @@ export function ShadeMappingPage() {
               setItemId(null);
             }}
             onItemChange={setItemId}
-            selected={selected}
-            onSelectedChange={changeSelected}
+            selected={selectedShades}
+            onSelectedChange={changeSelectedShades}
             generated={generated}
             onGenerate={() => setGenerated(true)}
             activeId={activeId}
@@ -196,16 +258,16 @@ export function ShadeMappingPage() {
     >
       <div className="flex h-full flex-col">
         <MapToolbar
-          name={name}
-          onNameChange={setName}
-          view={view}
-          onViewChange={setView}
+          name={mapName}
+          onNameChange={setMapName}
+          view={viewMode}
+          onViewChange={setViewMode}
           axisX={axisX}
           axisY={axisY}
           onAxesChange={(x, y) => {
             setAxisX(x);
             setAxisY(y);
-            setView("custom");
+            setViewMode("custom");
           }}
           showPhoto={showPhoto}
           onShowPhotoChange={setShowPhoto}
@@ -213,19 +275,19 @@ export function ShadeMappingPage() {
           onShowScaleChange={setShowScale}
         />
         {/* Full screen shows the map and its button bar. */}
-        <div ref={stage} className="flex min-h-0 flex-1 flex-col bg-card">
+        <div ref={stageRef} className="flex min-h-0 flex-1 flex-col bg-card">
           <div className="relative min-h-140 flex-1">
             {generated ? (
               <div className="absolute inset-0">
                 <ShadeMap
-                  ref={map}
+                  ref={mapRef}
                   zoom={zoom}
                   onWheelZoom={wheelZoom}
-                  shades={[...selected.values()]}
-                  view={view}
+                  shades={[...selectedShades.values()]}
+                  view={viewMode}
                   axisX={axisX}
                   axisY={axisY}
-                  config={config.data}
+                  config={activeConfig.data}
                   showPhoto={showPhoto}
                   showScale={showScale}
                   hideProductName={hideProductName}
@@ -240,17 +302,22 @@ export function ShadeMappingPage() {
             )}
           </div>
           <div className="flex shrink-0 items-center justify-end gap-3 overflow-x-auto border-t px-5 py-2 text-[11px] text-destructive">
-            {generated && config.isError && <p className="mr-auto">region cut-offs unavailable</p>}
+            {generated && activeConfig.isError && <p className="mr-auto">region cut-offs unavailable</p>}
             <div className="flex shrink-0 gap-1.5">
               <Button size="sm" variant="outline" onClick={() => setHideProductName(!hideProductName)}>
                 {hideProductName ? <Eye /> : <EyeOff />}
                 {hideProductName ? "show product name" : "hide product name"}
               </Button>
-              <Button size="sm" variant="outline" onClick={reset}>
+              <Button size="sm" variant="outline" onClick={resetMap}>
                 <RotateCcw />
                 reset
               </Button>
-              <Button size="sm" variant="outline" disabled={!generated || create.isPending} onClick={save}>
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={!generated || createMapping.isPending || updateMapping.isPending}
+                onClick={() => setSaveOpen(true)}
+              >
                 <Save />
                 save
               </Button>
@@ -276,11 +343,11 @@ export function ShadeMappingPage() {
                 size="sm"
                 variant="outline"
                 aria-label="Full screen"
-                onClick={() => void (document.fullscreenElement ? document.exitFullscreen() : stage.current?.requestFullscreen())}
+                onClick={() => void (document.fullscreenElement ? document.exitFullscreen() : stageRef.current?.requestFullscreen())}
               >
                 <Maximize />
               </Button>
-              <Button size="sm" variant="outline" disabled={!generated} onClick={download}>
+              <Button size="sm" variant="outline" disabled={!generated} onClick={downloadMap}>
                 <Download />
                 download
               </Button>
@@ -288,6 +355,15 @@ export function ShadeMappingPage() {
           </div>
         </div>
       </div>
+      {saveOpen && (
+        <SaveMappingDialog
+          initialName={mapName}
+          initialNotes={notes}
+          saving={createMapping.isPending || updateMapping.isPending}
+          onSave={saveMapping}
+          onClose={() => setSaveOpen(false)}
+        />
+      )}
     </PageShell>
   );
 }

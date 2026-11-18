@@ -25,7 +25,7 @@ export function ClassificationConfigPage() {
           <p className="text-xs font-medium">1. Product format</p>
           <Select value={formatId === null ? null : String(formatId)} onValueChange={(value) => value && setFormatId(Number(value))}>
             <SelectTrigger className="w-56" aria-label="Product format">
-              <SelectValue>{() => format?.name ?? "- Product format -"}</SelectValue>
+              <SelectValue>{() => format?.name ?? "Product format"}</SelectValue>
             </SelectTrigger>
             <SelectContent>
               {formats.data?.map((entry) => (

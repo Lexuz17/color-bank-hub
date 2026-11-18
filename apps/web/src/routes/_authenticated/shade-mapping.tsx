@@ -3,7 +3,8 @@ import { ShadeMappingPage } from "@/features/shade-mapping/components/shade-mapp
 
 export interface ShadeMappingSearch {
   itemId?: number;
-  shadeIds?: string;
+  brandId?: string;
+  mappingId?: string;
 }
 
 export const Route = createFileRoute("/_authenticated/shade-mapping")({
@@ -12,7 +13,8 @@ export const Route = createFileRoute("/_authenticated/shade-mapping")({
   }),
   validateSearch: (search: Record<string, unknown>): ShadeMappingSearch => ({
     itemId: search.itemId ? Number(search.itemId) : undefined,
-    shadeIds: typeof search.shadeIds === "string" ? search.shadeIds : undefined,
+    brandId: typeof search.brandId === "string" ? search.brandId : undefined,
+    mappingId: typeof search.mappingId === "string" ? search.mappingId : undefined,
   }),
   component: ShadeMappingPage,
 });

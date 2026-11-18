@@ -31,6 +31,10 @@ export async function listShades(query: ShadeQuery) {
   return { ...page, items: await Promise.all(page.items.map(withPhotoUrls)) };
 }
 
+export async function listShadesByIds(ids: string[]) {
+  return Promise.all((await repository.listShadesByIds(ids)).map(withPhotoUrls));
+}
+
 export async function findShade(id: string, role: Role) {
   return withPhotoUrls(visibleShade(await repository.findShade(id), role));
 }

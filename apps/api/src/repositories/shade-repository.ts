@@ -69,6 +69,20 @@ export async function listShades(query: ShadeQuery) {
     },
   };
 }
+export async function listShadesByIds(ids: string[]) {
+  const rows = await db
+    .select(view)
+    .from(shades)
+    .innerJoin(products, eq(products.id, shades.productId))
+    .innerJoin(brands, eq(brands.id, products.brandId))
+    .innerJoin(productFormatItems, eq(productFormatItems.id, products.productFormatItemId))
+    .where(inArray(shades.id, ids));
+  return rows.map(({ shade, product, brand, formatItem }) => {
+    const { composition: _composition, ...publicShade } = shade;
+    return { ...publicShade, product, brand, formatItem };
+  });
+}
+
 export async function findShade(id: string) {
   const [row] = await db
     .select(view)
