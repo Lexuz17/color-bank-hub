@@ -256,7 +256,7 @@ export async function setupApiMocks(page: Page, { authenticated = true }: { auth
                   image: null,
                   createdAt: "2026-01-01T00:00:00.000Z",
                   updatedAt: "2026-01-01T00:00:00.000Z",
-                  role: "website_admin",
+                  role: "admin",
                   status: "active",
                 },
               }

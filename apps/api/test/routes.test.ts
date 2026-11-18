@@ -9,7 +9,7 @@ const userWith = (role: Role) => ({
   name: `Test ${role}`,
   role,
 });
-const app = createApp({ resolveUser: async () => userWith("website_admin") });
+const app = createApp({ resolveUser: async () => userWith("admin") });
 async function request(path: string, method = "GET", body?: unknown, target = app) {
   return target.request(path, {
     method,
@@ -107,7 +107,7 @@ test("write routes enforce the permission matrix before touching the database", 
 test("/api/me returns the signed-in user", async () => {
   const response = await request("/api/me");
   assert.equal(response.status, 200);
-  assert.equal((await response.json()).data.role, "website_admin");
+  assert.equal((await response.json()).data.role, "admin");
 });
 test("uploads validate type, size and per-purpose permission", async () => {
   const tsi = createApp({ resolveUser: async () => userWith("tsi") });

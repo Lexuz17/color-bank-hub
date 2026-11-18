@@ -84,12 +84,8 @@
           "name": "role_requests_user_id_users_id_fk",
           "tableFrom": "role_requests",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -97,12 +93,8 @@
           "name": "role_requests_decided_by_users_id_fk",
           "tableFrom": "role_requests",
           "tableTo": "users",
-          "columnsFrom": [
-            "decided_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["decided_by"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -192,9 +184,7 @@
         "users_email_unique": {
           "name": "users_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},
@@ -308,12 +298,8 @@
           "name": "accounts_user_id_users_id_fk",
           "tableFrom": "accounts",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -401,12 +387,8 @@
           "name": "sessions_user_id_users_id_fk",
           "tableFrom": "sessions",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -416,9 +398,7 @@
         "sessions_token_unique": {
           "name": "sessions_token_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "token"
-          ]
+          "columns": ["token"]
         }
       },
       "policies": {},
@@ -601,12 +581,8 @@
           "name": "audit_logs_actor_id_users_id_fk",
           "tableFrom": "audit_logs",
           "tableTo": "users",
-          "columnsFrom": [
-            "actor_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["actor_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -656,9 +632,7 @@
         "brands_name_unique": {
           "name": "brands_name_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "name"
-          ]
+          "columns": ["name"]
         }
       },
       "policies": {},
@@ -746,12 +720,8 @@
           "name": "product_format_items_product_format_id_product_formats_id_fk",
           "tableFrom": "product_format_items",
           "tableTo": "product_formats",
-          "columnsFrom": [
-            "product_format_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["product_format_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -761,9 +731,7 @@
         "product_format_items_code_unique": {
           "name": "product_format_items_code_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "code"
-          ]
+          "columns": ["code"]
         }
       },
       "policies": {},
@@ -812,9 +780,7 @@
         "product_formats_name_unique": {
           "name": "product_formats_name_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "name"
-          ]
+          "columns": ["name"]
         }
       },
       "policies": {},
@@ -908,12 +874,8 @@
           "name": "products_brand_id_brands_id_fk",
           "tableFrom": "products",
           "tableTo": "brands",
-          "columnsFrom": [
-            "brand_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["brand_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -921,12 +883,8 @@
           "name": "products_product_format_item_id_product_format_items_id_fk",
           "tableFrom": "products",
           "tableTo": "product_format_items",
-          "columnsFrom": [
-            "product_format_item_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["product_format_item_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1037,12 +995,8 @@
           "name": "classification_config_versions_product_format_id_product_formats_id_fk",
           "tableFrom": "classification_config_versions",
           "tableTo": "product_formats",
-          "columnsFrom": [
-            "product_format_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["product_format_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1050,12 +1004,8 @@
           "name": "classification_config_versions_created_by_users_id_fk",
           "tableFrom": "classification_config_versions",
           "tableTo": "users",
-          "columnsFrom": [
-            "created_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -1112,12 +1062,8 @@
           "name": "shade_benchmarks_shade_id_shades_id_fk",
           "tableFrom": "shade_benchmarks",
           "tableTo": "shades",
-          "columnsFrom": [
-            "shade_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["shade_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1125,12 +1071,8 @@
           "name": "shade_benchmarks_benchmark_shade_id_shades_id_fk",
           "tableFrom": "shade_benchmarks",
           "tableTo": "shades",
-          "columnsFrom": [
-            "benchmark_shade_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["benchmark_shade_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1138,10 +1080,7 @@
       "compositePrimaryKeys": {
         "shade_benchmarks_shade_id_benchmark_shade_id_pk": {
           "name": "shade_benchmarks_shade_id_benchmark_shade_id_pk",
-          "columns": [
-            "shade_id",
-            "benchmark_shade_id"
-          ]
+          "columns": ["shade_id", "benchmark_shade_id"]
         }
       },
       "uniqueConstraints": {},
@@ -1493,12 +1432,8 @@
           "name": "shades_product_id_products_id_fk",
           "tableFrom": "shades",
           "tableTo": "products",
-          "columnsFrom": [
-            "product_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["product_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1506,12 +1441,8 @@
           "name": "shades_created_by_users_id_fk",
           "tableFrom": "shades",
           "tableTo": "users",
-          "columnsFrom": [
-            "created_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -1521,9 +1452,7 @@
         "shades_sku_unique": {
           "name": "shades_sku_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "sku"
-          ]
+          "columns": ["sku"]
         }
       },
       "policies": {},
@@ -1583,12 +1512,8 @@
           "name": "mapping_folders_owner_id_users_id_fk",
           "tableFrom": "mapping_folders",
           "tableTo": "users",
-          "columnsFrom": [
-            "owner_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["owner_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1629,12 +1554,8 @@
           "name": "mapping_pins_user_id_users_id_fk",
           "tableFrom": "mapping_pins",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1642,12 +1563,8 @@
           "name": "mapping_pins_mapping_id_mappings_id_fk",
           "tableFrom": "mapping_pins",
           "tableTo": "mappings",
-          "columnsFrom": [
-            "mapping_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["mapping_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1655,10 +1572,7 @@
       "compositePrimaryKeys": {
         "mapping_pins_user_id_mapping_id_pk": {
           "name": "mapping_pins_user_id_mapping_id_pk",
-          "columns": [
-            "user_id",
-            "mapping_id"
-          ]
+          "columns": ["user_id", "mapping_id"]
         }
       },
       "uniqueConstraints": {},
@@ -1818,12 +1732,8 @@
           "name": "mappings_owner_id_users_id_fk",
           "tableFrom": "mappings",
           "tableTo": "users",
-          "columnsFrom": [
-            "owner_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["owner_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1831,12 +1741,8 @@
           "name": "mappings_folder_id_mapping_folders_id_fk",
           "tableFrom": "mappings",
           "tableTo": "mapping_folders",
-          "columnsFrom": [
-            "folder_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["folder_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -1844,12 +1750,8 @@
           "name": "mappings_product_format_item_id_product_format_items_id_fk",
           "tableFrom": "mappings",
           "tableTo": "product_format_items",
-          "columnsFrom": [
-            "product_format_item_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["product_format_item_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2126,12 +2028,8 @@
           "name": "prototype_requests_requester_id_users_id_fk",
           "tableFrom": "prototype_requests",
           "tableTo": "users",
-          "columnsFrom": [
-            "requester_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["requester_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2139,12 +2037,8 @@
           "name": "prototype_requests_brand_id_brands_id_fk",
           "tableFrom": "prototype_requests",
           "tableTo": "brands",
-          "columnsFrom": [
-            "brand_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["brand_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2152,12 +2046,8 @@
           "name": "prototype_requests_product_id_products_id_fk",
           "tableFrom": "prototype_requests",
           "tableTo": "products",
-          "columnsFrom": [
-            "product_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["product_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2165,12 +2055,8 @@
           "name": "prototype_requests_shade_id_shades_id_fk",
           "tableFrom": "prototype_requests",
           "tableTo": "shades",
-          "columnsFrom": [
-            "shade_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["shade_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2178,12 +2064,8 @@
           "name": "prototype_requests_product_format_item_id_product_format_items_id_fk",
           "tableFrom": "prototype_requests",
           "tableTo": "product_format_items",
-          "columnsFrom": [
-            "product_format_item_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["product_format_item_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2191,12 +2073,8 @@
           "name": "prototype_requests_decided_by_users_id_fk",
           "tableFrom": "prototype_requests",
           "tableTo": "users",
-          "columnsFrom": [
-            "decided_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["decided_by"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -2204,12 +2082,8 @@
           "name": "prototype_requests_result_shade_id_shades_id_fk",
           "tableFrom": "prototype_requests",
           "tableTo": "shades",
-          "columnsFrom": [
-            "result_shade_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["result_shade_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2334,12 +2208,8 @@
           "name": "reports_reporter_id_users_id_fk",
           "tableFrom": "reports",
           "tableTo": "users",
-          "columnsFrom": [
-            "reporter_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["reporter_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2347,12 +2217,8 @@
           "name": "reports_brand_id_brands_id_fk",
           "tableFrom": "reports",
           "tableTo": "brands",
-          "columnsFrom": [
-            "brand_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["brand_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2360,12 +2226,8 @@
           "name": "reports_shade_id_shades_id_fk",
           "tableFrom": "reports",
           "tableTo": "shades",
-          "columnsFrom": [
-            "shade_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["shade_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2373,12 +2235,8 @@
           "name": "reports_resolved_by_users_id_fk",
           "tableFrom": "reports",
           "tableTo": "users",
-          "columnsFrom": [
-            "resolved_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["resolved_by"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -2394,96 +2252,52 @@
     "public.approval_status": {
       "name": "approval_status",
       "schema": "public",
-      "values": [
-        "pending",
-        "approved",
-        "declined"
-      ]
+      "values": ["pending", "approved", "declined"]
     },
     "public.mapping_view": {
       "name": "mapping_view",
       "schema": "public",
-      "values": [
-        "season",
-        "color_family",
-        "hue_circle",
-        "custom"
-      ]
+      "values": ["season", "color_family", "hue_circle", "custom"]
     },
     "public.priority_level": {
       "name": "priority_level",
       "schema": "public",
-      "values": [
-        "low",
-        "medium",
-        "high"
-      ]
+      "values": ["low", "medium", "high"]
     },
     "public.report_status": {
       "name": "report_status",
       "schema": "public",
-      "values": [
-        "pending",
-        "resolved"
-      ]
+      "values": ["pending", "resolved"]
     },
     "public.request_status": {
       "name": "request_status",
       "schema": "public",
-      "values": [
-        "pending",
-        "approved",
-        "formulating",
-        "completed",
-        "declined"
-      ]
+      "values": ["pending", "approved", "formulating", "completed", "declined"]
     },
     "public.request_type": {
       "name": "request_type",
       "schema": "public",
-      "values": [
-        "benchmark_matching",
-        "gap_filling"
-      ]
+      "values": ["benchmark_matching", "gap_filling"]
     },
     "public.season": {
       "name": "season",
       "schema": "public",
-      "values": [
-        "spring",
-        "summer",
-        "autumn",
-        "winter",
-        "neutral"
-      ]
+      "values": ["spring", "summer", "autumn", "winter", "neutral"]
     },
     "public.undertone": {
       "name": "undertone",
       "schema": "public",
-      "values": [
-        "warm",
-        "neutral",
-        "cool"
-      ]
+      "values": ["warm", "neutral", "cool"]
     },
     "public.user_role": {
       "name": "user_role",
       "schema": "public",
-      "values": [
-        "website_admin",
-        "rnd",
-        "pid",
-        "tsi"
-      ]
+      "values": ["website_admin", "rnd", "pid", "tsi"]
     },
     "public.user_status": {
       "name": "user_status",
       "schema": "public",
-      "values": [
-        "pending",
-        "active",
-        "disabled"
-      ]
+      "values": ["pending", "active", "disabled"]
     }
   },
   "schemas": {},

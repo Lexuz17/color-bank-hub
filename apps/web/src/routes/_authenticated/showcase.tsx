@@ -118,7 +118,7 @@ function ShowcasePage() {
   const activeSection = null;
   const [format, setFormat] = useState("Lip Tint Gloss");
   const [search, setSearch] = useState("");
-  const [role, setRole] = useState<Role>("website_admin");
+  const [role, setRole] = useState<Role>("admin");
   const [profileOpen, setProfileOpen] = useState(false);
   const [workflow, setWorkflow] = useState(2);
   const [dialogOpen, setDialogOpen] = useState(false);

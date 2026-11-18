@@ -6,7 +6,7 @@ import { accounts, users } from "../schema/index.js";
 export const DEV_PASSWORD = "devpassword123"; // Keep in sync with the development login form.
 
 const devUsers = [
-  { name: "Dev Admin", email: "admin@dev.local", role: "website_admin" },
+  { name: "Dev Admin", email: "admin@dev.local", role: "admin" },
   { name: "Dev RnD", email: "rnd@dev.local", role: "rnd" },
   { name: "Dev PID", email: "pid@dev.local", role: "pid" },
   { name: "Dev TSI", email: "tsi@dev.local", role: "tsi" },

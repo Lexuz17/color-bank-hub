@@ -8,7 +8,7 @@ export interface UserAccount {
   name: string;
   email: string;
   image: string | null;
-  role: Role | null; // until a Website Admin assigns one.
+  role: Role | null; // until a Admin assigns one.
   status: UserStatus;
   lastLoginAt: string | null;
   createdAt: string;

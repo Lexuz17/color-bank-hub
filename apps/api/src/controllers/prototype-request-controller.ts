@@ -10,11 +10,11 @@
 // Who does what:
 // | Action                                   | Roles                    | Permission (contracts/rbac.ts)       |
 // | New request                              | R&D, PID, TSI, Admin     | prototype:create (add "rnd": the brief's form lists RnD) |
-// | See every request (All, Pending review,  | Website Admin, R&D       | prototype:process                    |
+// | See every request (All, Pending review,  | Admin, R&D       | prototype:process                    |
 // |   Formulating)                           |                          |                                      |
 // | See own requests only ("My requests")    | everyone else            | -                                    |
-// | Approve / Decline (pending)              | Website Admin only       | prototype:decide (new: ["website_admin"]) |
-// | Start formulating, formulate, complete   | Website Admin, R&D       | prototype:process                    |
+// | Approve / Decline (pending)              | Admin only       | prototype:decide (new: ["admin"]) |
+// | Start formulating, formulate, complete   | Admin, R&D       | prototype:process                    |
 //
 // Rules (service):
 // - List and :id: can(role, "prototype:process") -> all; else requester_id = user. Someone else's id -> NOT_FOUND

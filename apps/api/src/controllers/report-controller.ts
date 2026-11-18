@@ -7,7 +7,7 @@
 // PATCH  /api/reports/:id  updateReport  report:resolve  report.reportPatch   write reports, audit_logs
 //
 // Visibility (service, not built yet: today every user gets every report):
-// - can(role, "report:resolve") (Website Admin, R&D) -> all reports.
+// - can(role, "report:resolve") (Admin, R&D) -> all reports.
 // - Others -> only their own (reporter_id = user). Applies to list and :id; someone else's id -> NOT_FOUND REPORT_NOT_FOUND.
 // Home pending count: GET /api/reports?status=pending&pageSize=1 and read pagination.total (same visibility rule).
 // Gap vs brief: no "issue type" column (Wrong color mapping, Incorrect shade data, Missing SKU). Add an enum column in packages/db first.

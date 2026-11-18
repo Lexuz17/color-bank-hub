@@ -73,7 +73,7 @@ test("sRGB color conversions match primary colors and D65 neutral references", (
   assert.equal(colorMetrics("#0000ff").hslH, 240);
 });
 test("permission matrix grants each capability only to its roles", () => {
-  assert.equal(can("website_admin", "user:manage"), true);
+  assert.equal(can("admin", "user:manage"), true);
   assert.equal(can("rnd", "user:manage"), false);
   assert.equal(can("rnd", "catalog:write"), true);
   assert.equal(can("tsi", "catalog:write"), false);

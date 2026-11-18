@@ -141,14 +141,14 @@ Who can do what is defined once in `packages/contracts/src/rbac.ts`; the API enf
 
 | Permission | Routes | Roles |
 | --- | --- | --- |
-| `catalog:write` | `POST /brands`, `/product-formats`, `/products`, `/shades`, `/imports/*`; `PATCH /shades/:id` | website_admin, rnd |
-| `shade:viewComposition` | Field-level: `composition` in shade responses | website_admin, rnd, tsi |
+| `catalog:write` | `POST /brands`, `/product-formats`, `/products`, `/shades`, `/imports/*`; `PATCH /shades/:id` | admin, rnd |
+| `shade:viewComposition` | Field-level: `composition` in shade responses | admin, rnd, tsi |
 | `report:create` | `POST /reports` | all roles |
-| `report:resolve` | `PATCH /reports/:id` | website_admin, rnd |
-| `prototype:create` | `POST /prototype-requests` | website_admin, pid, tsi |
-| `prototype:process` | `PATCH /prototype-requests/:id/status`, `/formulation` | website_admin, rnd |
-| `user:manage` | Web user-management screen (no API yet) | website_admin |
-| `classification:manage` | `GET`, `POST /classification-configs`; `PATCH /classification-configs/:id/activate` | website_admin |
+| `report:resolve` | `PATCH /reports/:id` | admin, rnd |
+| `prototype:create` | `POST /prototype-requests` | admin, pid, tsi |
+| `prototype:process` | `PATCH /prototype-requests/:id/status`, `/formulation` | admin, rnd |
+| `user:manage` | Web user-management screen (no API yet) | admin |
+| `classification:manage` | `GET`, `POST /classification-configs`; `PATCH /classification-configs/:id/activate` | admin |
 
 To change access, edit the role list in `rbac.ts`. To add a capability, add a `<resource>:<action>` key there and reference it with `requirePermission()` and `useCan()`.
 

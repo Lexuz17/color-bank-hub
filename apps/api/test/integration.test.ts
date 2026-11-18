@@ -36,7 +36,7 @@ test("PostgreSQL API integration: catalog, imports, reports and prototype lifecy
     .values({
       name: `${prefix} actor`,
       email: `${prefix.toLowerCase()}@test.invalid`,
-      role: "website_admin",
+      role: "admin",
       status: "active",
       emailVerified: true,
     })
@@ -47,7 +47,7 @@ test("PostgreSQL API integration: catalog, imports, reports and prototype lifecy
       id: actor.id,
       email: actor.email,
       name: actor.name,
-      role: "website_admin",
+      role: "admin",
     }),
   });
   async function call(path: string, method = "GET", body?: unknown, status = 200) {
