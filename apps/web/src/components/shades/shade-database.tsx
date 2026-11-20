@@ -7,7 +7,6 @@ import type { Season } from "@color-bank-hub/contracts/common";
 import type { Shade, ShadeSort } from "@color-bank-hub/contracts/shade";
 import { SearchInput, ShadeSwatch, StatusBadge, LoadingState } from "@/components/shared/workspace-components";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -23,19 +22,11 @@ const toneLabels = { warm: "Warm", neutral: "Neutral", cool: "Cool" } as const;
 export function ShadeDatabase({
   productFormatId = null,
   productFormatItemId = null,
-  onInspect,
   editable = false,
-  selected,
-  onToggleSelect,
-  onSelectAll,
 }: {
   productFormatId?: number | null;
   productFormatItemId?: number | null;
-  onInspect?: (id: string) => void;
   editable?: boolean;
-  selected?: Map<string, Shade>;
-  onToggleSelect?: (shade: Shade, checked: boolean) => void;
-  onSelectAll?: (shades: Shade[], checked: boolean) => void;
 }) {
   const [search, setSearch] = useState("");
   const [brandId, setBrandId] = useState("");
@@ -121,15 +112,6 @@ export function ShadeDatabase({
             <Table>
               <TableHeader>
                 <TableRow>
-                  {onToggleSelect && (
-                    <TableHead className="w-10 px-3 text-center">
-                      <Checkbox
-                        checked={rows.data.items.length > 0 && rows.data.items.every((shade) => selected?.has(shade.id))}
-                        onCheckedChange={(checked) => onSelectAll?.(rows.data.items, !!checked)}
-                        aria-label="Select all shades on this page"
-                      />
-                    </TableHead>
-                  )}
                   <TableHead>Brand</TableHead>
                   <TableHead>Product name</TableHead>
                   <TableHead aria-sort={sort === "name" ? (direction === "asc" ? "ascending" : "descending") : "none"}>
@@ -152,36 +134,15 @@ export function ShadeDatabase({
               </TableHeader>
               <TableBody>
                 {rows.data.items.map((shade) => {
-                  const isSelected = selected?.has(shade.id) ?? false;
                   return (
-                    <TableRow
-                      key={shade.id}
-                      aria-selected={isSelected}
-                      className={isSelected ? "bg-[#faf0ee] hover:bg-[#f6e6e2] dark:bg-rose-950/20" : undefined}
-                    >
-                      {onToggleSelect && (
-                        <TableCell className="w-10 px-3 text-center">
-                          <Checkbox
-                            checked={isSelected}
-                            onCheckedChange={(checked) => onToggleSelect(shade, !!checked)}
-                            aria-label={`Select ${shade.name}`}
-                          />
-                        </TableCell>
-                      )}
+                    <TableRow key={shade.id}>
                       <TableCell>{shade.brand.name}</TableCell>
                       <TableCell>{shade.product.name}</TableCell>
                       <TableCell>
-                        {onInspect ? (
-                          <Button variant="ghost" size="sm" className="h-auto px-0" onClick={() => onInspect(shade.id)}>
-                            <ShadeSwatch hex={shade.hex} />
-                            {shade.name}
-                          </Button>
-                        ) : (
-                          <span className="flex items-center gap-2">
-                            <ShadeSwatch hex={shade.hex} />
-                            {shade.name}
-                          </span>
-                        )}
+                        <span className="flex items-center gap-2">
+                          <ShadeSwatch hex={shade.hex} />
+                          {shade.name}
+                        </span>
                       </TableCell>
                       <TableCell>{shade.sku}</TableCell>
                       <TableCell>
@@ -220,7 +181,7 @@ export function ShadeDatabase({
                 })}
                 {rows.data.items.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={(editable ? 8 : 7) + (onToggleSelect ? 1 : 0)} className="h-32 text-center text-muted-foreground">
+                    <TableCell colSpan={editable ? 8 : 7} className="h-32 text-center text-muted-foreground">
                       No shades match these filters.
                     </TableCell>
                   </TableRow>

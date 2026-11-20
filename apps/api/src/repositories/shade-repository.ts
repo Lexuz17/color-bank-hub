@@ -20,6 +20,7 @@ export async function listShades(query: ShadeQuery) {
     query.productId ? eq(products.id, query.productId) : undefined,
     query.productFormatId ? eq(productFormatItems.productFormatId, query.productFormatId) : undefined,
     query.productFormatItemId ? eq(products.productFormatItemId, query.productFormatItemId) : undefined,
+    query.productFormatItemIds ? inArray(products.productFormatItemId, query.productFormatItemIds) : undefined,
     query.season ? eq(shades.season, query.season) : undefined,
     query.undertone ? eq(shades.undertone, query.undertone) : undefined,
     query.colorFamily ? eq(shades.colorFamily, query.colorFamily) : undefined,
@@ -57,10 +58,18 @@ export async function listShades(query: ShadeQuery) {
       .innerJoin(productFormatItems, eq(productFormatItems.id, products.productFormatItemId))
       .where(where),
   ]);
+  const links = await listBenchmarkLinks(rows.map(({ shade }) => shade.id));
   return {
     items: rows.map(({ shade, product, brand, formatItem }) => {
       const { composition: _composition, ...publicShade } = shade;
-      return { ...publicShade, product, brand, formatItem };
+      return {
+        ...publicShade,
+        product,
+        brand,
+        formatItem,
+        benchmarkedTo: links.benchmarkedTo.get(shade.id) ?? [],
+        benchmarkFor: links.benchmarkFor.get(shade.id) ?? [],
+      };
     }),
     pagination: {
       page: query.page,
@@ -107,6 +116,39 @@ export async function findShade(id: string) {
     benchmarkFor,
   };
 }
+
+async function listBenchmarkLinks(ids: string[]) {
+  const benchmarkedTo = new Map<string, { id: string; name: string; product: string; brand: string }[]>();
+  const benchmarkFor = new Map<string, { id: string; name: string; product: string; brand: string }[]>();
+  if (ids.length === 0) return { benchmarkedTo, benchmarkFor };
+  const rows = await db
+    .select({
+      shadeId: shadeBenchmarks.shadeId,
+      benchmarkShadeId: shadeBenchmarks.benchmarkShadeId,
+    })
+    .from(shadeBenchmarks)
+    .where(or(inArray(shadeBenchmarks.shadeId, ids), inArray(shadeBenchmarks.benchmarkShadeId, ids)));
+  const linkedIds = [...new Set(rows.flatMap((row) => [row.shadeId, row.benchmarkShadeId]))];
+  const linked = linkedIds.length
+    ? await db
+        .select({ id: shades.id, name: shades.name, product: products.name, brand: brands.name })
+        .from(shades)
+        .innerJoin(products, eq(products.id, shades.productId))
+        .innerJoin(brands, eq(brands.id, products.brandId))
+        .where(inArray(shades.id, linkedIds))
+    : [];
+  const byId = new Map(linked.map((shade) => [shade.id, shade]));
+  const add = (map: typeof benchmarkedTo, key: string, otherId: string) => {
+    const other = byId.get(otherId);
+    if (other) map.set(key, [...(map.get(key) ?? []), other]);
+  };
+  for (const { shadeId, benchmarkShadeId } of rows) {
+    if (ids.includes(shadeId)) add(benchmarkedTo, shadeId, benchmarkShadeId);
+    if (ids.includes(benchmarkShadeId)) add(benchmarkFor, benchmarkShadeId, shadeId);
+  }
+  return { benchmarkedTo, benchmarkFor };
+}
+
 function linkedShades(own: AnyPgColumn, other: AnyPgColumn, id: string) {
   return db
     .select({
@@ -122,6 +164,7 @@ function linkedShades(own: AnyPgColumn, other: AnyPgColumn, id: string) {
     .where(eq(own, id))
     .orderBy(asc(brands.name), asc(shades.name));
 }
+
 async function insertShade(tx: Executor, input: ShadeInput) {
   const [product] = await tx
     .select({ isOwn: brands.isOwn })
@@ -136,6 +179,7 @@ async function insertShade(tx: Executor, input: ShadeInput) {
     .returning();
   return row;
 }
+
 export async function createShades(rows: ShadeInput[]) {
   return db.transaction(async (tx) => {
     const result = [];
@@ -143,6 +187,7 @@ export async function createShades(rows: ShadeInput[]) {
     return result;
   });
 }
+
 export async function updateShade(id: string, input: Partial<Omit<ShadeInput, "productId">>) {
   return db.transaction(async (tx) => {
     const [existing] = await tx.select().from(shades).where(eq(shades.id, id)).for("update");

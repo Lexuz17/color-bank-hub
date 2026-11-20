@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { type Page, name, pagination, uuid } from "./common.js";
+import { type Page, name, pagination, splitList, uuid } from "./common.js";
 import type { Shade } from "./shade.js";
 
 export const mappingView = z.enum(["season", "color_family", "hue_circle", "custom"]);
@@ -31,9 +31,6 @@ export const mappingFolderInput = z.object({ name }).strict();
 export type MappingFolderInput = z.infer<typeof mappingFolderInput>;
 
 export const mappingFolderMove = z.object({ folderId: uuid.nullable() }).strict();
-
-// A list in the query string arrives as "a,b,c": make it an array, then check each item.
-const splitList = (value: unknown) => (typeof value === "string" ? value.split(",") : value);
 
 export const mappingQuery = pagination.extend({
   library: z.enum(["all", "mine"]).default("all"),

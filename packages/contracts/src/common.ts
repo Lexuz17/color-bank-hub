@@ -2,6 +2,8 @@ import { z } from "zod";
 
 export const uuid = z.uuid();
 export const name = z.string().trim().min(1).max(255);
+
+export const splitList = (value: unknown) => (typeof value === "string" ? value.split(",") : value);
 export const hex = z
   .string()
   .regex(/^#[\da-fA-F]{6}$/, "Use a six-digit HEX code")

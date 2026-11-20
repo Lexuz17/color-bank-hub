@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { Brand, FormatItem, Product } from "./catalog.js";
-import { type CompositionItem, type Season, type Undertone, composition, hex, name, pagination, season, undertone, uuid } from "./common.js";
+import { type CompositionItem, type Season, type Undertone, composition, hex, name, pagination, season, splitList, undertone, uuid } from "./common.js";
 
 export const shadeInput = z
   .object({
@@ -32,6 +32,7 @@ export const shadeQuery = pagination.extend({
   productId: uuid.optional(),
   productFormatId: z.coerce.number().int().positive().optional(),
   productFormatItemId: z.coerce.number().int().positive().optional(),
+  productFormatItemIds: z.preprocess(splitList, z.array(z.coerce.number().int().positive()).max(100)).optional(),
   undertone: undertone.optional(),
   season: season.optional(),
   colorFamily: name.optional(),
@@ -59,6 +60,12 @@ export interface StoredShade {
   hslH: number | null;
   hslS: number | null;
   hslL: number | null;
+  labL: number | null;
+  labA: number | null;
+  labB: number | null;
+  lchL: number | null;
+  lchC: number | null;
+  lchH: number | null;
   lipPhotoKey: string | null;
   swatchPhotoKey: string | null;
   /** Signed URLs for display, null without a photo. */
@@ -81,8 +88,8 @@ export interface Shade extends StoredShade {
   brand: Brand;
   /** Shade endpoints do not send the shade count of the sub-category. */
   formatItem: Omit<FormatItem, "count">;
-  /** Detail only (GET /shades/:id). External shades this one is benchmarked to. */
+  /** External shades this one is benchmarked to. */
   benchmarkedTo?: ShadeRef[];
-  /** Detail only. Own shades that use this one as their benchmark. */
+  /** Own shades that use this one as their benchmark. */
   benchmarkFor?: ShadeRef[];
 }
