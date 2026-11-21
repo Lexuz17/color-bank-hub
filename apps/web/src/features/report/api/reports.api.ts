@@ -1,10 +1,14 @@
-import type { Report, ReportInput, ReportStatus } from "@color-bank-hub/contracts/report";
-import { patch, post } from "@/lib/http";
+import type { CreateReportRequest, ReportDetailResponse, ReportResponse, UpdateReportRequest } from "@color-bank-hub/contracts/report";
+import { get, patch, post } from "@/lib/http";
 
-export function createReport(body: ReportInput) {
-  return post<Report>("/reports", body);
+export function createReport(request: CreateReportRequest) {
+  return post<ReportResponse>("/reports", request);
 }
 
-export function updateReport(id: string, status: ReportStatus) {
-  return patch<Report>(`/reports/${id}`, { status });
+export function updateReport(id: string, request: UpdateReportRequest) {
+  return patch<ReportResponse>(`/reports/${id}`, request);
+}
+
+export function getReport(id: string, signal?: AbortSignal) {
+  return get<ReportDetailResponse>(`/reports/${id}`, undefined, signal);
 }

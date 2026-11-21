@@ -93,7 +93,6 @@ test("write routes enforce the permission matrix before touching the database", 
     [tsi, "POST", "/api/brands"],
     [tsi, "PATCH", `/api/shades/${id}`],
     [tsi, "POST", "/api/imports/commit"],
-    [pid, "PATCH", `/api/reports/${id}`],
     [pid, "PATCH", `/api/prototype-requests/${id}/status`],
     [pid, "PATCH", `/api/prototype-requests/${id}/formulation`],
   ] as const) {
@@ -127,7 +126,7 @@ test("uploads validate type, size and per-purpose permission", async () => {
   const ok = await upload({});
   assert.equal(ok.status, 201);
   const { data } = await ok.json();
-  assert.match(data.key, /^shade-photo\/[0-9a-f-]{36}\.webp$/);
+  assert.match(data.key, /^shade-photo\/\d{4}\/\d{2}\/[0-9a-f-]{36}\.webp$/);
 
   assert.equal((await upload({ contentType: "application/pdf" })).status, 422); // wrong file type
   assert.equal((await upload({ size: 6 * 1024 ** 2 })).status, 422); // too large

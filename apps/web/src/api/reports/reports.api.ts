@@ -1,7 +1,6 @@
-import type { Page } from "@color-bank-hub/contracts/common";
-import type { Report, ReportParams } from "@color-bank-hub/contracts/report";
+import type { ListReportsParams, ReportListResponse } from "@color-bank-hub/contracts/report";
 import { get } from "@/lib/http";
 
-export function getReports(params: ReportParams, signal?: AbortSignal) {
-  return get<Page<Report>>("/reports", params, signal);
+export function getReports(params: ListReportsParams, signal?: AbortSignal) {
+  return get<ReportListResponse>("/reports", params, signal);
 }

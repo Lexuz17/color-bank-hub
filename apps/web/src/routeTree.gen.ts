@@ -17,10 +17,11 @@ import { Route as AuthenticatedColorBankRouteImport } from './routes/_authentica
 import { Route as AuthenticatedColorDatabaseRouteImport } from './routes/_authenticated/color-database'
 import { Route as AuthenticatedDataInputRouteImport } from './routes/_authenticated/data-input'
 import { Route as AuthenticatedMyMappingsRouteImport } from './routes/_authenticated/my-mappings'
-import { Route as AuthenticatedReportRouteImport } from './routes/_authenticated/report'
 import { Route as AuthenticatedShadeMappingRouteImport } from './routes/_authenticated/shade-mapping'
 import { Route as AuthenticatedShowcaseRouteImport } from './routes/_authenticated/showcase'
 import { Route as AuthenticatedUserManagementRouteImport } from './routes/_authenticated/user-management'
+import { Route as AuthenticatedReportIndexRouteImport } from './routes/_authenticated/report.index'
+import { Route as AuthenticatedReportReportIdRouteImport } from './routes/_authenticated/report.$reportId'
 
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
   id: '/_authenticated',
@@ -63,11 +64,6 @@ const AuthenticatedMyMappingsRoute = AuthenticatedMyMappingsRouteImport.update({
   path: '/my-mappings',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AuthenticatedReportRoute = AuthenticatedReportRouteImport.update({
-  id: '/report',
-  path: '/report',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
 const AuthenticatedShadeMappingRoute =
   AuthenticatedShadeMappingRouteImport.update({
     id: '/shade-mapping',
@@ -85,6 +81,18 @@ const AuthenticatedUserManagementRoute =
     path: '/user-management',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedReportIndexRoute =
+  AuthenticatedReportIndexRouteImport.update({
+    id: '/report/',
+    path: '/report/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedReportReportIdRoute =
+  AuthenticatedReportReportIdRouteImport.update({
+    id: '/report/$reportId',
+    path: '/report/$reportId',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
@@ -94,10 +102,11 @@ export interface FileRoutesByFullPath {
   '/color-database': typeof AuthenticatedColorDatabaseRoute
   '/data-input': typeof AuthenticatedDataInputRoute
   '/my-mappings': typeof AuthenticatedMyMappingsRoute
-  '/report': typeof AuthenticatedReportRoute
   '/shade-mapping': typeof AuthenticatedShadeMappingRoute
   '/showcase': typeof AuthenticatedShowcaseRoute
   '/user-management': typeof AuthenticatedUserManagementRoute
+  '/report/$reportId': typeof AuthenticatedReportReportIdRoute
+  '/report/': typeof AuthenticatedReportIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
@@ -106,11 +115,12 @@ export interface FileRoutesByTo {
   '/color-database': typeof AuthenticatedColorDatabaseRoute
   '/data-input': typeof AuthenticatedDataInputRoute
   '/my-mappings': typeof AuthenticatedMyMappingsRoute
-  '/report': typeof AuthenticatedReportRoute
   '/shade-mapping': typeof AuthenticatedShadeMappingRoute
   '/showcase': typeof AuthenticatedShowcaseRoute
   '/user-management': typeof AuthenticatedUserManagementRoute
   '/': typeof AuthenticatedIndexRoute
+  '/report/$reportId': typeof AuthenticatedReportReportIdRoute
+  '/report': typeof AuthenticatedReportIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -121,11 +131,12 @@ export interface FileRoutesById {
   '/_authenticated/color-database': typeof AuthenticatedColorDatabaseRoute
   '/_authenticated/data-input': typeof AuthenticatedDataInputRoute
   '/_authenticated/my-mappings': typeof AuthenticatedMyMappingsRoute
-  '/_authenticated/report': typeof AuthenticatedReportRoute
   '/_authenticated/shade-mapping': typeof AuthenticatedShadeMappingRoute
   '/_authenticated/showcase': typeof AuthenticatedShowcaseRoute
   '/_authenticated/user-management': typeof AuthenticatedUserManagementRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/report/$reportId': typeof AuthenticatedReportReportIdRoute
+  '/_authenticated/report/': typeof AuthenticatedReportIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -137,10 +148,11 @@ export interface FileRouteTypes {
     | '/color-database'
     | '/data-input'
     | '/my-mappings'
-    | '/report'
     | '/shade-mapping'
     | '/showcase'
     | '/user-management'
+    | '/report/$reportId'
+    | '/report/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
@@ -149,11 +161,12 @@ export interface FileRouteTypes {
     | '/color-database'
     | '/data-input'
     | '/my-mappings'
-    | '/report'
     | '/shade-mapping'
     | '/showcase'
     | '/user-management'
     | '/'
+    | '/report/$reportId'
+    | '/report'
   id:
     | '__root__'
     | '/_authenticated'
@@ -163,11 +176,12 @@ export interface FileRouteTypes {
     | '/_authenticated/color-database'
     | '/_authenticated/data-input'
     | '/_authenticated/my-mappings'
-    | '/_authenticated/report'
     | '/_authenticated/shade-mapping'
     | '/_authenticated/showcase'
     | '/_authenticated/user-management'
     | '/_authenticated/'
+    | '/_authenticated/report/$reportId'
+    | '/_authenticated/report/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -233,13 +247,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMyMappingsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/report': {
-      id: '/_authenticated/report'
-      path: '/report'
-      fullPath: '/report'
-      preLoaderRoute: typeof AuthenticatedReportRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
     '/_authenticated/shade-mapping': {
       id: '/_authenticated/shade-mapping'
       path: '/shade-mapping'
@@ -261,6 +268,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedUserManagementRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/report/': {
+      id: '/_authenticated/report/'
+      path: '/report'
+      fullPath: '/report/'
+      preLoaderRoute: typeof AuthenticatedReportIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/report/$reportId': {
+      id: '/_authenticated/report/$reportId'
+      path: '/report/$reportId'
+      fullPath: '/report/$reportId'
+      preLoaderRoute: typeof AuthenticatedReportReportIdRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
   }
 }
 
@@ -270,11 +291,12 @@ interface AuthenticatedRouteChildren {
   AuthenticatedColorDatabaseRoute: typeof AuthenticatedColorDatabaseRoute
   AuthenticatedDataInputRoute: typeof AuthenticatedDataInputRoute
   AuthenticatedMyMappingsRoute: typeof AuthenticatedMyMappingsRoute
-  AuthenticatedReportRoute: typeof AuthenticatedReportRoute
   AuthenticatedShadeMappingRoute: typeof AuthenticatedShadeMappingRoute
   AuthenticatedShowcaseRoute: typeof AuthenticatedShowcaseRoute
   AuthenticatedUserManagementRoute: typeof AuthenticatedUserManagementRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedReportReportIdRoute: typeof AuthenticatedReportReportIdRoute
+  AuthenticatedReportIndexRoute: typeof AuthenticatedReportIndexRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
@@ -284,11 +306,12 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedColorDatabaseRoute: AuthenticatedColorDatabaseRoute,
   AuthenticatedDataInputRoute: AuthenticatedDataInputRoute,
   AuthenticatedMyMappingsRoute: AuthenticatedMyMappingsRoute,
-  AuthenticatedReportRoute: AuthenticatedReportRoute,
   AuthenticatedShadeMappingRoute: AuthenticatedShadeMappingRoute,
   AuthenticatedShowcaseRoute: AuthenticatedShowcaseRoute,
   AuthenticatedUserManagementRoute: AuthenticatedUserManagementRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedReportReportIdRoute: AuthenticatedReportReportIdRoute,
+  AuthenticatedReportIndexRoute: AuthenticatedReportIndexRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(

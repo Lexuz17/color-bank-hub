@@ -4,7 +4,7 @@ import { colorMetrics } from "@color-bank-hub/contracts/color";
 import { composition } from "@color-bank-hub/contracts/common";
 import { can } from "@color-bank-hub/contracts/rbac";
 import { transitionInput } from "@color-bank-hub/contracts/prototype";
-import { reportInput } from "@color-bank-hub/contracts/report";
+import { createReportRequest } from "@color-bank-hub/contracts/report";
 import { shadeInput, shadePatch, shadeQuery } from "@color-bank-hub/contracts/shade";
 const shade = {
   productId: "818565f8-bc7f-4c65-bd17-331c2e1d3986",
@@ -39,7 +39,7 @@ test("pagination, patch, composition, and report inputs reject invalid values", 
     ]).success,
     false,
   );
-  assert.equal(reportInput.safeParse({ description: "short" }).success, false);
+  assert.equal(createReportRequest.safeParse({ description: "short" }).success, false);
 });
 test("declining a request requires a reason", () => {
   assert.equal(transitionInput.safeParse({ status: "declined" }).success, false);

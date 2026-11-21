@@ -23,6 +23,8 @@ const schema = z
     S3_KEY_PREFIX: z.string().min(1),
     S3_ACCESS_KEY_ID: z.string().min(1),
     S3_SECRET_ACCESS_KEY: z.string().min(1),
+    // Days the reporter has to confirm or reopen a resolved report before it closes by itself.
+    REPORT_REVIEW_DAYS: z.coerce.number().int().min(1).max(30).default(3),
   })
   .refine((value) => !value.GOOGLE_CLIENT_ID === !value.GOOGLE_CLIENT_SECRET, {
     message: "GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET must be configured together",
@@ -45,6 +47,7 @@ export const env = {
   allowedEmailDomain: value.ALLOWED_EMAIL_DOMAIN,
   googleClientId: value.GOOGLE_CLIENT_ID || undefined,
   googleClientSecret: value.GOOGLE_CLIENT_SECRET || undefined,
+  reportReviewDays: value.REPORT_REVIEW_DAYS,
   s3: {
     endpoint: value.S3_ENDPOINT,
     region: value.S3_REGION,

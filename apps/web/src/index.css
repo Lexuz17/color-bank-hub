@@ -15,6 +15,11 @@
   html {
     @apply font-sans;
   }
+  /* Tailwind v4 resets buttons to the default arrow. */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
 }
 
 @theme inline {

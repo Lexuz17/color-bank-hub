@@ -1,10 +1,11 @@
 import { Combobox, ComboboxContent, ComboboxEmpty, ComboboxInput, ComboboxItem, ComboboxList } from "@/components/ui/combobox";
+import { ShadeSwatch } from "@/components/shared/workspace-components";
 import { cn } from "@/lib/utils";
 
 interface Props {
   value: string | null;
   onChange: (value: string) => void;
-  options: [value: string, label: string][];
+  options: [value: string, label: string, color?: string][];
   placeholder: string;
   disabled?: boolean;
   className?: string;
@@ -13,6 +14,7 @@ interface Props {
 // A select you can type into, so a long list does not have to be scrolled.
 export function SearchSelect({ value, onChange, options, placeholder, disabled, className }: Props) {
   const labelOf = (option: string) => options.find(([key]) => key === option)?.[1] ?? "";
+  const colorOf = (option: string) => options.find(([key]) => key === option)?.[2];
 
   return (
     <Combobox
@@ -28,6 +30,7 @@ export function SearchSelect({ value, onChange, options, placeholder, disabled, 
         <ComboboxList>
           {(option: string) => (
             <ComboboxItem key={option} value={option} className="text-xs">
+              {colorOf(option) && <ShadeSwatch hex={colorOf(option) ?? ""} className="size-3.5" />}
               {labelOf(option)}
             </ComboboxItem>
           )}

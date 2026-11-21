@@ -80,7 +80,7 @@ Lists for shades, reports, and requests return:
 
 Other successful responses return `{data: ...}`. Creation returns HTTP 201. Lists accept `page` and `pageSize` (1–100).
 
-Shade filters: `search` (shade/SKU/product/brand), `brandId`, `productFormatItemId`, `season`, `undertone`, `colorFamily`. Sorting: `sort=name|sku|createdAt|hue|lightness`, `direction=asc|desc`. Report filters: `status=pending|resolved`. Request filters: `status` and `productFormatItemId`. Enum values are lowercase.
+Shade filters: `search` (shade/SKU/product/brand), `brandId`, `productFormatItemId`, `season`, `undertone`, `colorFamily`. Sorting: `sort=name|sku|createdAt|hue|lightness`, `direction=asc|desc`. Report filters: `status=pending|resolved|closed|rejected`. Request filters: `status` and `productFormatItemId`. Enum values are lowercase.
 
 ## Data input
 
@@ -103,7 +103,7 @@ HEX calculates RGB, HSL, HSV, CIE Lab, and LCh (sRGB, D65). Season, undertone, a
 
 ## Reports
 
-Submit `{description, brandId?, shadeId?, attachmentUrls?, priority?}`. Description requires 10–20,000 characters; priority is `low|medium|high`. If both brand and shade are supplied, their relationship is validated. Update with `{status: "resolved"}` or `{status: "pending"}`. Resolution records its timestamp and the signed-in user; reopening clears those fields. Status changes are audited.
+Submit `{issueType, description, brandId?, productId?, shadeId?, attachmentKeys?, priority?}`. `issueType` is `wrong_color_mapping|incorrect_shade_data|missing_sku|other`; the first two need a shade, `missing_sku` needs a product, `other` (also system bugs) needs nothing. Brand, product and shade must agree; product and brand are filled from the shade. Description requires 10–20,000 characters; priority is `low|medium|high`. `attachmentKeys` (max 5) are `report-attachment` upload keys (images or PDF); responses return signed links. Admin and R&D see every report, other roles only their own. Update with `{status, note?}` (note max 1,000 characters). Moves: `pending→resolved` and `pending→rejected` (admin/R&D; a rejection needs a note), `resolved→closed` (the reporter confirms), `resolved→pending` (the reporter with a note, or admin/R&D), `rejected→pending` (admin/R&D). Other moves return `CONFLICT` `INVALID_TRANSITION`. A resolved report closes by itself after `REPORT_REVIEW_DAYS` (default 3) days (`autoClosed: true`); this happens when reports are read, not on a timer. Responses include `reviewDeadline` while resolved. `GET /reports/:id` also returns `events`: the status history (`from`, `to`, `note`, `autoClosed`, `actor`, `createdAt`), oldest first. Status changes are audited.
 
 ## Color Bank workflow
 
@@ -144,7 +144,7 @@ Who can do what is defined once in `packages/contracts/src/rbac.ts`; the API enf
 | `catalog:write` | `POST /brands`, `/product-formats`, `/products`, `/shades`, `/imports/*`; `PATCH /shades/:id` | admin, rnd |
 | `shade:viewComposition` | Field-level: `composition` in shade responses | admin, rnd, tsi |
 | `report:create` | `POST /reports` | all roles |
-| `report:resolve` | `PATCH /reports/:id` | admin, rnd |
+| `report:resolve` | Resolve, reject and reopen rejected reports (`PATCH /reports/:id`); see all reports | admin, rnd |
 | `prototype:create` | `POST /prototype-requests` | admin, pid, tsi |
 | `prototype:process` | `PATCH /prototype-requests/:id/status`, `/formulation` | admin, rnd |
 | `user:manage` | Web user-management screen (no API yet) | admin |
@@ -171,11 +171,11 @@ Unknown write fields are rejected. UUIDs, HEX values, URLs, pagination, percenta
 | `BAD_REQUEST` | 400 | `INVALID_JSON` |
 | `UNAUTHORIZED` | 401 | — |
 | `FORBIDDEN` | 403 | `ACCOUNT_INACTIVE`, `MISSING_PERMISSION` |
-| `NOT_FOUND` | 404 | `ROUTE_NOT_FOUND`, `SHADE_NOT_FOUND`, `REPORT_NOT_FOUND`, `REQUEST_NOT_FOUND`, `CONFIG_NOT_FOUND`, `FORMAT_NOT_FOUND`, `MAPPING_NOT_FOUND`, `FOLDER_NOT_FOUND` |
+| `NOT_FOUND` | 404 | `ROUTE_NOT_FOUND`, `SHADE_NOT_FOUND`, `PRODUCT_NOT_FOUND`, `BRAND_NOT_FOUND`, `REPORT_NOT_FOUND`, `REQUEST_NOT_FOUND`, `CONFIG_NOT_FOUND`, `FORMAT_NOT_FOUND`, `MAPPING_NOT_FOUND`, `FOLDER_NOT_FOUND` |
 | `CONFLICT` | 409 | `UNIQUE_VIOLATION`, `INVALID_TRANSITION`, `NOT_FORMULATING`, `ALREADY_ACTIVE`, `MAPPING_NAME_TAKEN`, `FOLDER_NAME_TAKEN` |
 | `PAYLOAD_TOO_LARGE` | 413 | — |
 | `VALIDATION_ERROR` | 422 | — (see `issues`) |
-| `BUSINESS_RULE` | 422 | `INVALID_PRODUCT`, `EXTERNAL_COMPOSITION`, `BRAND_SHADE_MISMATCH`, `RESULT_REQUIRED`, `IMPORT_INVALID`, `INVALID_REFERENCE`, `INVALID_LABEL`, `CATCH_ALL_REQUIRED`, `UNKNOWN_FAMILY`, `SUB_OUTSIDE_FAMILY`, `MAPPING_FORMAT_MISMATCH` |
+| `BUSINESS_RULE` | 422 | `INVALID_PRODUCT`, `EXTERNAL_COMPOSITION`, `BRAND_SHADE_MISMATCH`, `PRODUCT_SHADE_MISMATCH`, `BRAND_PRODUCT_MISMATCH`, `REPORT_SHADE_REQUIRED`, `REPORT_PRODUCT_REQUIRED`, `NOTE_REQUIRED`, `RESULT_REQUIRED`, `IMPORT_INVALID`, `INVALID_REFERENCE`, `INVALID_LABEL`, `CATCH_ALL_REQUIRED`, `UNKNOWN_FAMILY`, `SUB_OUTSIDE_FAMILY`, `MAPPING_FORMAT_MISMATCH` |
 | `INTERNAL` | 500 | — |
 
 Throw with `fail(code, message, reason?)` from `src/core/errors.ts`. Internal SQL and credentials are not sent to clients.

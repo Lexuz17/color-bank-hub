@@ -3,7 +3,7 @@ import { ShadeSwatch, StatusBadge } from "@/components/shared/workspace-componen
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { LinkedShades } from "./linked-shades";
+import { LinkedShades } from "@/components/shared/linked-shades";
 
 interface Props {
   shades: Shade[];

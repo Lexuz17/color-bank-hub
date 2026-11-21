@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { MappingSteps } from "./mapping-steps";
-import { SearchSelect } from "./search-select";
+import { SearchSelect } from "@/components/shared/search-select";
 
 const ALL = "all";
 const noFilters = {

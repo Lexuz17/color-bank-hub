@@ -12,4 +12,5 @@ export const mappingView = pgEnum("mapping_view", ["season", "color_family", "hu
 export const priorityLevel = pgEnum("priority_level", ["low", "medium", "high"]);
 export const requestType = pgEnum("request_type", ["benchmark_matching", "gap_filling"]);
 export const requestStatus = pgEnum("request_status", ["pending", "approved", "formulating", "completed", "declined"]);
-export const reportStatus = pgEnum("report_status", ["pending", "resolved"]);
+export const reportStatus = pgEnum("report_status", ["pending", "resolved", "closed", "rejected"]);
+export const reportIssueType = pgEnum("report_issue_type", ["wrong_color_mapping", "incorrect_shade_data", "missing_sku", "other"]);

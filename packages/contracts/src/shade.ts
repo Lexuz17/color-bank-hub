@@ -1,6 +1,18 @@
 import { z } from "zod";
 import type { Brand, FormatItem, Product } from "./catalog.js";
-import { type CompositionItem, type Season, type Undertone, composition, hex, name, pagination, season, splitList, undertone, uuid } from "./common.js";
+import {
+  type CompositionItem,
+  type Season,
+  type Undertone,
+  composition,
+  hex,
+  name,
+  pagination,
+  season,
+  splitList,
+  undertone,
+  uuid,
+} from "./common.js";
 
 export const shadeInput = z
   .object({
