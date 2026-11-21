@@ -47,8 +47,13 @@ export function HomePage() {
 
   return (
     <PageShell section="Home">
-      <section className="relative overflow-hidden border-b bg-secondary/35 px-6 py-12 lg:px-12">
-        <div aria-hidden="true" className="pointer-events-none absolute -top-20 -right-20 size-80 rounded-full border-[40px] border-secondary/50" />
+      <section className="relative overflow-hidden border-b bg-muted px-6 py-12 lg:px-12">
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+          <div className="absolute -top-16 -right-24 size-[34rem] rounded-full bg-border/60" />
+          <div className="absolute -bottom-40 -left-24 size-96 rounded-full bg-border/40" />
+          <div className="absolute -right-48 -bottom-[28rem] size-[44rem] rounded-full border border-white" />
+          <div className="absolute right-0 bottom-0 h-40 w-64 bg-[radial-gradient(circle,var(--color-muted-foreground)_1.5px,transparent_1.5px)] bg-[length:18px_18px] opacity-25 [mask-image:linear-gradient(to_top_left,black,transparent)]" />
+        </div>
         <div className="relative max-w-xl">
           <p className="mb-3 flex items-center gap-3 text-xs text-muted-foreground">
             welcome to <span aria-hidden="true" className="h-px w-16 bg-border" />
