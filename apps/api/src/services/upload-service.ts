@@ -9,7 +9,10 @@ export async function createUpload({ purpose, contentType, size }: UploadRequest
   if (!can(role, uploadRules[purpose].permission)) fail("FORBIDDEN", "You do not have permission for this action", "MISSING_PERMISSION");
   const problem = checkUpload(purpose, { contentType, size });
   if (problem) fail("VALIDATION_ERROR", problem, "FILE_REJECTED");
-  const key = `${purpose}/${randomUUID()}.${contentType.split("/")[1]}`;
+
+  // <purpose>/<yyyy>/<mm>/<uuid>.<ext>: the month folder keeps listings small (UTC, only for the folder name).
+  const month = new Date().toISOString().slice(0, 7).replace("-", "/");
+  const key = `${purpose}/${month}/${randomUUID()}.${contentType.split("/")[1]}`;
   return { key, uploadUrl: await presignUpload(key, contentType, size) };
 }
 

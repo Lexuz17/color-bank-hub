@@ -20,6 +20,7 @@ const schema = z
     S3_ENDPOINT: z.url(),
     S3_REGION: z.string().min(1).default("auto"),
     S3_BUCKET: z.string().min(1),
+    S3_KEY_PREFIX: z.string().min(1),
     S3_ACCESS_KEY_ID: z.string().min(1),
     S3_SECRET_ACCESS_KEY: z.string().min(1),
   })
@@ -48,6 +49,7 @@ export const env = {
     endpoint: value.S3_ENDPOINT,
     region: value.S3_REGION,
     bucket: value.S3_BUCKET,
+    keyPrefix: value.S3_KEY_PREFIX,
     accessKeyId: value.S3_ACCESS_KEY_ID,
     secretAccessKey: value.S3_SECRET_ACCESS_KEY,
   },
