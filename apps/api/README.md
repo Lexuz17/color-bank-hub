@@ -37,21 +37,17 @@ All resource paths below begin with `/api`.
 | --- | --- | --- |
 | GET | `/me` | The signed-in user (`id`, `email`, `name`, `role`) |
 | GET | `/brands` | Brand lookup |
-| POST | `/brands` | Create a brand; `{name, isOwn?}` |
 | GET | `/product-formats` | Categories with nested format items and actual shade counts |
-| POST | `/product-formats` | Add a format/subcategory using `{name, items:[{name, code}]}` |
 | GET | `/products` | Product lookup, capped at 1,000 records |
-| POST | `/products` | Create a product with brand, format, and ingredients |
 | GET | `/shades` | Search, filter, sort, and paginate shades |
 | GET | `/shades/:id` | Shade, product, brand, and format details |
-| POST | `/shades` | Manual shade entry with computed color metrics |
 | PATCH | `/shades/:id` | Update supported shade fields; recompute metrics when HEX changes |
 | GET | `/classification-configs/active?productFormatItemId=` | Active color cut-offs (season, family, Munsell hue…) of the sub-category's category |
 | GET | `/classification-configs?productFormatId=` | Cut-off versions of a category, newest first |
 | POST | `/classification-configs` | Save cut-offs as a new active version and re-classify the category's shades; `{productFormatId, config, note?}` |
 | PATCH | `/classification-configs/:id/activate` | Roll back: make an older version active and re-classify |
-| POST | `/imports/preview` | Validate rows and references without writing |
-| POST | `/imports/commit` | Revalidate and insert all rows in one transaction |
+| POST | `/data-input/preview` | Check rows of names (brand, product, shade…) and return every error and warning per row with the computed labels; writes nothing |
+| POST | `/data-input/commit` | Check again, then create the missing brands and products, the classified shades and their benchmarks in one transaction; `IMPORT_INVALID` when any row fails |
 | GET | `/mappings` | My Mappings library: automatic maps of own brands + the user's saved maps, filters, search, paging, sidebar counts |
 | GET | `/mappings/:id` | A saved map (owner only) with its shades |
 | POST | `/mappings` | Save a shade map (name, notes, format, shades, view, axes, display toggles) with a copy of the active cut-offs |
@@ -141,7 +137,7 @@ Who can do what is defined once in `packages/contracts/src/rbac.ts`; the API enf
 
 | Permission | Routes | Roles |
 | --- | --- | --- |
-| `catalog:write` | `POST /brands`, `/product-formats`, `/products`, `/shades`, `/imports/*`; `PATCH /shades/:id` | admin, rnd |
+| `catalog:write` | `POST /data-input/*`; `PATCH /shades/:id` | admin, rnd |
 | `shade:viewComposition` | Field-level: `composition` in shade responses | admin, rnd, tsi |
 | `report:create` | `POST /reports` | all roles |
 | `report:resolve` | Resolve, reject and reopen rejected reports (`PATCH /reports/:id`); see all reports | admin, rnd |
@@ -175,7 +171,7 @@ Unknown write fields are rejected. UUIDs, HEX values, URLs, pagination, percenta
 | `CONFLICT` | 409 | `UNIQUE_VIOLATION`, `INVALID_TRANSITION`, `NOT_FORMULATING`, `ALREADY_ACTIVE`, `MAPPING_NAME_TAKEN`, `FOLDER_NAME_TAKEN` |
 | `PAYLOAD_TOO_LARGE` | 413 | — |
 | `VALIDATION_ERROR` | 422 | — (see `issues`) |
-| `BUSINESS_RULE` | 422 | `INVALID_PRODUCT`, `EXTERNAL_COMPOSITION`, `BRAND_SHADE_MISMATCH`, `PRODUCT_SHADE_MISMATCH`, `BRAND_PRODUCT_MISMATCH`, `REPORT_SHADE_REQUIRED`, `REPORT_PRODUCT_REQUIRED`, `NOTE_REQUIRED`, `RESULT_REQUIRED`, `IMPORT_INVALID`, `INVALID_REFERENCE`, `INVALID_LABEL`, `CATCH_ALL_REQUIRED`, `UNKNOWN_FAMILY`, `SUB_OUTSIDE_FAMILY`, `MAPPING_FORMAT_MISMATCH` |
+| `BUSINESS_RULE` | 422 | `BRAND_SHADE_MISMATCH`, `PRODUCT_SHADE_MISMATCH`, `BRAND_PRODUCT_MISMATCH`, `REPORT_SHADE_REQUIRED`, `REPORT_PRODUCT_REQUIRED`, `NOTE_REQUIRED`, `RESULT_REQUIRED`, `IMPORT_INVALID`, `INVALID_REFERENCE`, `INVALID_LABEL`, `CATCH_ALL_REQUIRED`, `UNKNOWN_FAMILY`, `SUB_OUTSIDE_FAMILY`, `MAPPING_FORMAT_MISMATCH` |
 | `INTERNAL` | 500 | — |
 
 Throw with `fail(code, message, reason?)` from `src/core/errors.ts`. Internal SQL and credentials are not sent to clients.

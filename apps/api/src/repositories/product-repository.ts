@@ -1,5 +1,5 @@
-import { asc, eq } from "drizzle-orm";
-import { db } from "#api/lib/db.js";
+import { and, asc, eq, inArray, sql } from "drizzle-orm";
+import { db, type Executor } from "#api/lib/db.js";
 import { products } from "@color-bank-hub/db";
 
 export async function listProducts() {
@@ -11,7 +11,23 @@ export async function findProduct(id: string) {
   return row;
 }
 
-export async function createProduct(input: typeof products.$inferInsert) {
-  const [row] = await db.insert(products).values(input).returning();
+export async function createProduct(tx: Executor, input: typeof products.$inferInsert) {
+  const [row] = await tx.insert(products).values(input).returning();
   return row;
+}
+
+export async function findProductsByNames(brandIds: string[], names: string[]) {
+  if (!brandIds.length) return [];
+  return db
+    .select({ id: products.id, brandId: products.brandId, name: products.name, productFormatItemId: products.productFormatItemId })
+    .from(products)
+    .where(
+      and(
+        inArray(products.brandId, brandIds),
+        inArray(
+          sql`lower(${products.name})`,
+          names.map((value) => value.toLowerCase()),
+        ),
+      ),
+    );
 }

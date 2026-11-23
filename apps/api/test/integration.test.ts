@@ -65,128 +65,92 @@ test("PostgreSQL API integration: catalog, imports, reports and prototype lifecy
     return result;
   }
   try {
-    const format = (
-      await call(
-        "/api/product-formats",
-        "POST",
-        {
-          name: prefix,
-          items: [
-            {
-              name: "Test tint",
-              code: randomUUID().replace(/-/g, "").slice(0, 4),
-            },
-          ],
-        },
-        201,
-      )
-    ).data;
+    const [format] = await db.insert(productFormats).values({ name: prefix }).returning();
     productFormatId = format.id;
-    itemId = format.items[0].id;
-    const own = (await call("/api/brands", "POST", { name: `${prefix} OWN`, isOwn: true }, 201)).data;
-    ids.brands.push(own.id);
-    const external = (await call("/api/brands", "POST", { name: `${prefix} EXTERNAL` }, 201)).data;
-    ids.brands.push(external.id);
-    const product = (
-      await call(
-        "/api/products",
-        "POST",
+    const [item] = await db
+      .insert(productFormatItems)
+      .values({ productFormatId: format.id, name: "Test tint", code: randomUUID().replace(/-/g, "").slice(0, 4) })
+      .returning();
+    itemId = item.id;
+    const [own, external] = await db
+      .insert(brands)
+      .values([{ name: `${prefix} OWN`, isOwn: true }, { name: `${prefix} EXTERNAL` }])
+      .returning();
+    ids.brands.push(own.id, external.id);
+    const [product, externalProduct] = await db
+      .insert(products)
+      .values([
+        { brandId: own.id, productFormatItemId: itemId, name: `${prefix} Tint` },
+        { brandId: external.id, productFormatItemId: itemId, name: `${prefix} External tint` },
+      ])
+      .returning();
+    ids.products.push(product.id, externalProduct.id);
+    const { colorMetrics } = await import("@color-bank-hub/contracts/color");
+    const [shade, externalShade] = await db
+      .insert(shades)
+      .values([
         {
-          brandId: own.id,
-          productFormatItemId: itemId,
-          name: `${prefix} Tint`,
+          productId: product.id,
+          sku: `${prefix}-1`,
+          name: "Rose test",
+          ingredientsInci: "Aqua, Glycerin",
+          composition: [{ name: "Red", percentage: 20 }],
+          hex: "#aa6d78",
+          ...colorMetrics("#aa6d78"),
         },
-        201,
-      )
-    ).data;
-    ids.products.push(product.id);
-    const externalProduct = (
-      await call(
-        "/api/products",
-        "POST",
-        {
-          brandId: external.id,
-          productFormatItemId: itemId,
-          name: `${prefix} External tint`,
-        },
-        201,
-      )
-    ).data;
-    ids.products.push(externalProduct.id);
-    const shadeInput = {
-      productId: product.id,
-      sku: `${prefix}-1`,
-      name: "Rose test",
-      hex: "#AA6D78",
-      ingredientsInci: "Aqua, Glycerin",
-      composition: [{ name: "Red", percentage: 20 }],
-    };
-    const shade = (await call("/api/shades", "POST", shadeInput, 201)).data;
-    ids.shades.push(shade.id);
-    assert.equal(shade.hex, "#aa6d78");
-    assert.equal(shade.r, 170);
-    assert.equal(shade.season, null);
-    assert.equal((await call(`/api/shades?search=${prefix}&pageSize=1`)).data.pagination.total, 1);
+        { productId: externalProduct.id, sku: `${prefix}-external`, name: "External", hex: "#ff0000", ...colorMetrics("#ff0000") },
+      ])
+      .returning();
+    ids.shades.push(shade.id, externalShade.id);
+    assert.equal((await call(`/api/shades?search=${prefix}&pageSize=1`)).data.pagination.total, 2);
     assert.equal((await call(`/api/shades?brandId=${own.id}&productFormatItemId=${itemId}`)).data.items.length, 1);
     assert.ok((await call(`/api/shades/${shade.id}`)).data.composition);
-    await call("/api/shades", "POST", shadeInput, 409);
-    await call("/api/shades", "POST", { ...shadeInput, productId: externalProduct.id, sku: `${prefix}-ext` }, 422);
-    const externalShade = (
-      await call(
-        "/api/shades",
-        "POST",
-        {
-          productId: externalProduct.id,
-          sku: `${prefix}-external`,
-          name: "External",
-          hex: "#ff0000",
-        },
-        201,
-      )
-    ).data;
-    ids.shades.push(externalShade.id);
     assert.equal("composition" in (await call(`/api/shades/${externalShade.id}`)).data, false);
     const changed = (await call(`/api/shades/${shade.id}`, "PATCH", { hex: "#ff0000" })).data;
     assert.equal(changed.hslH, 0);
     assert.equal(changed.hslS, 100);
     assert.equal(changed.season, null);
+    // Data Input creates the brand and product by name. It uses the seeded sub-category TM, so this test's own format has no config.
     const importRow = {
-      productId: product.id,
+      origin: "own",
+      brand: `${prefix} IMPORT`,
+      productName: `${prefix} Imported tint`,
+      subCategoryCode: "TM",
+      shadeName: "Imported",
       sku: `${prefix}-2`,
-      name: "Imported",
       hex: "#cc6677",
+      ingredientsInci: "Aqua, Glycerin",
     };
-    const preview = (await call("/api/imports/preview", "POST", { rows: [importRow] })).data;
+    const preview = (await call("/api/data-input/preview", "POST", { rows: [importRow] })).data;
     assert.equal(preview.valid, true);
+    assert.equal(preview.newBrandCount, 1);
     assert.equal((await db.select().from(shades).where(eq(shades.sku, importRow.sku))).length, 0);
-    assert.equal(
-      (
-        await call("/api/imports/preview", "POST", {
-          rows: [importRow, importRow],
-        })
-      ).data.valid,
-      false,
-    );
+    assert.equal((await call("/api/data-input/preview", "POST", { rows: [importRow, importRow] })).data.valid, false);
     await call(
-      "/api/imports/commit",
+      "/api/data-input/commit",
       "POST",
-      {
-        rows: [importRow, { ...importRow, sku: `${prefix}-bad`, hex: "invalid" }],
-      },
+      { rows: [importRow, { ...importRow, shadeName: "Bad", sku: `${prefix}-bad`, hex: "invalid" }] },
       422,
     );
     assert.equal((await db.select().from(shades).where(eq(shades.sku, importRow.sku))).length, 0);
-    const imported = (await call("/api/imports/commit", "POST", { rows: [importRow] }, 201)).data;
-    ids.shades.push(imported.items[0].id);
-    assert.equal(imported.imported, 1);
+    const imported = (await call("/api/data-input/commit", "POST", { rows: [importRow] }, 201)).data;
+    assert.deepEqual(imported, { imported: 1, createdBrands: 1, createdProducts: 1 });
+    const [importedBrand] = await db.select().from(brands).where(eq(brands.name, importRow.brand));
+    ids.brands.push(importedBrand.id);
+    const importedProducts = await db.select().from(products).where(eq(products.brandId, importedBrand.id));
+    ids.products.push(...importedProducts.map((row) => row.id));
+    const importedShades = await db.select().from(shades).where(eq(shades.sku, importRow.sku));
+    ids.shades.push(...importedShades.map((row) => row.id));
+    assert.equal(importedShades.length, 1);
+    assert.ok(importedShades[0].colorFamily);
     const formats = (await call("/api/product-formats")).data;
-    assert.equal(formats.find((item: { id: number }) => item.id === productFormatId).count, 3);
+    assert.equal(formats.find((item: { id: number }) => item.id === productFormatId).count, 2);
     const report = (
       await call(
         "/api/reports",
         "POST",
         {
-          brandId: own.id,
+          issueType: "incorrect_shade_data",
           shadeId: shade.id,
           description: "Integration test shade correction",
         },

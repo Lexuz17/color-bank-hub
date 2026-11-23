@@ -1,10 +1,11 @@
-import { and, asc, desc, eq, ilike, inArray, or, count, getTableColumns, type SQL } from "drizzle-orm";
+import { and, asc, desc, eq, ilike, inArray, or, count, getTableColumns, sql, type SQL } from "drizzle-orm";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import { db } from "#api/lib/db.js";
 import { brands, products, productFormatItems, shadeBenchmarks, shades } from "@color-bank-hub/db";
 import type { ShadeInput, ShadeQuery } from "@color-bank-hub/contracts/shade";
 import { fail } from "#api/core/errors.js";
 import { colorMetrics } from "@color-bank-hub/contracts/color";
+import type { classifyColor } from "@color-bank-hub/contracts/color-classification";
 
 type Executor = Parameters<Parameters<typeof db.transaction>[0]>[0];
 // Composition is returned only on own-brand detail records, never on external products.
@@ -165,29 +166,6 @@ function linkedShades(own: AnyPgColumn, other: AnyPgColumn, id: string) {
     .orderBy(asc(brands.name), asc(shades.name));
 }
 
-async function insertShade(tx: Executor, input: ShadeInput) {
-  const [product] = await tx
-    .select({ isOwn: brands.isOwn })
-    .from(products)
-    .innerJoin(brands, eq(brands.id, products.brandId))
-    .where(eq(products.id, input.productId));
-  if (!product) fail("BUSINESS_RULE", "Product not found", "INVALID_PRODUCT");
-  if (input.composition && !product.isOwn) fail("BUSINESS_RULE", "Composition is only allowed for own brands", "EXTERNAL_COMPOSITION");
-  const [row] = await tx
-    .insert(shades)
-    .values({ ...input, ...colorMetrics(input.hex) })
-    .returning();
-  return row;
-}
-
-export async function createShades(rows: ShadeInput[]) {
-  return db.transaction(async (tx) => {
-    const result = [];
-    for (const row of rows) result.push(await insertShade(tx, row));
-    return result;
-  });
-}
-
 export async function updateShade(id: string, input: Partial<Omit<ShadeInput, "productId">>) {
   return db.transaction(async (tx) => {
     const [existing] = await tx.select().from(shades).where(eq(shades.id, id)).for("update");
@@ -248,4 +226,41 @@ export function listCategoryHexes(tx: Executor, productFormatId: number) {
 
 export function updateLabels(tx: Executor, id: string, labels: ShadeLabels) {
   return tx.update(shades).set(labels).where(eq(shades.id, id));
+}
+
+export async function findShadesForImport(input: { productIds: string[]; names: string[]; skus: string[] }) {
+  const names = input.names.map((value) => value.toLowerCase());
+  const sameName = input.productIds.length ? and(inArray(shades.productId, input.productIds), inArray(sql`lower(${shades.name})`, names)) : undefined;
+  const sameSku = input.skus.length ? inArray(shades.sku, input.skus) : undefined;
+  const where = or(sameName, sameSku);
+  if (!where) return [];
+  return db.select({ productId: shades.productId, name: shades.name, sku: shades.sku }).from(shades).where(where);
+}
+
+export async function findBenchmarkCandidates(names: string[]) {
+  if (!names.length) return [];
+  return db
+    .select({ id: shades.id, name: shades.name, product: products.name, brand: brands.name, isOwn: brands.isOwn, code: productFormatItems.code })
+    .from(shades)
+    .innerJoin(products, eq(products.id, shades.productId))
+    .innerJoin(brands, eq(brands.id, products.brandId))
+    .innerJoin(productFormatItems, eq(productFormatItems.id, products.productFormatItemId))
+    .where(
+      inArray(
+        sql`lower(${shades.name})`,
+        names.map((value) => value.toLowerCase()),
+      ),
+    );
+}
+
+export async function createClassifiedShade(tx: Executor, values: ShadeInput & ReturnType<typeof classifyColor> & { createdBy: string }) {
+  const [row] = await tx
+    .insert(shades)
+    .values(values as typeof shades.$inferInsert)
+    .returning({ id: shades.id });
+  return row.id;
+}
+
+export async function createBenchmarks(tx: Executor, links: { shadeId: string; benchmarkShadeId: string }[]) {
+  if (links.length) await tx.insert(shadeBenchmarks).values(links);
 }

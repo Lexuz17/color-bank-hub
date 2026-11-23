@@ -6,6 +6,5 @@ const canWrite = requirePermission("catalog:write");
 
 export const shadeRoutes = new Hono<AppEnv>()
   .get("/shades", shades.listShades)
-  .post("/shades", canWrite, shades.createShade)
   .get("/shades/:id", shades.findShade)
   .patch("/shades/:id", canWrite, shades.updateShade);

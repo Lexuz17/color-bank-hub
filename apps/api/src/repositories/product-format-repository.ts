@@ -1,4 +1,4 @@
-import { asc, count, eq } from "drizzle-orm";
+import { asc, count, eq, inArray } from "drizzle-orm";
 import { db } from "#api/lib/db.js";
 import { products, productFormats, productFormatItems, shades } from "@color-bank-hub/db";
 
@@ -28,18 +28,10 @@ export async function listFormats() {
     })),
   }));
 }
-export async function createFormat(input: { name: string; items: { name: string; code: string }[] }) {
-  return db.transaction(async (tx) => {
-    const [created] = await tx.insert(productFormats).values({ name: input.name }).onConflictDoNothing({ target: productFormats.name }).returning();
-    const format = created ?? (await tx.select().from(productFormats).where(eq(productFormats.name, input.name)))[0];
-    const items = await tx
-      .insert(productFormatItems)
-      .values(input.items.map((item) => ({ ...item, productFormatId: format.id })))
-      .returning();
-    return {
-      ...format,
-      count: 0,
-      items: items.map((item) => ({ ...item, count: 0 })),
-    };
-  });
+export async function listFormatItemsByCodes(codes: string[]) {
+  if (!codes.length) return [];
+  return db
+    .select({ id: productFormatItems.id, code: productFormatItems.code })
+    .from(productFormatItems)
+    .where(inArray(productFormatItems.code, codes));
 }

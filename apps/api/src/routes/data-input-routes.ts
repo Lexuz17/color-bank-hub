@@ -4,7 +4,6 @@ import { type AppEnv, requirePermission } from "#api/middleware/auth.js";
 
 const canWrite = requirePermission("catalog:write");
 
-// Paths stay /imports/* until the web moves to /data-input/* (see the controller header).
 export const dataInputRoutes = new Hono<AppEnv>()
-  .post("/imports/preview", canWrite, dataInput.preview)
-  .post("/imports/commit", canWrite, dataInput.commit);
+  .post("/data-input/preview", canWrite, dataInput.preview)
+  .post("/data-input/commit", canWrite, dataInput.commit);

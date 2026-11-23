@@ -1,60 +1,34 @@
-// Data Input: add shades by File Upload (.xlsx) or Manual Entry (form, one shade). Saved shades show in Color Database.
-// Template: apps/web/public/templates/shade-import-template.xlsx (sheet "Guide" explains every column).
+// Data Input: add shades from the .xlsx template (File Upload) or one at a time (Manual Entry).
 //
-// Method Path                     Handler  Permission     Called when                                      DB
-// POST   /api/data-input/preview  preview  catalog:write  File: user picks the .xlsx (check, no save)      read only
-// POST   /api/data-input/commit   commit   catalog:write  File: user clicks Import after a clean preview   write brands, products, shades, shade_benchmarks
-//                                                         Manual: user clicks Submit (rows = [one row])  (one transaction)
-//
-// Flow
-// - File:   user picks the .xlsx + photos (several files or one .zip). Web parses the .xlsx, uploads each photo named in
-//           "Lip Photo File" / "Swatch Photo File" via POST /api/uploads ("shade-photo"), puts the keys in lipPhotoKey /
-//           swatchPhotoKey -> rows JSON -> preview (errors per row/column + computed labels)
-//           -> user fixes the file and re-uploads, or clicks Import -> commit.
-// - Manual: form -> commit with one row. Errors come back as `issues` on the form fields.
-// - After commit the web invalidates shades + product-formats queries, so Color Database shows the new rows.
-//
-// - Schema-nya nanti ada di file baru contracts/data-input.ts, yang menggantikan contracts/import.ts.
-// - Yang dikirim adalah nama, bukan ID. Contohnya brand: "Emina", bukan brandId: "uuid…". Excel memang berisi teks. API mencari brand dan product dengan nama itu, lalu membuatnya kalau belum ada.
-//
-// Validation: check ALL rows and return ALL errors at once (max 500 rows). Commit saves nothing if any row fails.
-//   Zod (shape)      required fields, hex #RRGGBB, lengths, composition percentages 0-100.
-//   Service (rules)  reason                          rule
-//                    UNKNOWN_SUB_CATEGORY            subCategoryCode exists
-//                    BRAND_ORIGIN_MISMATCH           existing brand has the same origin (own/external)
-//                    PRODUCT_FORMAT_MISMATCH         existing product has the same sub-category
-//                    DUPLICATE_SHADE                 (product, shade name) not in DB and not twice in the file
-//                    DUPLICATE_SKU                   sku not in DB and not twice in the file
-//                    EXTERNAL_SKU / EXTERNAL_COMPOSITION / EXTERNAL_BENCHMARK   sku, composition, benchmark only for own (Optional, kenya kl ada juga gpp)
-//                    COMPOSITION_OVER_100            composition total <= 100%
-//                    BENCHMARK_NOT_FOUND             benchmark shade exists in DB or in this file, and is external
-//                    BENCHMARK_FORMAT_NOT_ALLOWED    same sub-category (or allowed pair, kenya ini notice message aja warning.. gk perlu merah.. tpi ttp kasih info)
-//                    UPLOAD_*                        photo keys pass verifyUpload("shade-photo")
-//   Web (before upload) PHOTO_FILE_MISSING            a file name in the sheet matches a picked photo (exact name + extension,
-//                                                     case ignored)
-//
-// Store (commit, one transaction): find or create brand -> find or create product -> classifyColor(hex, active config
-//   of the category) -> insert shade -> insert shade_benchmarks.
-//
-// Remove once this works: POST /api/brands, POST /api/products, POST /api/product-formats, /api/imports/*,
-// apps/web/src/components/catalog/catalog-setup.tsx, create functions in apps/web/src/services/catalog-api.ts,
-// the "Paste from Excel" method in the Data Input page, and matching cases in apps/api/test/*.test.ts.
-// Web needs an .xlsx parser and, for .zip, an unzip library (propose dependencies first, e.g. read-excel-file, fflate).
+// Method Path                     Handler  Permission     DB
+// POST   /api/data-input/preview  preview  catalog:write  read only
+// POST   /api/data-input/commit   commit   catalog:write  write brands, products, shades, shade_benchmarks (one transaction)
 
-import { importInput } from "@color-bank-hub/contracts/import";
+// Both take rows of names, not ids (max 500). Manual Entry sends one row.
+// Preview checks every row and returns all errors and warnings at once, plus the computed labels.
+// Commit checks again and saves everything or nothing (IMPORT_INVALID if any row fails). The web uploads the photos
+// ("shade-photo") first and sends their keys as lipPhotoKey / swatchPhotoKey.
+
+// Rules (services/data-input-service.ts):
+// - A brand or product that does not exist yet (matched by name, ignoring case) is created; origin own|external sets isOwn.
+// - The sub-category code picks the category; its active classification config labels the shade.
+// - Errors: UNKNOWN_SUB_CATEGORY, BRAND_ORIGIN_MISMATCH, PRODUCT_FORMAT_MISMATCH, DUPLICATE_SHADE, DUPLICATE_SKU,
+//   COMPOSITION_OVER_100, BENCHMARK_NOT_FOUND. Warning only: BENCHMARK_FORMAT_NOT_ALLOWED.
+
+import { commitDataInputRequest, previewDataInputRequest } from "@color-bank-hub/contracts/data-input";
 import type { Context } from "hono";
 import { parse } from "#api/core/errors.js";
 import type { AppEnv } from "#api/middleware/auth.js";
-import { commitImport, previewImport } from "#api/services/data-input-service.js";
+import { commitDataInput, previewDataInput } from "#api/services/data-input-service.js";
 
 type Ctx = Context<AppEnv>;
 
 export async function preview(c: Ctx) {
-  const { rows } = parse(importInput, await c.req.json());
-  return c.json({ data: await previewImport(rows) });
+  const { rows } = parse(previewDataInputRequest, await c.req.json());
+  return c.json({ data: await previewDataInput(rows) });
 }
 
 export async function commit(c: Ctx) {
-  const { rows } = parse(importInput, await c.req.json());
-  return c.json({ data: await commitImport(rows) }, 201);
+  const { rows } = parse(commitDataInputRequest, await c.req.json());
+  return c.json({ data: await commitDataInput(rows, c.get("user")) }, 201);
 }

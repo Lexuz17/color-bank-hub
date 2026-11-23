@@ -54,12 +54,9 @@ test("write endpoints reject malformed JSON and invalid or mass-assignment input
   assert.equal(error.reason, "INVALID_JSON");
   for (const [path, body] of [
     ["/api/reports", { description: "short" }],
-    ["/api/shades", { name: "Shade", hex: "invalid" }],
-    ["/api/products", { name: "Product" }],
-    ["/api/brands", { name: "Brand", createdBy: "spoof" }],
     ["/api/prototype-requests", { status: "approved" }],
-    ["/api/imports/preview", { rows: [] }],
-    ["/api/imports/commit", { rows: Array(501).fill({}) }],
+    ["/api/data-input/preview", { rows: [] }],
+    ["/api/data-input/commit", { rows: Array(501).fill({}) }],
   ] as const) {
     const response = await request(path, "POST", body);
     assert.equal(response.status, 422, path);
@@ -90,9 +87,8 @@ test("write routes enforce the permission matrix before touching the database", 
   const pid = createApp({ resolveUser: async () => userWith("pid") });
   const id = "818565f8-bc7f-4c65-bd17-331c2e1d3986";
   for (const [target, method, path] of [
-    [tsi, "POST", "/api/brands"],
     [tsi, "PATCH", `/api/shades/${id}`],
-    [tsi, "POST", "/api/imports/commit"],
+    [tsi, "POST", "/api/data-input/commit"],
     [pid, "PATCH", `/api/prototype-requests/${id}/status`],
     [pid, "PATCH", `/api/prototype-requests/${id}/formulation`],
   ] as const) {

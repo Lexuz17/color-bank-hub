@@ -39,14 +39,11 @@ export async function findShade(id: string, role: Role) {
   return withPhotoUrls(visibleShade(await repository.findShade(id), role));
 }
 
-export async function createShade(input: ShadeInput, role: Role) {
-  await verifyPhotos(input);
-  const [shade] = await repository.createShades([input]);
-  return withPhotoUrls(visibleShade(shade, role));
-}
+export const findShadesForImport = (input: { productIds: string[]; names: string[]; skus: string[] }) => repository.findShadesForImport(input);
+export const findBenchmarkCandidates = (names: string[]) => repository.findBenchmarkCandidates(names);
 
-// Used by data-input. Forwards only, as the old import did (no photo check yet).
-export const createShades = (rows: ShadeInput[]) => repository.createShades(rows);
+export const createClassifiedShade = repository.createClassifiedShade;
+export const createBenchmarks = repository.createBenchmarks;
 
 export async function updateShade(id: string, input: ShadePatch, role: Role) {
   await verifyPhotos(input);
