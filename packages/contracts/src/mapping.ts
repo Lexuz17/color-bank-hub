@@ -10,7 +10,7 @@ export const mappingInput = z
     name,
     notes: z.string().trim().min(1).max(300),
     productFormatItemId: z.number().int().positive(),
-    shadeIds: z.array(uuid).min(1).max(500),
+    shadeIds: z.array(uuid).min(1),
     viewMode: mappingView,
     /** Axis keys of the custom view (e.g. "lchC"). Ignored for the other views. */
     axisX: z.string().max(20).optional(),
@@ -44,7 +44,7 @@ export type MappingParams = z.input<typeof mappingQuery>;
 
 export interface MappingCard {
   kind: "system" | "mine";
-  /** system: `${brandId}:${productFormatItemId}`, mine: the mapping id */
+  /** system: `${productId}:${productFormatItemId}`, mine: the mapping id */
   id: string;
   name: string;
   notes: string | null;

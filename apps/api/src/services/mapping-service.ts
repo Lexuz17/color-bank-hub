@@ -115,8 +115,8 @@ export async function listMappings(query: MappingQuery, userId: string): Promise
   const systemEntries: Entry[] = shadeGroups.map((group) => ({
     card: {
       kind: "system",
-      id: `${group.brandId}:${group.formatItemId}`,
-      name: `${group.brandName} - ${group.formatItemName}`,
+      id: `${group.productId}:${group.formatItemId}`,
+      name: `${group.brandName} - ${group.productName}`,
       notes: null,
       shadeCount: group.shadeCount,
       swatches: group.swatches,
@@ -125,7 +125,7 @@ export async function listMappings(query: MappingQuery, userId: string): Promise
     },
     brandIds: [group.brandId],
     formatItemId: group.formatItemId,
-    text: `${group.brandName} - ${group.formatItemName}`,
+    text: `${group.brandName} ${group.productName} ${group.formatItemName}`,
   }));
 
   const mineEntries: Entry[] = ownMappings.map((mapping) => {

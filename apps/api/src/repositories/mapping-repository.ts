@@ -54,6 +54,8 @@ export const listMappingsByOwner = (ownerId: string) =>
 export const listShadeGroups = () =>
   db
     .select({
+      productId: products.id,
+      productName: products.name,
       brandId: brands.id,
       brandName: brands.name,
       formatItemId: productFormatItems.id,
@@ -67,7 +69,7 @@ export const listShadeGroups = () =>
     .innerJoin(brands, eq(brands.id, products.brandId))
     .innerJoin(productFormatItems, eq(productFormatItems.id, products.productFormatItemId))
     .where(eq(brands.isOwn, true))
-    .groupBy(brands.id, brands.name, productFormatItems.id, productFormatItems.name);
+    .groupBy(products.id, brands.id, productFormatItems.id);
 
 export const listShadeSummaries = (ids: string[]) =>
   db

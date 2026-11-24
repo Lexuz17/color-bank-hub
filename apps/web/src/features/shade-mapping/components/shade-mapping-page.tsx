@@ -62,13 +62,13 @@ export function ShadeMappingPage() {
   const [hideProductName, setHideProductName] = useState(false);
   const activeConfig = useActiveConfig(generated ? itemId : null);
 
-  const routeSearch = useSearch({ strict: false }) as { itemId?: number; brandId?: string; mappingId?: string };
+  const routeSearch = useSearch({ strict: false }) as { itemId?: number; productId?: string; mappingId?: string };
   const savedMapping = useMapping(routeSearch.mappingId ?? null);
-  // Opened from an automatic map of My Mappings: every shade of that brand + sub-category.
-  // shortcut: first 100 shades (API page limit), page through them when one brand + sub-category passes 100.
+  // Opened from an automatic map of My Mappings: every shade of that product.
+  // shortcut: first 100 shades (API page limit), page through them when one product passes 100.
   const brandShades = useShades(
-    { brandId: routeSearch.brandId, productFormatItemId: routeSearch.itemId, pageSize: 100 },
-    !!routeSearch.brandId && !!routeSearch.itemId,
+    { productId: routeSearch.productId, productFormatItemId: routeSearch.itemId, pageSize: 100 },
+    !!routeSearch.productId && !!routeSearch.itemId,
   );
 
   useEffect(() => {

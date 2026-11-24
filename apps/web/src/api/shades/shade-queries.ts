@@ -1,5 +1,5 @@
 import type { ShadeParams } from "@color-bank-hub/contracts/shade";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { getShade, getShades } from "./shades.api";
 
 export const useShades = (params: ShadeParams, enabled = true) =>
@@ -9,6 +9,15 @@ export const useShades = (params: ShadeParams, enabled = true) =>
     // Keep the current rows on screen while a new page or filter loads.
     placeholderData: keepPreviousData,
     enabled,
+  });
+
+export const useInfiniteShades = (params: Omit<ShadeParams, "page">) =>
+  useInfiniteQuery({
+    queryKey: ["shades", "list", "infinite", params],
+    queryFn: ({ pageParam, signal }) => getShades({ ...params, page: pageParam }, signal),
+    initialPageParam: 1,
+    getNextPageParam: ({ pagination }) => (pagination.page * pagination.pageSize < pagination.total ? pagination.page + 1 : undefined),
+    placeholderData: keepPreviousData,
   });
 
 export const useShade = (id: string | null) =>

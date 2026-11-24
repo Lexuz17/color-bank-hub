@@ -1,29 +1,26 @@
 import type { ShadeRef } from "@color-bank-hub/contracts/shade";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useState } from "react";
 
-const maxShown = 2;
+const collapsedCount = 2;
 
 export function LinkedShades({ shades }: { shades: ShadeRef[] }) {
+  const [expanded, setExpanded] = useState(false);
   if (shades.length === 0) return <span className="text-muted-foreground">—</span>;
-  const rest = shades.slice(maxShown);
+  const hiddenCount = shades.length - collapsedCount;
   return (
     <div className="space-y-0.5">
-      {shades.slice(0, maxShown).map((shade) => (
+      {(expanded ? shades : shades.slice(0, collapsedCount)).map((shade) => (
         <p key={shade.id}>
-          {shade.name} · <span className="text-muted-foreground">{shade.product}</span>
+          {shade.name} ·{" "}
+          <span className="text-muted-foreground">
+            {shade.brand} {shade.product}
+          </span>
         </p>
       ))}
-      {rest.length > 0 && (
-        <Tooltip>
-          <TooltipTrigger render={<p className="cursor-default text-muted-foreground" />}>+{rest.length}</TooltipTrigger>
-          <TooltipContent>
-            {shades.map((shade) => (
-              <p key={shade.id}>
-                {shade.brand} · {shade.product} · {shade.name}
-              </p>
-            ))}
-          </TooltipContent>
-        </Tooltip>
+      {hiddenCount > 0 && (
+        <button type="button" className="text-[11px] text-primary hover:underline" onClick={() => setExpanded(!expanded)}>
+          {expanded ? "Hide" : `Show all (+${hiddenCount})`}
+        </button>
       )}
     </div>
   );

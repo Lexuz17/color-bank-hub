@@ -28,9 +28,8 @@ export function MappingCard({ card, folders, onDelete }: Props) {
   const move = useMoveToFolder();
 
   function open() {
-    // A system card is "<brandId>:<productFormatItemId>"; a saved map is opened by its id.
-    const [brandId, itemId] = card.id.split(":");
-    void navigate({ to: "/shade-mapping", search: card.kind === "mine" ? { mappingId: card.id } : { brandId, itemId: Number(itemId) } });
+    const [productId, itemId] = card.id.split(":");
+    void navigate({ to: "/shade-mapping", search: card.kind === "mine" ? { mappingId: card.id } : { productId, itemId: Number(itemId) } });
   }
 
   return (

@@ -3,31 +3,40 @@ import type { Shade } from "@color-bank-hub/contracts/shade";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useProductFormats } from "@/api/product-formats/product-format-queries";
-import { useShades } from "@/api/shades/shade-queries";
+import { useInfiniteShades } from "@/api/shades/shade-queries";
 import { PageShell } from "@/components/layout/page-shell";
-import { ApiError, ResultsPagination } from "@/components/shared/request-feedback";
+import { ApiError } from "@/components/shared/request-feedback";
 import { LoadingState, SearchInput } from "@/components/shared/workspace-components";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
+import { useLoadMoreOnScroll } from "../hooks/use-load-more-on-scroll";
 import { CrossFormatDialog } from "./cross-format-dialog";
 import { FormatSidebar } from "./format-sidebar";
 import { ShadeTable } from "./shade-table";
 
-const PAGE_SIZE = 25;
+const PAGE_SIZE = 50;
 
 export function ColorDatabasePage() {
   const navigate = useNavigate();
   const formats = useProductFormats();
   const [itemIds, setItemIds] = useState<number[]>([]);
   const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<Map<string, Shade>>(new Map());
   const [crossFormatOpen, setCrossFormatOpen] = useState(false);
 
-  const shades = useShades({
-    page,
+  const shades = useInfiniteShades({
     pageSize: PAGE_SIZE,
     search: search || undefined,
     productFormatItemIds: itemIds.join(",") || undefined,
+  });
+
+  const loadedShades = shades.data?.pages.flatMap((page) => page.items) ?? [];
+  const total = shades.data?.pages[0]?.pagination.total ?? 0;
+
+  const bottomMarkerRef = useLoadMoreOnScroll({
+    hasMore: shades.hasNextPage,
+    isLoading: shades.isFetchingNextPage,
+    loadMore: () => void shades.fetchNextPage(),
+    loadedCount: loadedShades.length,
   });
 
   const pickedItems =
@@ -51,7 +60,6 @@ export function ColorDatabasePage() {
 
   function changeItems(next: number[]) {
     setItemIds(next);
-    setPage(1);
     // Unticking a format drops its selected shades. "All formats" (empty) keeps the selection.
     if (next.length > 0) setSelected(new Map([...selected].filter(([, shade]) => next.includes(shade.formatItem.id))));
   }
@@ -150,7 +158,6 @@ export function ColorDatabasePage() {
           value={search}
           onValueChange={(value) => {
             setSearch(value);
-            setPage(1);
           }}
           className="w-full sm:w-72"
         />
@@ -167,21 +174,9 @@ export function ColorDatabasePage() {
           </div>
         ) : (
           <>
-            <ShadeTable
-              shades={shades.data.items}
-              selected={selected}
-              showFormat={itemIds.length !== 1}
-              onToggle={toggleShade}
-              onToggleAll={toggleAll}
-            />
-            <div className="px-5">
-              <ResultsPagination
-                page={page}
-                total={shades.data.pagination.total}
-                pageSize={PAGE_SIZE}
-                onPageChange={setPage}
-                disabled={shades.isFetching}
-              />
+            <ShadeTable shades={loadedShades} selected={selected} showFormat={itemIds.length !== 1} onToggle={toggleShade} onToggleAll={toggleAll} />
+            <div ref={bottomMarkerRef} className="px-5 py-4 text-center text-[11px] text-muted-foreground">
+              {shades.isFetchingNextPage ? "Loading more…" : `${loadedShades.length} of ${total} shades`}
             </div>
           </>
         )}

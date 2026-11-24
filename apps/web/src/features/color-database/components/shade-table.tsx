@@ -1,7 +1,9 @@
 import type { Shade } from "@color-bank-hub/contracts/shade";
+import { useRef } from "react";
 import { ShadeSwatch, StatusBadge } from "@/components/shared/workspace-components";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { cn } from "@/lib/utils";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { LinkedShades } from "@/components/shared/linked-shades";
 
@@ -21,6 +23,19 @@ const toneLabels = { warm: "Warm", neutral: "Neutral", cool: "Cool" } as const;
 const one = (value: number | null) => (value === null ? "—" : String(Number(value.toFixed(1))));
 
 export function ShadeTable({ shades, selected, showFormat, onToggle, onToggleAll }: Props) {
+  const lastPicked = useRef<number | null>(null);
+
+  function pick(index: number, shade: Shade, event: Event) {
+    const checked = !selected.has(shade.id);
+    const from = lastPicked.current;
+    if ((event as MouseEvent).shiftKey && from !== null && from < shades.length) {
+      onToggleAll(shades.slice(Math.min(from, index), Math.max(from, index) + 1), checked);
+    } else {
+      onToggle(shade, checked);
+    }
+    lastPicked.current = index;
+  }
+
   return (
     <div className="border-b bg-card">
       <Table>
@@ -48,18 +63,35 @@ export function ShadeTable({ shades, selected, showFormat, onToggle, onToggleAll
             <TableHead>Lightness</TableHead>
             <TableHead>Benchmark for</TableHead>
             <TableHead>Benchmarked to</TableHead>
-            <TableHead>LCh + Lab</TableHead>
+            <TableHead>L</TableHead>
+            <TableHead>C</TableHead>
+            <TableHead>h</TableHead>
+            <TableHead>a</TableHead>
+            <TableHead>b</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {shades.map((shade) => {
+          {shades.map((shade, index) => {
             const isSelected = selected.has(shade.id);
             const benchmarkedTo = shade.benchmarkedTo ?? [];
             const benchmarkFor = shade.benchmarkFor ?? [];
             return (
-              <TableRow key={shade.id} aria-selected={isSelected} className={isSelected ? "bg-accent hover:bg-accent" : undefined}>
+              <TableRow
+                key={shade.id}
+                aria-selected={isSelected}
+                className={cn("cursor-pointer", isSelected && "bg-accent hover:bg-accent")}
+                // Shift + click would select text; links, buttons and the checkbox keep their own click.
+                onMouseDown={(event) => event.shiftKey && event.preventDefault()}
+                onClick={(event) => {
+                  if (!(event.target as HTMLElement).closest("a, button, [role=checkbox]")) pick(index, shade, event.nativeEvent);
+                }}
+              >
                 <TableCell className="w-10 px-3 text-center">
-                  <Checkbox checked={isSelected} onCheckedChange={(checked) => onToggle(shade, !!checked)} aria-label={`Select ${shade.name}`} />
+                  <Checkbox
+                    checked={isSelected}
+                    onCheckedChange={(_, details) => pick(index, shade, details.event)}
+                    aria-label={`Select ${shade.name}`}
+                  />
                 </TableCell>
                 <TableCell>{shade.brand.name}</TableCell>
                 <TableCell>{shade.product.name}</TableCell>
@@ -85,20 +117,18 @@ export function ShadeTable({ shades, selected, showFormat, onToggle, onToggleAll
                 <TableCell>
                   <LinkedShades shades={benchmarkedTo} />
                 </TableCell>
-                <TableCell>
-                  <p>
-                    LCh {one(shade.lchL)} · {one(shade.lchC)} · {one(shade.lchH)}
-                  </p>
-                  <p className="text-muted-foreground">
-                    Lab {one(shade.labL)} · {one(shade.labA)} · {one(shade.labB)}
-                  </p>
-                </TableCell>
+                {/* L* is the same in LCh and Lab, so it shows once. */}
+                <TableCell>{one(shade.lchL)}</TableCell>
+                <TableCell>{one(shade.lchC)}</TableCell>
+                <TableCell>{one(shade.lchH)}</TableCell>
+                <TableCell>{one(shade.labA)}</TableCell>
+                <TableCell>{one(shade.labB)}</TableCell>
               </TableRow>
             );
           })}
           {shades.length === 0 && (
             <TableRow>
-              <TableCell colSpan={showFormat ? 17 : 16} className="h-32 text-center text-muted-foreground">
+              <TableCell colSpan={showFormat ? 21 : 20} className="h-32 text-center text-muted-foreground">
                 No shades match.
               </TableCell>
             </TableRow>

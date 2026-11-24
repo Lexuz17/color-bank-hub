@@ -48,7 +48,7 @@ All resource paths below begin with `/api`.
 | PATCH | `/classification-configs/:id/activate` | Roll back: make an older version active and re-classify |
 | POST | `/data-input/preview` | Check rows of names (brand, product, shade…) and return every error and warning per row with the computed labels; writes nothing |
 | POST | `/data-input/commit` | Check again, then create the missing brands and products, the classified shades and their benchmarks in one transaction; `IMPORT_INVALID` when any row fails |
-| GET | `/mappings` | My Mappings library: automatic maps of own brands + the user's saved maps, filters, search, paging, sidebar counts |
+| GET | `/mappings` | My Mappings library: automatic maps (one per product of an own brand) + the user's saved maps, filters, search, paging, sidebar counts |
 | GET | `/mappings/:id` | A saved map (owner only) with its shades |
 | POST | `/mappings` | Save a shade map (name, notes, format, shades, view, axes, display toggles) with a copy of the active cut-offs |
 | PATCH | `/mappings/:id` | Replace the content of a saved map (owner only) |

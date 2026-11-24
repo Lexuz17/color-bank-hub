@@ -211,7 +211,7 @@ export function MappingLibrarySidebar({ counts, filters, onChange }: Props) {
               active={filters.brandIds.includes(brand.id)}
               label={brand.name}
               count={counts?.brands[brand.id] ?? 0}
-              onClick={() => onChange({ brandIds: toggle(filters.brandIds, brand.id) })}
+              onClick={() => onChange({ brandIds: toggle(filters.brandIds, brand.id), productFormatItemIds: [] })}
             />
           ))}
         </Section>
@@ -229,7 +229,7 @@ export function MappingLibrarySidebar({ counts, filters, onChange }: Props) {
               active={filters.productFormatItemIds.includes(item.id)}
               label={item.name}
               count={counts?.formats[item.id] ?? 0}
-              onClick={() => onChange({ productFormatItemIds: toggle(filters.productFormatItemIds, item.id) })}
+              onClick={() => onChange({ productFormatItemIds: toggle(filters.productFormatItemIds, item.id), brandIds: [] })}
             />
           ))}
         </Section>

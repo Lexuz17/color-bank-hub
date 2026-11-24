@@ -1,7 +1,7 @@
 // Shade maps. Used by: My Mappings (library, folders, delete), Shade Mapping (open, Save).
 // Client decision (2026-11-11, confirmed later):
-// - "All mappings" = automatic maps, the same for every account: one per own brand (brands.is_own) + sub-category,
-//   e.g. "Emina — Lip Tint Gloss". Not stored: computed from shades on every read, so new products appear automatically.
+// - "All mappings" = automatic maps, the same for every account: one per product of an own brand (brands.is_own),
+//   e.g. "Emina - Glossy Stain". Client chose per product over brand + sub-category (more cards). Not stored: computed from shades on every read, so new products appear automatically.
 // - "Mine" = maps a user saved. Private: only the owner can read, edit or delete them (admin too has no access).
 // - No draft. A map that is not saved is not stored. No tags on a card; a map has required free text notes (max 300).
 // - Folders: one level, named by the user, for "Mine" only. Deleting a folder moves its maps back out (folder_id = null).
@@ -10,7 +10,7 @@
 // Method Path                     Handler        Input (contracts)                     DB
 // GET    /api/mappings            listMappings   mappingQuery: library=all|mine,        all:  read shades + products + brands + product_format_items
 //                                                folderId?, brandIds? and productFormatItemIds? ("a,b,c"; any match),
-//                                                search?, page                          (group by brand + sub-category -> one card each)
+//                                                search?, page                          (group by product -> one card each)
 //                                                                                       mine: read mappings where owner_id = user
 //                                                -> { items, pagination, counts }
 // GET    /api/mappings/:id        findMapping    uuid                                  read  mappings + the shades of shadeIds
@@ -31,7 +31,7 @@
 // - Folder name is unique per owner (case-insensitive) -> CONFLICT FOLDER_NAME_TAKEN.
 // - POST copies the active config on the server (the client does not send it) and stores useActiveConfig = false.
 //   A format without an active config cannot be saved: NOT_FOUND CONFIG_NOT_FOUND. PATCH keeps the stored config.
-// - An automatic map has no id in the database. The card opens Shade Mapping with brandId + itemId; editing it and
+// - An automatic map has no id in the database. The card opens Shade Mapping with productId + itemId; editing it and
 //   clicking Save creates a new "Mine" map (POST).
 // Config (labels on the map are computed when shown, with classifyColor(hex, config), not read from shades):
 // - useActiveConfig = false (Custom): classificationConfig, copied from the active config on save.
